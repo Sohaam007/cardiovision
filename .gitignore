@@ -22,6 +22,7 @@ dist/
 
 # Context & Secrets
 context_bundle.md
+.agents/
 .env
 .env.local
 .env.*.local
@@ -29,3 +30,7 @@ context_bundle.md
 # IDE
 .vscode/
 .idea/
+
+# Agents Internal
+.agents/
+
