@@ -10,6 +10,7 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "z_alizadeh_sani.csv"
 DEFAULT_SCHEMA_PATH = PROJECT_ROOT / "models" / "feature_schema.json"
+DEFAULT_NAMES_PATH = PROJECT_ROOT / "models" / "feature_names.json"
 
 # Targets and Leakage definitions
 FORBIDDEN_LEAKAGE_COLUMNS = {"LAD", "LCX", "RCA", "Cath", "CAD", "CAD-LABEL"}
@@ -216,6 +217,28 @@ def get_features_for_target(
     X, _ = get_features_and_targets(path=path)
     check_no_leakage(X.columns)
     return X
+
+
+def export_feature_names(
+    output_path: Union[Path, str] = DEFAULT_NAMES_PATH,
+    df: Optional[pd.DataFrame] = None
+) -> List[str]:
+    """
+    Export frozen ordered list of 54 model input feature names to models/feature_names.json.
+    Excludes all target columns and constant columns; enforces zero-leakage invariant.
+    """
+    if df is None:
+        df = load_data()
+    X = clean_features(df)
+    feature_names = list(X.columns)
+    check_no_leakage(feature_names)
+
+    out_file = Path(output_path)
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_file, "w", encoding="utf-8") as f:
+        json.dump(feature_names, f, indent=2)
+
+    return feature_names
 
 
 def generate_feature_schema(
@@ -778,10 +801,12 @@ def main() -> None:
     print(f"    Concordance: {normal_zero_vessels} of {normal_total} Normal cases have 0 stenotic vessels (98.85%).")
     print("    Row index 93: Cath='Normal', LAD='Stenotic', LCX='Normal', RCA='Normal' (EF-TTE=45%).")
 
-    # 5. Generate and export feature schema
+    # 5. Generate and export feature schema and feature names
     schema = generate_feature_schema()
+    names = export_feature_names()
     print(f"\n[5] Feature schema successfully generated at: {DEFAULT_SCHEMA_PATH}")
-    print(f"    Documented features count: {len(schema)}")
+    print(f"    Feature names list exported to: {DEFAULT_NAMES_PATH}")
+    print(f"    Documented features count: {len(schema)} (frozen names count: {len(names)})")
     print("=" * 70)
 
 

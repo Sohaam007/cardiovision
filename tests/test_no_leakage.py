@@ -184,6 +184,25 @@ def test_feature_schema_no_leakage():
             assert "group" in entry
 
 
+def test_feature_names_no_leakage():
+    """Verify that models/feature_names.json exists, has 54 features, and zero leakage."""
+    names_path = PROJECT_ROOT / "models" / "feature_names.json"
+    assert names_path.exists(), "models/feature_names.json does not exist"
+
+    with open(names_path, "r", encoding="utf-8") as f:
+        names = json.load(f)
+
+    assert isinstance(names, list), "models/feature_names.json must be a list"
+    assert len(names) == 54, f"Expected 54 features in feature_names.json, got {len(names)}"
+
+    # Check zero leakage in feature_names.json
+    check_no_leakage(names)
+
+    # Cross check against X.columns exactly
+    X, _ = get_features_and_targets()
+    assert names == list(X.columns), "feature_names.json must match X.columns in order and name"
+
+
 def test_constant_column_dropped():
     """Verify that zero-variance constant column 'Exertional CP' is dropped from X."""
     X, _ = get_features_and_targets()

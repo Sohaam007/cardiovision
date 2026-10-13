@@ -191,8 +191,8 @@ def test_feature_schema_exact_match():
         "unit", "reference_range", "options", "description"
     }
 
-    allowed_types = {"integer", "number", "binary", "categorical", "ordinal"}
-    allowed_groups = {"Demographic", "History/exam", "ECG", "Lab", "Echo"}
+    allowed_types = {"binary", "numeric", "categorical", "integer", "number", "ordinal"}
+    allowed_groups = {"vitals_history", "ecg", "echo_lab", "Demographic", "History/exam", "ECG", "Lab", "Echo"}
 
     for entry in schema:
         assert required_keys.issubset(set(entry.keys())), f"Missing keys in entry: {entry['name']}"
@@ -204,7 +204,7 @@ def test_feature_schema_exact_match():
         series_clean = X[col_name]
         series_raw = raw_df[col_name]
 
-        if col_type in ("integer", "number", "ordinal"):
+        if col_type in ("integer", "number", "ordinal", "numeric"):
             actual_min = float(series_clean.min())
             actual_max = float(series_clean.max())
             schema_min = float(entry["min"])
