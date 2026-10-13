@@ -15,3 +15,15 @@
   - 86 of 87 Normal cases (98.85%) have 0 stenotic vessels across all three coronary arteries (LAD, LCX, RCA).
   - Row index 93 clinical observation: 65yo male, EF-TTE 45%, Typical Chest Pain=1, documented as Normal in Cath catheterization summary, but annotated with Stenotic LAD (LCX and RCA Normal). In catheterization adjudication, borderline or intermediate diameter stenosis (~50%) may be noted segmentally in LAD yet categorized overall as non-obstructive CAD by the catheterization panel, or represents a clerical recording artifact. Ground truth for all 303 patients is preserved unaltered without manual tampering: CAD target is derived strictly from `Cath`, and vessel targets are derived strictly from `LAD`, `LCX`, and `RCA` columns.
   - Zero-leakage invariant: All 4 targets (CAD, LAD, LCX, RCA) and raw Cath are strictly excluded from feature matrix X (54 clinical features across 303 rows). Constant feature `Exertional CP` (100% 'N') is dropped.
+  - Column name reconciliation (raw CSV vs docs/02_DATASET.md):
+    - 'Thyroid disease' in doc -> 'Thyroid Disease' in CSV (title case)
+    - 'Weak peripheral pulse' in doc -> 'Weak Peripheral Pulse' in CSV (title case)
+    - 'Systolic/Diastolic murmur' in doc -> separate 'Systolic Murmur' and 'Diastolic Murmur' in CSV
+    - 'Typical chest pain' in doc -> 'Typical Chest Pain' in CSV (title case)
+    - 'Function class' in doc -> 'Function Class' in CSV (title case)
+    - 'Q wave' in doc -> 'Q Wave' in CSV (title case)
+    - 'ST elevation' in doc -> 'St Elevation' in CSV ('St' prefix)
+    - 'ST depression' in doc -> 'St Depression' in CSV ('St' prefix)
+    - 'T inversion' in doc -> 'Tinversion' in CSV (no space)
+    - 'Poor R progression' in doc -> 'Poor R Progression' in CSV (title case)
+    Raw CSV column names are retained directly to ensure full reproducibility and schema stability.

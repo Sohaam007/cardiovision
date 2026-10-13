@@ -190,3 +190,18 @@ def test_constant_column_dropped():
     X, _ = get_features_and_targets()
     assert "Exertional CP" not in X.columns
     assert "exertional cp" not in [c.lower() for c in X.columns]
+
+
+def test_no_production_shap_import():
+    """Verify that shap is never imported in ml/features.py or production requirements."""
+    ml_features_path = PROJECT_ROOT / "ml" / "features.py"
+    req_path = PROJECT_ROOT / "requirements.txt"
+
+    content = ml_features_path.read_text(encoding="utf-8")
+    assert "import shap" not in content, "Forbidden 'import shap' detected in ml/features.py"
+    assert "from shap" not in content, "Forbidden 'from shap' detected in ml/features.py"
+
+    req_content = req_path.read_text(encoding="utf-8")
+    for line in req_content.splitlines():
+        pkg = line.strip().split("==")[0].strip().lower()
+        assert pkg != "shap", "Forbidden shap dependency found in production requirements.txt"
