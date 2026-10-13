@@ -7,3 +7,4 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 03:41 | ML-03 | Soham | done | 4 XGBoost boosters saved, Platt calibration fitted, TreeSHAP global importances and offline figures exported
 2026-10-14 03:42 | API-01 | Soham | done | Real model serving and TreeSHAP in api/inference.py with sub-15ms latency, mock fallback, and parity tests
 2026-10-14 03:46 | UI-01 | Soumyadeep | done | PersonaPicker with 8 holdout patients, ClinicalPanel tabs (TreeSHAP, Sensitivity sliders, ClinicalForm, 3D controls), SafetyModal disclaimer merged
+2026-10-14 03:48 | DOC-01 | Soham | done | 03_ML_SPEC.md, 07_DEPLOY.md, 10_REPORT_OUTLINE.md, and 11_VIDEO_SCRIPT.md populated with verified numbers from metrics.json
