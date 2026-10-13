@@ -18,10 +18,9 @@ from ml.features import (
     get_feature_names,
     get_features_and_targets,
     get_features_for_target,
+    load_clean_data,
     load_data,
 )
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_feature_matrix_no_leakage():
@@ -190,3 +189,79 @@ def test_constant_column_dropped():
     X, _ = get_features_and_targets()
     assert "Exertional CP" not in X.columns
     assert "exertional cp" not in [c.lower() for c in X.columns]
+
+
+def test_no_production_shap_import():
+    """Verify that shap is never imported in ml/features.py or production requirements."""
+    ml_features_path = PROJECT_ROOT / "ml" / "features.py"
+    req_path = PROJECT_ROOT / "requirements.txt"
+
+    content = ml_features_path.read_text(encoding="utf-8")
+    assert "import shap" not in content, "Forbidden 'import shap' detected in ml/features.py"
+    assert "from shap" not in content, "Forbidden 'from shap' detected in ml/features.py"
+
+    req_content = req_path.read_text(encoding="utf-8")
+    for line in req_content.splitlines():
+        pkg = line.strip().split("==")[0].strip().lower()
+        assert pkg != "shap", "Forbidden shap dependency found in production requirements.txt"
+
+
+def test_load_clean_data():
+    """Verify load_clean_data returns (X, y) with shapes (303, 54) and (303, 4)."""
+    X, y = load_clean_data()
+
+    assert isinstance(X, pd.DataFrame), "X must be a pandas DataFrame"
+    assert isinstance(y, pd.DataFrame), "y must be a pandas DataFrame"
+    assert X.shape == (303, 54), f"Expected X shape (303, 54), got {X.shape}"
+    assert y.shape == (303, 4), f"Expected y shape (303, 4), got {y.shape}"
+    assert list(y.columns) == ["CAD", "LAD", "LCX", "RCA"], f"Unexpected y columns: {list(y.columns)}"
+    assert X.isna().sum().sum() == 0, "X contains null values"
+    assert y.isna().sum().sum() == 0, "y contains null values"
+
+    # Zero leakage check on X
+    check_no_leakage(X.columns)
+
+
+def test_cad_label_rejection():
+    """Verify check_no_leakage rejects CAD-label and case variations."""
+    for variant in ["CAD-label", "cad-label", "CAD-LABEL", "Cad-Label"]:
+        with pytest.raises(AssertionError, match="CRITICAL LEAKAGE DETECTED"):
+            check_no_leakage([variant])
+        with pytest.raises(AssertionError, match="CRITICAL LEAKAGE DETECTED"):
+            check_no_leakage(["Age", "Sex", variant])
+
+
+def test_zero_width_space_evasion_rejection():
+    """Verify check_no_leakage strips zero-width and invisible characters before matching."""
+    evasions = [
+        "\u200bLAD",
+        "\ufeffLAD",
+        "\u200cLCX",
+        "\u200dRCA",
+        "\u00a0Cath",
+        "\u200bCAD-label\ufeff",
+        "  \u200bCAD\u200c  ",
+    ]
+    for evasion in evasions:
+        with pytest.raises(AssertionError, match="CRITICAL LEAKAGE DETECTED"):
+            check_no_leakage([evasion])
+
+
+def test_single_string_iteration_rejection():
+    """Verify check_no_leakage handles single string input without breaking into character iterations."""
+    for forbidden in ["LAD", "Cath", "CAD-label", "rca", "LCX"]:
+        with pytest.raises(AssertionError, match="CRITICAL LEAKAGE DETECTED"):
+            check_no_leakage(forbidden)
+
+    # Clean single feature string must pass cleanly
+    check_no_leakage("Age")
+    check_no_leakage("BMI")
+
+
+def test_load_data_file_not_found():
+    """Verify load_data and load_clean_data raise FileNotFoundError on missing custom path."""
+    with pytest.raises(FileNotFoundError):
+        load_data("non_existent_file.csv")
+
+    with pytest.raises(FileNotFoundError):
+        load_clean_data("non_existent_file.csv")

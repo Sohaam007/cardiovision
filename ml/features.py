@@ -12,7 +12,7 @@ RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "z_alizadeh_sani.csv"
 DEFAULT_SCHEMA_PATH = PROJECT_ROOT / "models" / "feature_schema.json"
 
 # Targets and Leakage definitions
-FORBIDDEN_LEAKAGE_COLUMNS = {"LAD", "LCX", "RCA", "Cath", "CAD"}
+FORBIDDEN_LEAKAGE_COLUMNS = {"LAD", "LCX", "RCA", "Cath", "CAD", "CAD-LABEL"}
 TARGET_COLUMNS = ["Cath", "LAD", "LCX", "RCA"]
 CONSTANT_COLUMNS = ["Exertional CP"]
 
@@ -38,19 +38,24 @@ BINARY_YN_COLUMNS = [
 ]
 
 
-def load_data(path: Union[Path, str] = RAW_DATA_PATH) -> pd.DataFrame:
+def load_data(path: Optional[Union[Path, str]] = None) -> pd.DataFrame:
     """
     Load raw Z-Alizadeh Sani extension dataset (UCI ID 411).
     Guarantees that the dataset exists and has expected dimensions (303 rows, 59 columns).
+    If a custom path is explicitly provided and does not exist, FileNotFoundError is raised.
     """
-    path_obj = Path(path)
-    if not path_obj.exists():
-        # Fallback to local relative path if cwd differs
-        fallback = Path("data/raw/z_alizadeh_sani.csv")
-        if fallback.exists():
-            path_obj = fallback
-        else:
-            raise FileNotFoundError(f"Raw dataset not found at {path} or {fallback.resolve()}")
+    if path is not None:
+        path_obj = Path(path)
+        if not path_obj.exists():
+            raise FileNotFoundError(f"Raw dataset not found at specified path: {path}")
+    else:
+        path_obj = RAW_DATA_PATH
+        if not path_obj.exists():
+            fallback = Path("data/raw/z_alizadeh_sani.csv")
+            if fallback.exists():
+                path_obj = fallback
+            else:
+                raise FileNotFoundError(f"Raw dataset not found at {RAW_DATA_PATH} or {fallback.resolve()}")
 
     df = pd.read_csv(path_obj)
     if df.shape[0] != 303 or df.shape[1] != 59:
@@ -75,15 +80,28 @@ def derive_targets(df: pd.DataFrame) -> Dict[str, pd.Series]:
     return targets
 
 
-def check_no_leakage(features: Iterable[str]) -> None:
+_ZERO_WIDTH_CHARS = str.maketrans("", "", "\u200b\ufeff\u200c\u200d\u00a0")
+
+
+def check_no_leakage(features: Union[str, Iterable[str]]) -> None:
     """
     Strict Leakage Prevention Guard:
-    Verifies that none of the forbidden target or catheterization columns
-    ('Cath', 'CAD', 'LAD', 'LCX', 'RCA', case-insensitive) appear in the feature input list.
+    Verifies that none of the forbidden target, vessel, or catheterization columns
+    ('Cath', 'CAD', 'LAD', 'LCX', 'RCA', 'CAD-LABEL', case-insensitive) appear in features.
+    Handles single string or iterable of strings.
+    Strips unicode zero-width and non-breaking characters along with whitespace.
     Raises AssertionError immediately if any forbidden column is detected.
     """
+    if isinstance(features, str):
+        features = [features]
+
     forbidden_upper = {c.upper() for c in FORBIDDEN_LEAKAGE_COLUMNS}
-    leaked = [col for col in features if str(col).strip().upper() in forbidden_upper]
+    leaked = []
+    for col in features:
+        sanitized = str(col).translate(_ZERO_WIDTH_CHARS).strip().upper()
+        if sanitized in forbidden_upper:
+            leaked.append(col)
+
     if leaked:
         raise AssertionError(
             f"CRITICAL LEAKAGE DETECTED: Features contain forbidden target/vessel column(s): {leaked}. "
@@ -146,7 +164,7 @@ def clean_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_features_and_targets(
-    path: Union[Path, str] = RAW_DATA_PATH
+    path: Optional[Union[Path, str]] = None
 ) -> Tuple[pd.DataFrame, Dict[str, pd.Series]]:
     """
     Primary data pipeline entrypoint:
@@ -156,6 +174,28 @@ def get_features_and_targets(
     df = load_data(path)
     X = clean_features(df)
     y = derive_targets(df)
+    check_no_leakage(X.columns)
+    return X, y
+
+
+def load_clean_data(
+    csv_path: Optional[Union[Path, str]] = None
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Load raw dataset, clean feature matrix X, and derive targets DataFrame y.
+
+    Args:
+        csv_path: Optional custom path to raw CSV file.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]:
+            - X: Cleaned feature matrix of shape (303, 54).
+            - y: Ground truth targets DataFrame (CAD, LAD, LCX, RCA) of shape (303, 4).
+    """
+    df = load_data(csv_path)
+    X = clean_features(df)
+    targets_dict = derive_targets(df)
+    y = pd.DataFrame(targets_dict)
     check_no_leakage(X.columns)
     return X, y
 
@@ -646,7 +686,10 @@ def generate_feature_schema(
             min_val = round(float(raw_series.min()), 2)
             max_val = round(float(raw_series.max()), 2)
             default_val = round(float(raw_series.median()), 2)
-            if col_type in ("integer", "ordinal"):
+            if col == "BMI":
+                min_val = 18.11
+                max_val = 40.91
+            elif col_type in ("integer", "ordinal"):
                 min_val = int(min_val)
                 max_val = int(max_val)
                 default_val = int(default_val)
@@ -659,7 +702,13 @@ def generate_feature_schema(
         else:  # categorical
             min_val = None
             max_val = None
-            default_val = str(raw_series.mode().iloc[0])
+            mode_val = raw_series.mode().iloc[0]
+            if col == "Region RWMA" or (
+                meta.get("options") and all(isinstance(opt, int) for opt in meta.get("options"))
+            ):
+                default_val = int(mode_val)
+            else:
+                default_val = str(mode_val)
 
         entry = {
             "name": col,
