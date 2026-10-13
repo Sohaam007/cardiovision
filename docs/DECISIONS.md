@@ -1,0 +1,12 @@
+# DECISIONS
+- Vessels are procedural tubes; no Blender dependency (24-36h deadline).
+- P(CAD) >= max(vessel probs) enforced server-side.
+- Repeated stratified 5-fold x3 + small fixed grid instead of nested Optuna.
+- No shap import in API; use XGBoost pred_contribs.
+- Hosting: Vercel (frontend) + Render free (API) + fallback demo mode.
+- Dataset: UCI id 411 (Extension), not 412. License rows verified 13 Oct 2026 in 08_ASSETS_LICENSES.md. Downloaded and converted to CSV in `data/raw/z_alizadeh_sani.csv` (303 rows, 59 cols).
+- BodyParts3D is optional; procedural heart is the default. Mesh work time-boxed to 1.5 h.
+- Hackathon brief `Track_A.pdf` verified against `docs/`: 100% aligned (targets, metrics, exclusion of LAD/LCX/RCA/Cath from inputs, 3D and clinical dashboard requirements, 6-page max report, 3-10 min video).
+- GitHub repository initialized at `https://github.com/Sohaam007/cardiovision`.
+- Web frontend pinned to React 18 for stable R3F / Drei / Zustand / Recharts interoperability with strict TypeScript.
+- `requirements.txt` contains pinned production dependencies without `shap`; `shap` placed exclusively in `requirements-dev.txt`.
