@@ -30,3 +30,7 @@ context_bundle.md
 # IDE
 .vscode/
 .idea/
+
+# Agents Internal
+.agents/
+
