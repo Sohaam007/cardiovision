@@ -9,4 +9,5 @@
 - Python 3.11, pinned `requirements.txt`. TypeScript strict. Add tests for new logic.
 - Do not invent metrics or numbers. Every number in docs/report must come from `models/metrics.json`.
 - If a task card is ambiguous, make the smallest reasonable choice, log it in `docs/DECISIONS.md`, and continue.
+- When reviewing a PR: follow adversarial protocol in `docs/WORKFLOW.md`; verify test/build suites; log unverified items in `docs/UNVERIFIED.md`; update `docs/STATUS.md`.
 - Do not touch files outside the task's scope.
