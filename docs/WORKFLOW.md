@@ -29,7 +29,7 @@ Every task card lives in `docs/tasks/<ID>.md`:
 
 ## 3. Adversarial PR Review Protocol
 
-Review PRs as an adversary, not as a formality. Claims made in PR descriptions are checkable—check them by execution.
+Review PRs as an adversary, not as a formality. Claims made in PR descriptions are checkable: check them by execution.
 
 ### Step 1: Independent Local Execution
 Never trust PR descriptions or green badges. Check out the branch and run the checks locally:
@@ -64,7 +64,7 @@ A test that cannot fail is an illusion of protection.
 ### Step 4: Adversarial Attack Checks
 Actively probe the code against project-specific failure modes:
 - **Leakage attack:** Inject casing variants (`lad`, `Cath `, `CAD`, `lcx`) into candidate feature lists; confirm `test_no_leakage.py` catches them.
-- **Lesion location illusion:** Confirm no 3D shader, mesh texture, or UI label implies lesion location along a vessel. The dataset has no segmental location data—vessels must be colored strictly by predicted probability across their entire geometry.
+- **Lesion location illusion:** Confirm no 3D shader, mesh texture, or UI label implies lesion location along a vessel. The dataset has no segmental location data; vessels must be colored strictly by predicted probability across their entire geometry.
 - **Probability consistency:** Verify that `P(CAD) >= max(P(LAD), P(LCX), P(RCA))` is never violated.
 - **Production dependency check:** Ensure `import shap` is absent from `api/` and `requirements.txt`. TreeSHAP in production must use XGBoost `pred_contribs=True` or LightGBM `pred_contrib=True`.
 - **Metrics honesty:** Confirm that no accuracy or AUC values are invented or hardcoded; all metrics must trace to `models/metrics.json`.

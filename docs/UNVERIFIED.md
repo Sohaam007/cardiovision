@@ -19,6 +19,7 @@ Status options:
 
 | Date | PR # | Task ID | Component / Item | Why Unverified | Assignee | Status | Verification Plan |
 |---|---|---|---|---|---|---|---|
+| 2026-10-14 00:16 | #3 | DOC-WF | Remote GitHub Actions CI | .github/workflows not yet created in repo (OPS-02 pending); verified locally | Debdas | open | Create .github/workflows in OPS-02 and verify remote checks pass |
 
 ---
 
