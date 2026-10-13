@@ -3,3 +3,6 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 00:18 | DOC-WF | Soham | done | PR #3 adversarial review protocol and unverified log merged into main
 2026-10-14 01:10 | 3D-01 | Soumyadeep | done | Interactive 3D heart scene with procedural vessels, demand frameloop, and debug recoloring merged into main
 2026-10-14 02:35 | ML-01 | Soham | done | 54 features cleaned (303 rows), targets derived, zero leakage enforced via 41 tests, schema exported, PR #5 merged
+2026-10-14 03:40 | ML-02 | Soham | done | 4 targets x 4 models evaluated via 5-fold x 3-repeat nested CV on N=295 rows with baseline comparisons
+2026-10-14 03:41 | ML-03 | Soham | done | 4 XGBoost boosters saved, Platt calibration fitted, TreeSHAP global importances and offline figures exported
+2026-10-14 03:42 | API-01 | Soham | done | Real model serving and TreeSHAP in api/inference.py with sub-15ms latency, mock fallback, and parity tests

@@ -1,0 +1,490 @@
+{
+  "cad": [
+    {
+      "feature": "Typical Chest Pain",
+      "mean_abs_shap": 1.2681,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "",
+      "description": "Classical substernal exertional angina"
+    },
+    {
+      "feature": "EF-TTE",
+      "mean_abs_shap": 0.5128,
+      "direction": "positive",
+      "group": "Echo",
+      "unit": "%",
+      "description": "Transthoracic echocardiographic ejection fraction"
+    },
+    {
+      "feature": "Age",
+      "mean_abs_shap": 0.4722,
+      "direction": "positive",
+      "group": "Demographic",
+      "unit": "years",
+      "description": "Patient age in years"
+    },
+    {
+      "feature": "FBS",
+      "mean_abs_shap": 0.4183,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Fasting blood sugar level"
+    },
+    {
+      "feature": "Region RWMA",
+      "mean_abs_shap": 0.4077,
+      "direction": "positive",
+      "group": "Echo",
+      "unit": "",
+      "description": "Regional wall motion abnormality segment count (0=normal)"
+    },
+    {
+      "feature": "TG",
+      "mean_abs_shap": 0.3617,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Serum triglycerides level"
+    },
+    {
+      "feature": "HTN",
+      "mean_abs_shap": 0.284,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "",
+      "description": "History of Hypertension"
+    },
+    {
+      "feature": "Tinversion",
+      "mean_abs_shap": 0.2276,
+      "direction": "positive",
+      "group": "ECG",
+      "unit": "",
+      "description": "T-wave inversion on electrocardiogram"
+    },
+    {
+      "feature": "ESR",
+      "mean_abs_shap": 0.2008,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mm/hr",
+      "description": "Erythrocyte sedimentation rate"
+    },
+    {
+      "feature": "BMI",
+      "mean_abs_shap": 0.1852,
+      "direction": "positive",
+      "group": "Demographic",
+      "unit": "kg/m^2",
+      "description": "Body Mass Index"
+    },
+    {
+      "feature": "Na",
+      "mean_abs_shap": 0.1402,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mEq/L",
+      "description": "Serum sodium concentration"
+    },
+    {
+      "feature": "DM",
+      "mean_abs_shap": 0.128,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "",
+      "description": "History of Diabetes Mellitus"
+    },
+    {
+      "feature": "Dyspnea",
+      "mean_abs_shap": 0.1115,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "",
+      "description": "Shortness of breath on exertion or rest"
+    },
+    {
+      "feature": "BP",
+      "mean_abs_shap": 0.1039,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "mmHg",
+      "description": "Resting systolic blood pressure"
+    },
+    {
+      "feature": "PR",
+      "mean_abs_shap": 0.0958,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "bpm",
+      "description": "Resting pulse rate"
+    }
+  ],
+  "lad": [
+    {
+      "feature": "Typical Chest Pain",
+      "mean_abs_shap": 0.8373,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "",
+      "description": "Classical substernal exertional angina"
+    },
+    {
+      "feature": "Region RWMA",
+      "mean_abs_shap": 0.5044,
+      "direction": "positive",
+      "group": "Echo",
+      "unit": "",
+      "description": "Regional wall motion abnormality segment count (0=normal)"
+    },
+    {
+      "feature": "EF-TTE",
+      "mean_abs_shap": 0.441,
+      "direction": "positive",
+      "group": "Echo",
+      "unit": "%",
+      "description": "Transthoracic echocardiographic ejection fraction"
+    },
+    {
+      "feature": "Age",
+      "mean_abs_shap": 0.3303,
+      "direction": "positive",
+      "group": "Demographic",
+      "unit": "years",
+      "description": "Patient age in years"
+    },
+    {
+      "feature": "Lymph",
+      "mean_abs_shap": 0.1241,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "%",
+      "description": "Lymphocyte percentage in differential"
+    },
+    {
+      "feature": "LDL",
+      "mean_abs_shap": 0.1142,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Low-density lipoprotein cholesterol level"
+    },
+    {
+      "feature": "ESR",
+      "mean_abs_shap": 0.1066,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mm/hr",
+      "description": "Erythrocyte sedimentation rate"
+    },
+    {
+      "feature": "PR",
+      "mean_abs_shap": 0.102,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "bpm",
+      "description": "Resting pulse rate"
+    },
+    {
+      "feature": "WBC",
+      "mean_abs_shap": 0.0954,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "/uL",
+      "description": "White blood cell count"
+    },
+    {
+      "feature": "CR",
+      "mean_abs_shap": 0.0883,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Serum creatinine level"
+    },
+    {
+      "feature": "HTN",
+      "mean_abs_shap": 0.0836,
+      "direction": "positive",
+      "group": "History/exam",
+      "unit": "",
+      "description": "History of Hypertension"
+    },
+    {
+      "feature": "FBS",
+      "mean_abs_shap": 0.0641,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Fasting blood sugar level"
+    },
+    {
+      "feature": "HDL",
+      "mean_abs_shap": 0.0616,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "High-density lipoprotein cholesterol level"
+    },
+    {
+      "feature": "BMI",
+      "mean_abs_shap": 0.0612,
+      "direction": "positive",
+      "group": "Demographic",
+      "unit": "kg/m^2",
+      "description": "Body Mass Index"
+    },
+    {
+      "feature": "TG",
+      "mean_abs_shap": 0.0497,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Serum triglycerides level"
+    }
+  ],
+  "lcx": [
+    {
+      "feature": "Typical Chest Pain",
+      "mean_abs_shap": 0.4528,
+      "direction": "negative",
+      "group": "History/exam",
+      "unit": "",
+      "description": "Classical substernal exertional angina"
+    },
+    {
+      "feature": "Age",
+      "mean_abs_shap": 0.4321,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "years",
+      "description": "Patient age in years"
+    },
+    {
+      "feature": "CR",
+      "mean_abs_shap": 0.2445,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Serum creatinine level"
+    },
+    {
+      "feature": "TG",
+      "mean_abs_shap": 0.2303,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Serum triglycerides level"
+    },
+    {
+      "feature": "PLT",
+      "mean_abs_shap": 0.1893,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "10^3/uL",
+      "description": "Platelet count"
+    },
+    {
+      "feature": "FBS",
+      "mean_abs_shap": 0.1712,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Fasting blood sugar level"
+    },
+    {
+      "feature": "HDL",
+      "mean_abs_shap": 0.1551,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "High-density lipoprotein cholesterol level"
+    },
+    {
+      "feature": "Na",
+      "mean_abs_shap": 0.1254,
+      "direction": "positive",
+      "group": "Lab",
+      "unit": "mEq/L",
+      "description": "Serum sodium concentration"
+    },
+    {
+      "feature": "BMI",
+      "mean_abs_shap": 0.1061,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "kg/m^2",
+      "description": "Body Mass Index"
+    },
+    {
+      "feature": "BP",
+      "mean_abs_shap": 0.1052,
+      "direction": "negative",
+      "group": "History/exam",
+      "unit": "mmHg",
+      "description": "Resting systolic blood pressure"
+    },
+    {
+      "feature": "LDL",
+      "mean_abs_shap": 0.0794,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Low-density lipoprotein cholesterol level"
+    },
+    {
+      "feature": "ESR",
+      "mean_abs_shap": 0.0697,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "mm/hr",
+      "description": "Erythrocyte sedimentation rate"
+    },
+    {
+      "feature": "Weight",
+      "mean_abs_shap": 0.0684,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "kg",
+      "description": "Patient body weight in kilograms"
+    },
+    {
+      "feature": "Length",
+      "mean_abs_shap": 0.057,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "cm",
+      "description": "Patient height in centimeters"
+    },
+    {
+      "feature": "HB",
+      "mean_abs_shap": 0.05,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "g/dL",
+      "description": "Hemoglobin level"
+    }
+  ],
+  "rca": [
+    {
+      "feature": "DM",
+      "mean_abs_shap": 0.2059,
+      "direction": "negative",
+      "group": "History/exam",
+      "unit": "",
+      "description": "History of Diabetes Mellitus"
+    },
+    {
+      "feature": "Typical Chest Pain",
+      "mean_abs_shap": 0.1949,
+      "direction": "negative",
+      "group": "History/exam",
+      "unit": "",
+      "description": "Classical substernal exertional angina"
+    },
+    {
+      "feature": "Age",
+      "mean_abs_shap": 0.1821,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "years",
+      "description": "Patient age in years"
+    },
+    {
+      "feature": "ESR",
+      "mean_abs_shap": 0.166,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "mm/hr",
+      "description": "Erythrocyte sedimentation rate"
+    },
+    {
+      "feature": "Neut",
+      "mean_abs_shap": 0.1244,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "%",
+      "description": "Neutrophil percentage in differential"
+    },
+    {
+      "feature": "TG",
+      "mean_abs_shap": 0.0958,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "mg/dL",
+      "description": "Serum triglycerides level"
+    },
+    {
+      "feature": "Lymph",
+      "mean_abs_shap": 0.0896,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "%",
+      "description": "Lymphocyte percentage in differential"
+    },
+    {
+      "feature": "WBC",
+      "mean_abs_shap": 0.0829,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "/uL",
+      "description": "White blood cell count"
+    },
+    {
+      "feature": "Weight",
+      "mean_abs_shap": 0.0606,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "kg",
+      "description": "Patient body weight in kilograms"
+    },
+    {
+      "feature": "Length",
+      "mean_abs_shap": 0.0606,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "cm",
+      "description": "Patient height in centimeters"
+    },
+    {
+      "feature": "HB",
+      "mean_abs_shap": 0.0557,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "g/dL",
+      "description": "Hemoglobin level"
+    },
+    {
+      "feature": "PLT",
+      "mean_abs_shap": 0.055,
+      "direction": "negative",
+      "group": "Lab",
+      "unit": "10^3/uL",
+      "description": "Platelet count"
+    },
+    {
+      "feature": "Atypical",
+      "mean_abs_shap": 0.0531,
+      "direction": "negative",
+      "group": "History/exam",
+      "unit": "",
+      "description": "Atypical chest pain presentation"
+    },
+    {
+      "feature": "BMI",
+      "mean_abs_shap": 0.0524,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "kg/m^2",
+      "description": "Body Mass Index"
+    },
+    {
+      "feature": "Sex",
+      "mean_abs_shap": 0.0493,
+      "direction": "negative",
+      "group": "Demographic",
+      "unit": "",
+      "description": "Biological sex (Male or Female/Fmale)"
+    }
+  ]
+}

@@ -67,164 +67,354 @@
     },
     "prediction": {
       "cad": {
-        "prob": 0.2133,
-        "label": 0,
+        "prob": 0.9665,
+        "label": 1,
         "ci": [
-          0.1333,
-          0.2933
+          0.8865,
+          0.99
         ]
       },
       "vessels": {
         "LAD": {
-          "prob": 0.1744,
-          "label": 0
+          "prob": 0.9397,
+          "label": 1
         },
         "LCX": {
-          "prob": 0.1135,
+          "prob": 0.2412,
           "label": 0
         },
         "RCA": {
-          "prob": 0.124,
+          "prob": 0.2775,
           "label": 0
         }
       },
       "explanations": {
         "CAD": [
           {
-            "feature": "Current Smoker",
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.6
+            "shap": 1.769
           },
           {
-            "feature": "LDL",
-            "value": 70.0,
-            "shap": -0.45
+            "feature": "Region RWMA",
+            "value": 2.0,
+            "shap": 1.0204
           },
           {
             "feature": "EF-TTE",
             "value": 40.0,
-            "shap": 0.45
+            "shap": 0.4783
           },
           {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
-          },
-          {
-            "feature": "Age",
-            "value": 54.0,
-            "shap": -0.045
+            "feature": "FBS",
+            "value": 85.0,
+            "shap": -0.3784
           },
           {
             "feature": "HTN",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.2271
           },
           {
-            "feature": "DM",
+            "feature": "ESR",
+            "value": 10.0,
+            "shap": -0.2084
+          },
+          {
+            "feature": "PR",
+            "value": 100.0,
+            "shap": 0.1468
+          },
+          {
+            "feature": "Weight",
+            "value": 54.0,
+            "shap": 0.146
+          },
+          {
+            "feature": "Na",
+            "value": 139.0,
+            "shap": 0.1425
+          },
+          {
+            "feature": "Tinversion",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.1378
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 0.0,
+            "shap": 0.1291
+          },
+          {
+            "feature": "K",
+            "value": 4.7,
+            "shap": 0.1212
+          },
+          {
+            "feature": "LDL",
+            "value": 70.0,
+            "shap": 0.1107
+          },
+          {
+            "feature": "TG",
+            "value": 103.0,
+            "shap": -0.1101
+          },
+          {
+            "feature": "BP",
+            "value": 100.0,
+            "shap": -0.1071
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.012
+            "shap": 0.0428
           }
         ],
         "LAD": [
           {
-            "feature": "Current Smoker",
-            "value": 1.0,
-            "shap": 0.6
+            "feature": "Region RWMA",
+            "value": 2.0,
+            "shap": 1.0768
           },
           {
-            "feature": "LDL",
-            "value": 70.0,
-            "shap": -0.45
+            "feature": "Typical Chest Pain",
+            "value": 1.0,
+            "shap": 0.7666
           },
           {
             "feature": "EF-TTE",
             "value": 40.0,
-            "shap": 0.45
+            "shap": 0.5712
           },
           {
-            "feature": "BP",
+            "feature": "Lymph",
+            "value": 38.0,
+            "shap": 0.1212
+          },
+          {
+            "feature": "K",
+            "value": 4.7,
+            "shap": 0.1203
+          },
+          {
+            "feature": "BMI",
+            "value": 20.0773,
+            "shap": 0.1147
+          },
+          {
+            "feature": "HTN",
+            "value": 0.0,
+            "shap": -0.1016
+          },
+          {
+            "feature": "HDL",
+            "value": 45.0,
+            "shap": -0.1006
+          },
+          {
+            "feature": "PR",
             "value": 100.0,
-            "shap": -0.36
+            "shap": 0.0955
+          },
+          {
+            "feature": "LDL",
+            "value": 70.0,
+            "shap": -0.0864
           },
           {
             "feature": "Age",
             "value": 54.0,
-            "shap": -0.045
+            "shap": -0.0755
+          },
+          {
+            "feature": "ESR",
+            "value": 10.0,
+            "shap": -0.0724
+          },
+          {
+            "feature": "FBS",
+            "value": 85.0,
+            "shap": -0.0676
+          },
+          {
+            "feature": "WBC",
+            "value": 7400.0,
+            "shap": 0.0667
+          },
+          {
+            "feature": "Length",
+            "value": 164.0,
+            "shap": 0.0558
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.005
+            "shap": 0.0565
           }
         ],
         "LCX": [
           {
-            "feature": "Current Smoker",
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.6
+            "shap": 0.4636
           },
           {
-            "feature": "LDL",
-            "value": 70.0,
-            "shap": -0.45
-          },
-          {
-            "feature": "EF-TTE",
-            "value": 40.0,
-            "shap": 0.45
-          },
-          {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
+            "feature": "Weight",
+            "value": 54.0,
+            "shap": -0.282
           },
           {
             "feature": "Age",
             "value": 54.0,
-            "shap": -0.045
+            "shap": -0.2703
+          },
+          {
+            "feature": "BP",
+            "value": 100.0,
+            "shap": -0.2424
+          },
+          {
+            "feature": "BMI",
+            "value": 20.0773,
+            "shap": 0.2289
+          },
+          {
+            "feature": "FBS",
+            "value": 85.0,
+            "shap": -0.2089
+          },
+          {
+            "feature": "PLT",
+            "value": 230.0,
+            "shap": -0.2054
+          },
+          {
+            "feature": "CR",
+            "value": 1.0,
+            "shap": -0.1807
+          },
+          {
+            "feature": "HDL",
+            "value": 45.0,
+            "shap": 0.1769
+          },
+          {
+            "feature": "Na",
+            "value": 139.0,
+            "shap": -0.1689
+          },
+          {
+            "feature": "LDL",
+            "value": 70.0,
+            "shap": -0.1554
+          },
+          {
+            "feature": "HB",
+            "value": 13.5,
+            "shap": -0.0722
+          },
+          {
+            "feature": "K",
+            "value": 4.7,
+            "shap": 0.0655
+          },
+          {
+            "feature": "Length",
+            "value": 164.0,
+            "shap": -0.062
+          },
+          {
+            "feature": "TG",
+            "value": 103.0,
+            "shap": 0.0602
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.004
+            "shap": 0.0016
           }
         ],
         "RCA": [
           {
-            "feature": "Current Smoker",
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.6
+            "shap": 0.1856
           },
           {
-            "feature": "LDL",
-            "value": 70.0,
-            "shap": -0.45
+            "feature": "ESR",
+            "value": 10.0,
+            "shap": -0.1559
           },
           {
-            "feature": "EF-TTE",
-            "value": 40.0,
-            "shap": 0.45
+            "feature": "Lymph",
+            "value": 38.0,
+            "shap": -0.1263
           },
           {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
+            "feature": "TG",
+            "value": 103.0,
+            "shap": -0.1163
+          },
+          {
+            "feature": "BMI",
+            "value": 20.0773,
+            "shap": -0.1077
+          },
+          {
+            "feature": "DM",
+            "value": 0.0,
+            "shap": -0.0963
+          },
+          {
+            "feature": "Neut",
+            "value": 60.0,
+            "shap": -0.0828
+          },
+          {
+            "feature": "HTN",
+            "value": 0.0,
+            "shap": -0.0804
+          },
+          {
+            "feature": "WBC",
+            "value": 7400.0,
+            "shap": 0.0761
           },
           {
             "feature": "Age",
             "value": 54.0,
-            "shap": -0.045
+            "shap": -0.0642
+          },
+          {
+            "feature": "Length",
+            "value": 164.0,
+            "shap": -0.0621
+          },
+          {
+            "feature": "Atypical",
+            "value": 0.0,
+            "shap": 0.0491
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 0.0,
+            "shap": 0.0387
+          },
+          {
+            "feature": "K",
+            "value": 4.7,
+            "shap": 0.0386
+          },
+          {
+            "feature": "Sex",
+            "value": 1.0,
+            "shap": 0.0384
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.006
+            "shap": -0.1746
           }
         ]
       },
@@ -307,164 +497,354 @@
     },
     "prediction": {
       "cad": {
-        "prob": 0.1802,
-        "label": 0,
+        "prob": 0.7248,
+        "label": 1,
         "ci": [
-          0.1002,
-          0.2602
+          0.6448,
+          0.8048
         ]
       },
       "vessels": {
         "LAD": {
-          "prob": 0.1462,
+          "prob": 0.3584,
           "label": 0
         },
         "LCX": {
-          "prob": 0.0941,
+          "prob": 0.1843,
           "label": 0
         },
         "RCA": {
-          "prob": 0.1029,
-          "label": 0
+          "prob": 0.5338,
+          "label": 1
         }
       },
       "explanations": {
         "CAD": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
-          },
-          {
-            "feature": "LDL",
-            "value": 55.0,
-            "shap": -0.675
-          },
-          {
             "feature": "Age",
             "value": 66.0,
-            "shap": 0.495
+            "shap": 1.1416
           },
           {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.636
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.4306
           },
           {
             "feature": "EF-TTE",
             "value": 55.0,
-            "shap": -0.225
+            "shap": -0.3931
           },
           {
-            "feature": "Current Smoker",
-            "value": 0.0,
-            "shap": 0.0
+            "feature": "ESR",
+            "value": 76.0,
+            "shap": 0.3495
           },
           {
-            "feature": "DM",
+            "feature": "FBS",
+            "value": 78.0,
+            "shap": -0.3251
+          },
+          {
+            "feature": "TG",
+            "value": 63.0,
+            "shap": -0.2748
+          },
+          {
+            "feature": "Region RWMA",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.2423
+          },
+          {
+            "feature": "BP",
+            "value": 100.0,
+            "shap": -0.1938
+          },
+          {
+            "feature": "HB",
+            "value": 12.1,
+            "shap": 0.1902
+          },
+          {
+            "feature": "CR",
+            "value": 1.2,
+            "shap": 0.166
+          },
+          {
+            "feature": "Tinversion",
+            "value": 0.0,
+            "shap": -0.1624
+          },
+          {
+            "feature": "PR",
+            "value": 80.0,
+            "shap": 0.1554
+          },
+          {
+            "feature": "Weight",
+            "value": 67.0,
+            "shap": 0.1391
+          },
+          {
+            "feature": "BMI",
+            "value": 26.8386,
+            "shap": 0.1364
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.012
+            "shap": 0.0621
           }
         ],
         "LAD": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
-          },
-          {
-            "feature": "LDL",
-            "value": 55.0,
-            "shap": -0.675
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.823
           },
           {
             "feature": "Age",
             "value": 66.0,
-            "shap": 0.495
-          },
-          {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
+            "shap": 0.6445
           },
           {
             "feature": "EF-TTE",
             "value": 55.0,
-            "shap": -0.225
+            "shap": -0.5238
+          },
+          {
+            "feature": "Region RWMA",
+            "value": 0.0,
+            "shap": -0.3265
+          },
+          {
+            "feature": "ESR",
+            "value": 76.0,
+            "shap": 0.2121
+          },
+          {
+            "feature": "FBS",
+            "value": 78.0,
+            "shap": -0.1497
+          },
+          {
+            "feature": "TG",
+            "value": 63.0,
+            "shap": -0.1471
+          },
+          {
+            "feature": "PR",
+            "value": 80.0,
+            "shap": 0.146
+          },
+          {
+            "feature": "St Depression",
+            "value": 1.0,
+            "shap": 0.1252
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.0988
+          },
+          {
+            "feature": "LDL",
+            "value": 55.0,
+            "shap": -0.0983
+          },
+          {
+            "feature": "CR",
+            "value": 1.2,
+            "shap": -0.0639
+          },
+          {
+            "feature": "BUN",
+            "value": 30.0,
+            "shap": 0.0619
+          },
+          {
+            "feature": "HDL",
+            "value": 27.0,
+            "shap": 0.0571
+          },
+          {
+            "feature": "K",
+            "value": 4.4,
+            "shap": -0.0547
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.005
+            "shap": 0.0537
           }
         ],
         "LCX": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
-          },
-          {
-            "feature": "LDL",
-            "value": 55.0,
-            "shap": -0.675
-          },
-          {
             "feature": "Age",
             "value": 66.0,
-            "shap": 0.495
+            "shap": 0.5271
+          },
+          {
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.4706
+          },
+          {
+            "feature": "TG",
+            "value": 63.0,
+            "shap": -0.4559
           },
           {
             "feature": "BP",
             "value": 100.0,
-            "shap": -0.36
+            "shap": -0.318
           },
           {
-            "feature": "EF-TTE",
+            "feature": "PLT",
+            "value": 742.0,
+            "shap": -0.2583
+          },
+          {
+            "feature": "CR",
+            "value": 1.2,
+            "shap": 0.2313
+          },
+          {
+            "feature": "LDL",
             "value": 55.0,
-            "shap": -0.225
+            "shap": -0.2191
+          },
+          {
+            "feature": "FBS",
+            "value": 78.0,
+            "shap": -0.2117
+          },
+          {
+            "feature": "HDL",
+            "value": 27.0,
+            "shap": -0.1919
+          },
+          {
+            "feature": "Weight",
+            "value": 67.0,
+            "shap": 0.1163
+          },
+          {
+            "feature": "BUN",
+            "value": 30.0,
+            "shap": 0.0794
+          },
+          {
+            "feature": "Length",
+            "value": 158.0,
+            "shap": -0.0608
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.0595
+          },
+          {
+            "feature": "BMI",
+            "value": 26.8386,
+            "shap": 0.0572
+          },
+          {
+            "feature": "Na",
+            "value": 142.0,
+            "shap": 0.0566
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.004
+            "shap": -0.0153
           }
         ],
         "RCA": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
+            "feature": "Neut",
+            "value": 72.0,
+            "shap": 0.3505
           },
           {
-            "feature": "LDL",
-            "value": 55.0,
-            "shap": -0.675
+            "feature": "ESR",
+            "value": 76.0,
+            "shap": 0.2961
           },
           {
             "feature": "Age",
             "value": 66.0,
-            "shap": 0.495
+            "shap": 0.2325
           },
           {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
+            "feature": "DM",
+            "value": 0.0,
+            "shap": -0.1397
           },
           {
-            "feature": "EF-TTE",
-            "value": 55.0,
-            "shap": -0.225
+            "feature": "WBC",
+            "value": 13000.0,
+            "shap": 0.1339
+          },
+          {
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.0978
+          },
+          {
+            "feature": "Lymph",
+            "value": 18.0,
+            "shap": 0.089
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 1.0,
+            "shap": -0.0866
+          },
+          {
+            "feature": "PLT",
+            "value": 742.0,
+            "shap": -0.0814
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.0741
+          },
+          {
+            "feature": "HDL",
+            "value": 27.0,
+            "shap": -0.0732
+          },
+          {
+            "feature": "HB",
+            "value": 12.1,
+            "shap": -0.0586
+          },
+          {
+            "feature": "TG",
+            "value": 63.0,
+            "shap": -0.0583
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.0524
+          },
+          {
+            "feature": "Length",
+            "value": 158.0,
+            "shap": -0.0413
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.006
+            "shap": 0.0088
           }
         ]
       },
@@ -547,164 +927,354 @@
     },
     "prediction": {
       "cad": {
-        "prob": 0.485,
-        "label": 0,
+        "prob": 0.9793,
+        "label": 1,
         "ci": [
-          0.405,
-          0.565
+          0.8993,
+          0.99
         ]
       },
       "vessels": {
         "LAD": {
-          "prob": 0.4231,
-          "label": 0
+          "prob": 0.9582,
+          "label": 1
         },
         "LCX": {
-          "prob": 0.3079,
-          "label": 0
+          "prob": 0.5123,
+          "label": 1
         },
         "RCA": {
-          "prob": 0.3296,
+          "prob": 0.3928,
           "label": 0
         }
       },
       "explanations": {
         "CAD": [
           {
+            "feature": "Typical Chest Pain",
+            "value": 1.0,
+            "shap": 1.3671
+          },
+          {
+            "feature": "Region RWMA",
+            "value": 4.0,
+            "shap": 0.8347
+          },
+          {
             "feature": "Age",
             "value": 73.0,
-            "shap": 0.81
+            "shap": 0.5394
+          },
+          {
+            "feature": "FBS",
+            "value": 106.0,
+            "shap": 0.5069
           },
           {
             "feature": "EF-TTE",
             "value": 40.0,
-            "shap": 0.45
+            "shap": 0.4953
           },
           {
-            "feature": "LDL",
-            "value": 112.0,
-            "shap": 0.18
-          },
-          {
-            "feature": "BP",
-            "value": 120.0,
-            "shap": 0.0
+            "feature": "ESR",
+            "value": 31.0,
+            "shap": 0.2397
           },
           {
             "feature": "HTN",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.2206
           },
           {
-            "feature": "Current Smoker",
-            "value": 0.0,
-            "shap": 0.0
+            "feature": "TG",
+            "value": 115.0,
+            "shap": -0.2172
           },
           {
-            "feature": "DM",
+            "feature": "Weight",
+            "value": 54.0,
+            "shap": 0.1402
+          },
+          {
+            "feature": "HDL",
+            "value": 43.0,
+            "shap": -0.1399
+          },
+          {
+            "feature": "Dyspnea",
             "value": 0.0,
-            "shap": 0.0
+            "shap": 0.1244
+          },
+          {
+            "feature": "Tinversion",
+            "value": 0.0,
+            "shap": -0.1234
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.1104
+          },
+          {
+            "feature": "HB",
+            "value": 11.2,
+            "shap": 0.1063
+          },
+          {
+            "feature": "Atypical",
+            "value": 0.0,
+            "shap": 0.1049
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.012
+            "shap": -0.2161
           }
         ],
         "LAD": [
           {
-            "feature": "Age",
-            "value": 73.0,
-            "shap": 0.81
+            "feature": "Region RWMA",
+            "value": 4.0,
+            "shap": 0.9576
+          },
+          {
+            "feature": "Typical Chest Pain",
+            "value": 1.0,
+            "shap": 0.6881
           },
           {
             "feature": "EF-TTE",
             "value": 40.0,
-            "shap": 0.45
+            "shap": 0.5402
           },
           {
-            "feature": "LDL",
-            "value": 112.0,
-            "shap": 0.18
+            "feature": "Age",
+            "value": 73.0,
+            "shap": 0.2895
           },
           {
-            "feature": "BP",
-            "value": 120.0,
-            "shap": 0.0
+            "feature": "ESR",
+            "value": 31.0,
+            "shap": 0.1728
+          },
+          {
+            "feature": "Lymph",
+            "value": 17.0,
+            "shap": 0.1432
           },
           {
             "feature": "HTN",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.0906
+          },
+          {
+            "feature": "WBC",
+            "value": 6700.0,
+            "shap": 0.0784
+          },
+          {
+            "feature": "PR",
+            "value": 70.0,
+            "shap": -0.0774
+          },
+          {
+            "feature": "St Depression",
+            "value": 1.0,
+            "shap": 0.07
+          },
+          {
+            "feature": "HB",
+            "value": 11.2,
+            "shap": 0.061
+          },
+          {
+            "feature": "Neut",
+            "value": 76.0,
+            "shap": 0.0597
+          },
+          {
+            "feature": "FBS",
+            "value": 106.0,
+            "shap": 0.0487
+          },
+          {
+            "feature": "CR",
+            "value": 0.8,
+            "shap": -0.0466
+          },
+          {
+            "feature": "LDL",
+            "value": 112.0,
+            "shap": 0.0447
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.005
+            "shap": -0.0119
           }
         ],
         "LCX": [
           {
-            "feature": "Age",
-            "value": 73.0,
-            "shap": 0.81
+            "feature": "Weight",
+            "value": 54.0,
+            "shap": -0.4341
           },
           {
-            "feature": "EF-TTE",
-            "value": 40.0,
-            "shap": 0.45
+            "feature": "Typical Chest Pain",
+            "value": 1.0,
+            "shap": 0.3699
+          },
+          {
+            "feature": "Age",
+            "value": 73.0,
+            "shap": 0.3001
+          },
+          {
+            "feature": "CR",
+            "value": 0.8,
+            "shap": -0.1941
+          },
+          {
+            "feature": "PLT",
+            "value": 221.0,
+            "shap": -0.1941
+          },
+          {
+            "feature": "BMI",
+            "value": 22.7694,
+            "shap": 0.1509
+          },
+          {
+            "feature": "HDL",
+            "value": 43.0,
+            "shap": 0.1499
+          },
+          {
+            "feature": "Na",
+            "value": 142.0,
+            "shap": 0.1103
           },
           {
             "feature": "LDL",
             "value": 112.0,
-            "shap": 0.18
+            "shap": 0.0752
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.0736
+          },
+          {
+            "feature": "Length",
+            "value": 154.0,
+            "shap": -0.0568
           },
           {
             "feature": "BP",
             "value": 120.0,
-            "shap": 0.0
+            "shap": 0.0567
           },
           {
-            "feature": "HTN",
-            "value": 0.0,
-            "shap": 0.0
+            "feature": "TG",
+            "value": 115.0,
+            "shap": 0.0508
+          },
+          {
+            "feature": "ESR",
+            "value": 31.0,
+            "shap": 0.0506
+          },
+          {
+            "feature": "FBS",
+            "value": 106.0,
+            "shap": 0.0349
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.004
+            "shap": -0.0533
           }
         ],
         "RCA": [
           {
+            "feature": "ESR",
+            "value": 31.0,
+            "shap": 0.2312
+          },
+          {
+            "feature": "DM",
+            "value": 0.0,
+            "shap": -0.1746
+          },
+          {
             "feature": "Age",
             "value": 73.0,
-            "shap": 0.81
+            "shap": 0.17
           },
           {
-            "feature": "EF-TTE",
-            "value": 40.0,
-            "shap": 0.45
+            "feature": "Neut",
+            "value": 76.0,
+            "shap": 0.1378
           },
           {
-            "feature": "LDL",
-            "value": 112.0,
-            "shap": 0.18
+            "feature": "Typical Chest Pain",
+            "value": 1.0,
+            "shap": 0.0958
           },
           {
-            "feature": "BP",
-            "value": 120.0,
-            "shap": 0.0
+            "feature": "TG",
+            "value": 115.0,
+            "shap": -0.0957
+          },
+          {
+            "feature": "BMI",
+            "value": 22.7694,
+            "shap": -0.0896
+          },
+          {
+            "feature": "CR",
+            "value": 0.8,
+            "shap": -0.0821
           },
           {
             "feature": "HTN",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.0815
+          },
+          {
+            "feature": "WBC",
+            "value": 6700.0,
+            "shap": -0.0797
+          },
+          {
+            "feature": "Length",
+            "value": 154.0,
+            "shap": -0.0644
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.0586
+          },
+          {
+            "feature": "HB",
+            "value": 11.2,
+            "shap": -0.0575
+          },
+          {
+            "feature": "Lymph",
+            "value": 17.0,
+            "shap": 0.0533
+          },
+          {
+            "feature": "Region RWMA",
+            "value": 4.0,
+            "shap": -0.0439
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.006
+            "shap": 0.0208
           }
         ]
       },
@@ -787,164 +1357,354 @@
     },
     "prediction": {
       "cad": {
-        "prob": 0.334,
+        "prob": 0.4397,
         "label": 0,
         "ci": [
-          0.254,
-          0.414
+          0.3597,
+          0.5197
         ]
       },
       "vessels": {
         "LAD": {
-          "prob": 0.2809,
+          "prob": 0.2032,
           "label": 0
         },
         "LCX": {
-          "prob": 0.1915,
+          "prob": 0.1249,
           "label": 0
         },
         "RCA": {
-          "prob": 0.2075,
+          "prob": 0.2574,
           "label": 0
         }
       },
       "explanations": {
         "CAD": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -1.0613
           },
           {
-            "feature": "LDL",
-            "value": 110.0,
-            "shap": 0.15
+            "feature": "Tinversion",
+            "value": 1.0,
+            "shap": 0.6164
+          },
+          {
+            "feature": "ESR",
+            "value": 23.0,
+            "shap": 0.4213
           },
           {
             "feature": "Age",
             "value": 53.0,
-            "shap": -0.09
+            "shap": -0.3999
           },
           {
-            "feature": "BP",
-            "value": 120.0,
-            "shap": 0.0
+            "feature": "FBS",
+            "value": 79.0,
+            "shap": -0.3919
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.3755
+          },
+          {
+            "feature": "TG",
+            "value": 85.0,
+            "shap": -0.3209
           },
           {
             "feature": "EF-TTE",
             "value": 50.0,
-            "shap": -0.0
+            "shap": 0.3061
           },
           {
-            "feature": "Current Smoker",
+            "feature": "Region RWMA",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.2244
           },
           {
-            "feature": "DM",
-            "value": 0.0,
-            "shap": 0.0
+            "feature": "HB",
+            "value": 11.0,
+            "shap": 0.1639
+          },
+          {
+            "feature": "VHD",
+            "value": "N",
+            "shap": 0.1554
+          },
+          {
+            "feature": "Na",
+            "value": 140.0,
+            "shap": 0.1459
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 1.0,
+            "shap": -0.1399
+          },
+          {
+            "feature": "Weight",
+            "value": 63.0,
+            "shap": 0.1303
+          },
+          {
+            "feature": "CR",
+            "value": 0.6,
+            "shap": -0.1218
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.012
+            "shap": -0.3218
           }
         ],
         "LAD": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -1.0473
           },
           {
-            "feature": "LDL",
-            "value": 110.0,
-            "shap": 0.15
+            "feature": "Region RWMA",
+            "value": 0.0,
+            "shap": -0.3752
           },
           {
             "feature": "Age",
             "value": 53.0,
-            "shap": -0.09
+            "shap": -0.2093
           },
           {
-            "feature": "BP",
-            "value": 120.0,
-            "shap": 0.0
+            "feature": "WBC",
+            "value": 4200.0,
+            "shap": -0.1964
+          },
+          {
+            "feature": "St Depression",
+            "value": 1.0,
+            "shap": 0.1398
+          },
+          {
+            "feature": "FBS",
+            "value": 79.0,
+            "shap": -0.1341
+          },
+          {
+            "feature": "PR",
+            "value": 70.0,
+            "shap": -0.1238
+          },
+          {
+            "feature": "Tinversion",
+            "value": 1.0,
+            "shap": 0.0968
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.0947
+          },
+          {
+            "feature": "LDL",
+            "value": 110.0,
+            "shap": -0.0777
+          },
+          {
+            "feature": "ESR",
+            "value": 23.0,
+            "shap": 0.0693
+          },
+          {
+            "feature": "CR",
+            "value": 0.6,
+            "shap": -0.0629
           },
           {
             "feature": "EF-TTE",
             "value": 50.0,
-            "shap": -0.0
+            "shap": 0.0607
+          },
+          {
+            "feature": "Lymph",
+            "value": 23.0,
+            "shap": 0.0457
+          },
+          {
+            "feature": "HDL",
+            "value": 40.0,
+            "shap": 0.0438
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.005
+            "shap": 0.1043
           }
         ],
         "LCX": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
-          },
-          {
-            "feature": "LDL",
-            "value": 110.0,
-            "shap": 0.15
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.5104
           },
           {
             "feature": "Age",
             "value": 53.0,
-            "shap": -0.09
+            "shap": -0.467
+          },
+          {
+            "feature": "TG",
+            "value": 85.0,
+            "shap": -0.4405
+          },
+          {
+            "feature": "FBS",
+            "value": 79.0,
+            "shap": -0.2646
+          },
+          {
+            "feature": "PLT",
+            "value": 182.0,
+            "shap": 0.2539
+          },
+          {
+            "feature": "CR",
+            "value": 0.6,
+            "shap": -0.2166
+          },
+          {
+            "feature": "HDL",
+            "value": 40.0,
+            "shap": 0.1322
+          },
+          {
+            "feature": "Na",
+            "value": 140.0,
+            "shap": -0.0996
+          },
+          {
+            "feature": "Length",
+            "value": 155.0,
+            "shap": -0.081
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.0736
+          },
+          {
+            "feature": "ESR",
+            "value": 23.0,
+            "shap": 0.0579
           },
           {
             "feature": "BP",
             "value": 120.0,
-            "shap": 0.0
+            "shap": 0.0526
           },
           {
-            "feature": "EF-TTE",
-            "value": 50.0,
-            "shap": -0.0
+            "feature": "DLP",
+            "value": 1.0,
+            "shap": -0.049
+          },
+          {
+            "feature": "LDL",
+            "value": 110.0,
+            "shap": 0.0467
+          },
+          {
+            "feature": "K",
+            "value": 4.0,
+            "shap": -0.0449
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.004
+            "shap": 0.0512
           }
         ],
         "RCA": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.3146
           },
           {
-            "feature": "LDL",
-            "value": 110.0,
-            "shap": 0.15
+            "feature": "ESR",
+            "value": 23.0,
+            "shap": 0.2036
+          },
+          {
+            "feature": "DM",
+            "value": 0.0,
+            "shap": -0.1913
           },
           {
             "feature": "Age",
             "value": 53.0,
-            "shap": -0.09
+            "shap": -0.1427
           },
           {
-            "feature": "BP",
-            "value": 120.0,
-            "shap": 0.0
+            "feature": "WBC",
+            "value": 4200.0,
+            "shap": -0.1362
           },
           {
-            "feature": "EF-TTE",
-            "value": 50.0,
-            "shap": -0.0
+            "feature": "TG",
+            "value": 85.0,
+            "shap": -0.109
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 1.0,
+            "shap": -0.0682
+          },
+          {
+            "feature": "BMI",
+            "value": 26.2227,
+            "shap": 0.0675
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.0611
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.057
+          },
+          {
+            "feature": "CR",
+            "value": 0.6,
+            "shap": -0.0394
+          },
+          {
+            "feature": "Length",
+            "value": 155.0,
+            "shap": -0.0389
+          },
+          {
+            "feature": "Lymph",
+            "value": 23.0,
+            "shap": 0.0389
+          },
+          {
+            "feature": "HB",
+            "value": 11.0,
+            "shap": -0.0372
+          },
+          {
+            "feature": "FBS",
+            "value": 79.0,
+            "shap": -0.034
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.006
+            "shap": 0.0631
           }
         ]
       },
@@ -1027,164 +1787,354 @@
     },
     "prediction": {
       "cad": {
-        "prob": 0.5523,
+        "prob": 0.994,
         "label": 1,
         "ci": [
-          0.4723,
-          0.6323
+          0.914,
+          0.99
         ]
       },
       "vessels": {
         "LAD": {
-          "prob": 0.49,
-          "label": 0
+          "prob": 0.9378,
+          "label": 1
         },
         "LCX": {
-          "prob": 0.3682,
-          "label": 0
+          "prob": 0.8127,
+          "label": 1
         },
         "RCA": {
-          "prob": 0.3917,
-          "label": 0
+          "prob": 0.5313,
+          "label": 1
         }
       },
       "explanations": {
         "CAD": [
           {
-            "feature": "HTN",
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.75
+            "shap": 1.3321
           },
           {
-            "feature": "BP",
-            "value": 140.0,
-            "shap": 0.36
+            "feature": "Region RWMA",
+            "value": 3.0,
+            "shap": 0.6762
           },
           {
-            "feature": "Age",
-            "value": 62.0,
-            "shap": 0.315
+            "feature": "TG",
+            "value": 210.0,
+            "shap": 0.5761
           },
           {
             "feature": "EF-TTE",
             "value": 45.0,
-            "shap": 0.225
+            "shap": 0.5662
           },
           {
-            "feature": "LDL",
-            "value": 104.0,
-            "shap": 0.06
+            "feature": "BMI",
+            "value": 29.4107,
+            "shap": 0.4309
           },
           {
-            "feature": "Current Smoker",
+            "feature": "Tinversion",
+            "value": 1.0,
+            "shap": 0.3609
+          },
+          {
+            "feature": "ESR",
+            "value": 51.0,
+            "shap": 0.2689
+          },
+          {
+            "feature": "Age",
+            "value": 62.0,
+            "shap": 0.2672
+          },
+          {
+            "feature": "FBS",
+            "value": 96.0,
+            "shap": -0.2429
+          },
+          {
+            "feature": "Na",
+            "value": 144.0,
+            "shap": -0.2114
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.1968
+          },
+          {
+            "feature": "CR",
+            "value": 1.3,
+            "shap": 0.1435
+          },
+          {
+            "feature": "Dyspnea",
             "value": 0.0,
-            "shap": 0.0
+            "shap": 0.1055
           },
           {
-            "feature": "DM",
-            "value": 0.0,
-            "shap": 0.0
+            "feature": "BP",
+            "value": 140.0,
+            "shap": 0.1012
+          },
+          {
+            "feature": "K",
+            "value": 4.5,
+            "shap": 0.0713
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.012
+            "shap": 0.041
           }
         ],
         "LAD": [
           {
-            "feature": "HTN",
+            "feature": "Region RWMA",
+            "value": 3.0,
+            "shap": 0.8204
+          },
+          {
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.75
-          },
-          {
-            "feature": "BP",
-            "value": 140.0,
-            "shap": 0.36
-          },
-          {
-            "feature": "Age",
-            "value": 62.0,
-            "shap": 0.315
+            "shap": 0.7191
           },
           {
             "feature": "EF-TTE",
             "value": 45.0,
-            "shap": 0.225
+            "shap": 0.5717
+          },
+          {
+            "feature": "ESR",
+            "value": 51.0,
+            "shap": 0.2153
+          },
+          {
+            "feature": "Age",
+            "value": 62.0,
+            "shap": 0.1503
+          },
+          {
+            "feature": "Tinversion",
+            "value": 1.0,
+            "shap": 0.092
+          },
+          {
+            "feature": "CR",
+            "value": 1.3,
+            "shap": 0.0806
+          },
+          {
+            "feature": "Neut",
+            "value": 54.0,
+            "shap": -0.0796
           },
           {
             "feature": "LDL",
             "value": 104.0,
-            "shap": 0.06
+            "shap": -0.0784
+          },
+          {
+            "feature": "HDL",
+            "value": 31.0,
+            "shap": 0.0766
+          },
+          {
+            "feature": "PR",
+            "value": 70.0,
+            "shap": -0.0753
+          },
+          {
+            "feature": "K",
+            "value": 4.5,
+            "shap": -0.0679
+          },
+          {
+            "feature": "Na",
+            "value": 144.0,
+            "shap": -0.0663
+          },
+          {
+            "feature": "TG",
+            "value": 210.0,
+            "shap": 0.0593
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.0481
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.005
+            "shap": 0.042
           }
         ],
         "LCX": [
           {
-            "feature": "HTN",
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.75
+            "shap": 0.3546
           },
           {
-            "feature": "BP",
-            "value": 140.0,
-            "shap": 0.36
+            "feature": "TG",
+            "value": 210.0,
+            "shap": 0.3334
+          },
+          {
+            "feature": "CR",
+            "value": 1.3,
+            "shap": 0.331
+          },
+          {
+            "feature": "PLT",
+            "value": 165.0,
+            "shap": 0.2458
+          },
+          {
+            "feature": "Na",
+            "value": 144.0,
+            "shap": 0.2147
           },
           {
             "feature": "Age",
             "value": 62.0,
-            "shap": 0.315
+            "shap": 0.2023
           },
           {
-            "feature": "EF-TTE",
-            "value": 45.0,
-            "shap": 0.225
+            "feature": "HDL",
+            "value": 31.0,
+            "shap": -0.1333
+          },
+          {
+            "feature": "FBS",
+            "value": 96.0,
+            "shap": -0.1133
+          },
+          {
+            "feature": "ESR",
+            "value": 51.0,
+            "shap": 0.0922
+          },
+          {
+            "feature": "BP",
+            "value": 140.0,
+            "shap": 0.0752
           },
           {
             "feature": "LDL",
             "value": 104.0,
-            "shap": 0.06
+            "shap": 0.0661
+          },
+          {
+            "feature": "Systolic Murmur",
+            "value": 1.0,
+            "shap": -0.0481
+          },
+          {
+            "feature": "K",
+            "value": 4.5,
+            "shap": 0.0393
+          },
+          {
+            "feature": "Region RWMA",
+            "value": 3.0,
+            "shap": 0.0361
+          },
+          {
+            "feature": "Sex",
+            "value": 1.0,
+            "shap": 0.0305
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.004
+            "shap": 0.0361
           }
         ],
         "RCA": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
+            "feature": "Lymph",
+            "value": 42.0,
+            "shap": -0.2354
           },
           {
-            "feature": "BP",
-            "value": 140.0,
-            "shap": 0.36
+            "feature": "ESR",
+            "value": 51.0,
+            "shap": 0.1753
+          },
+          {
+            "feature": "DM",
+            "value": 0.0,
+            "shap": -0.1673
+          },
+          {
+            "feature": "Typical Chest Pain",
+            "value": 1.0,
+            "shap": 0.1634
+          },
+          {
+            "feature": "Neut",
+            "value": 54.0,
+            "shap": -0.1152
           },
           {
             "feature": "Age",
             "value": 62.0,
-            "shap": 0.315
+            "shap": 0.1114
           },
           {
-            "feature": "EF-TTE",
-            "value": 45.0,
-            "shap": 0.225
+            "feature": "Na",
+            "value": 144.0,
+            "shap": -0.0903
           },
           {
-            "feature": "LDL",
-            "value": 104.0,
-            "shap": 0.06
+            "feature": "WBC",
+            "value": 9400.0,
+            "shap": 0.0882
+          },
+          {
+            "feature": "PLT",
+            "value": 165.0,
+            "shap": 0.0758
+          },
+          {
+            "feature": "Weight",
+            "value": 84.0,
+            "shap": 0.0756
+          },
+          {
+            "feature": "K",
+            "value": 4.5,
+            "shap": 0.066
+          },
+          {
+            "feature": "Function Class",
+            "value": 3.0,
+            "shap": 0.0579
+          },
+          {
+            "feature": "Length",
+            "value": 169.0,
+            "shap": 0.0516
+          },
+          {
+            "feature": "CR",
+            "value": 1.3,
+            "shap": 0.0498
+          },
+          {
+            "feature": "PR",
+            "value": 70.0,
+            "shap": 0.0457
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.006
+            "shap": 0.0899
           }
         ]
       },
@@ -1267,164 +2217,354 @@
     },
     "prediction": {
       "cad": {
-        "prob": 0.5125,
+        "prob": 0.9775,
         "label": 1,
         "ci": [
-          0.4325,
-          0.5925
+          0.8975,
+          0.99
         ]
       },
       "vessels": {
         "LAD": {
-          "prob": 0.4502,
-          "label": 0
+          "prob": 0.5899,
+          "label": 1
         },
         "LCX": {
-          "prob": 0.3318,
-          "label": 0
+          "prob": 0.5824,
+          "label": 1
         },
         "RCA": {
-          "prob": 0.3543,
-          "label": 0
+          "prob": 0.5968,
+          "label": 1
         }
       },
       "explanations": {
         "CAD": [
           {
-            "feature": "HTN",
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.75
-          },
-          {
-            "feature": "DM",
-            "value": 1.0,
-            "shap": 0.5
-          },
-          {
-            "feature": "Age",
-            "value": 64.0,
-            "shap": 0.405
+            "shap": 1.4645
           },
           {
             "feature": "EF-TTE",
             "value": 55.0,
-            "shap": -0.225
+            "shap": -0.7051
+          },
+          {
+            "feature": "FBS",
+            "value": 141.0,
+            "shap": 0.6011
+          },
+          {
+            "feature": "BMI",
+            "value": 28.699,
+            "shap": 0.4249
+          },
+          {
+            "feature": "Age",
+            "value": 64.0,
+            "shap": 0.4122
+          },
+          {
+            "feature": "ESR",
+            "value": 24.0,
+            "shap": 0.3053
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.2859
+          },
+          {
+            "feature": "DM",
+            "value": 1.0,
+            "shap": 0.2411
+          },
+          {
+            "feature": "Region RWMA",
+            "value": 0.0,
+            "shap": -0.1789
           },
           {
             "feature": "BP",
             "value": 130.0,
-            "shap": 0.18
+            "shap": 0.1405
           },
           {
-            "feature": "LDL",
-            "value": 96.0,
-            "shap": -0.06
-          },
-          {
-            "feature": "Current Smoker",
+            "feature": "Atypical",
             "value": 0.0,
-            "shap": 0.0
+            "shap": 0.1163
+          },
+          {
+            "feature": "HDL",
+            "value": 34.0,
+            "shap": 0.1162
+          },
+          {
+            "feature": "Tinversion",
+            "value": 0.0,
+            "shap": -0.1151
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 0.0,
+            "shap": 0.1011
+          },
+          {
+            "feature": "Weight",
+            "value": 81.0,
+            "shap": -0.0987
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.012
+            "shap": 0.2333
           }
         ],
         "LAD": [
           {
-            "feature": "HTN",
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.75
-          },
-          {
-            "feature": "DM",
-            "value": 1.0,
-            "shap": 0.5
-          },
-          {
-            "feature": "Age",
-            "value": 64.0,
-            "shap": 0.405
+            "shap": 0.8443
           },
           {
             "feature": "EF-TTE",
             "value": 55.0,
-            "shap": -0.225
+            "shap": -0.6789
           },
           {
-            "feature": "BP",
-            "value": 130.0,
-            "shap": 0.18
+            "feature": "Region RWMA",
+            "value": 0.0,
+            "shap": -0.2452
+          },
+          {
+            "feature": "Age",
+            "value": 64.0,
+            "shap": 0.2074
+          },
+          {
+            "feature": "PR",
+            "value": 70.0,
+            "shap": -0.1071
+          },
+          {
+            "feature": "LDL",
+            "value": 96.0,
+            "shap": -0.1
+          },
+          {
+            "feature": "Lymph",
+            "value": 35.0,
+            "shap": 0.0969
+          },
+          {
+            "feature": "HTN",
+            "value": 1.0,
+            "shap": 0.0807
+          },
+          {
+            "feature": "FBS",
+            "value": 141.0,
+            "shap": 0.08
+          },
+          {
+            "feature": "ESR",
+            "value": 24.0,
+            "shap": 0.0691
+          },
+          {
+            "feature": "CR",
+            "value": 1.1,
+            "shap": -0.0566
+          },
+          {
+            "feature": "HDL",
+            "value": 34.0,
+            "shap": 0.0425
+          },
+          {
+            "feature": "Tinversion",
+            "value": 0.0,
+            "shap": -0.0387
+          },
+          {
+            "feature": "WBC",
+            "value": 8700.0,
+            "shap": -0.0351
+          },
+          {
+            "feature": "TG",
+            "value": 143.0,
+            "shap": 0.0333
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.005
+            "shap": -0.0342
           }
         ],
         "LCX": [
           {
-            "feature": "HTN",
+            "feature": "Typical Chest Pain",
             "value": 1.0,
-            "shap": 0.75
-          },
-          {
-            "feature": "DM",
-            "value": 1.0,
-            "shap": 0.5
+            "shap": 0.3981
           },
           {
             "feature": "Age",
             "value": 64.0,
-            "shap": 0.405
+            "shap": 0.2521
           },
           {
-            "feature": "EF-TTE",
-            "value": 55.0,
-            "shap": -0.225
+            "feature": "CR",
+            "value": 1.1,
+            "shap": -0.186
+          },
+          {
+            "feature": "PLT",
+            "value": 212.0,
+            "shap": -0.1326
+          },
+          {
+            "feature": "Na",
+            "value": 142.0,
+            "shap": 0.1217
           },
           {
             "feature": "BP",
             "value": 130.0,
-            "shap": 0.18
+            "shap": 0.0708
+          },
+          {
+            "feature": "HDL",
+            "value": 34.0,
+            "shap": -0.0679
+          },
+          {
+            "feature": "TG",
+            "value": 143.0,
+            "shap": 0.0645
+          },
+          {
+            "feature": "ESR",
+            "value": 24.0,
+            "shap": 0.0614
+          },
+          {
+            "feature": "FBS",
+            "value": 141.0,
+            "shap": 0.0571
+          },
+          {
+            "feature": "DLP",
+            "value": 1.0,
+            "shap": -0.049
+          },
+          {
+            "feature": "Sex",
+            "value": 1.0,
+            "shap": 0.0458
+          },
+          {
+            "feature": "K",
+            "value": 3.7,
+            "shap": -0.0445
+          },
+          {
+            "feature": "Weight",
+            "value": 81.0,
+            "shap": 0.0426
+          },
+          {
+            "feature": "LDL",
+            "value": 96.0,
+            "shap": 0.0409
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.004
+            "shap": -0.048
           }
         ],
         "RCA": [
           {
-            "feature": "HTN",
-            "value": 1.0,
-            "shap": 0.75
-          },
-          {
             "feature": "DM",
             "value": 1.0,
-            "shap": 0.5
+            "shap": 0.2582
+          },
+          {
+            "feature": "Typical Chest Pain",
+            "value": 1.0,
+            "shap": 0.1868
           },
           {
             "feature": "Age",
             "value": 64.0,
-            "shap": 0.405
+            "shap": 0.1488
           },
           {
-            "feature": "EF-TTE",
-            "value": 55.0,
-            "shap": -0.225
+            "feature": "ESR",
+            "value": 24.0,
+            "shap": 0.1469
           },
           {
-            "feature": "BP",
-            "value": 130.0,
-            "shap": 0.18
+            "feature": "Neut",
+            "value": 60.0,
+            "shap": -0.1306
+          },
+          {
+            "feature": "Lymph",
+            "value": 35.0,
+            "shap": -0.1174
+          },
+          {
+            "feature": "Length",
+            "value": 168.0,
+            "shap": 0.0911
+          },
+          {
+            "feature": "Weight",
+            "value": 81.0,
+            "shap": 0.0774
+          },
+          {
+            "feature": "PR",
+            "value": 70.0,
+            "shap": 0.0658
+          },
+          {
+            "feature": "K",
+            "value": 3.7,
+            "shap": -0.0611
+          },
+          {
+            "feature": "PLT",
+            "value": 212.0,
+            "shap": -0.0416
+          },
+          {
+            "feature": "WBC",
+            "value": 8700.0,
+            "shap": 0.0398
+          },
+          {
+            "feature": "Function Class",
+            "value": 0.0,
+            "shap": -0.0325
+          },
+          {
+            "feature": "Sex",
+            "value": 1.0,
+            "shap": 0.0298
+          },
+          {
+            "feature": "VHD",
+            "value": "N",
+            "shap": -0.0274
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.006
+            "shap": 0.0752
           }
         ]
       },
@@ -1507,24 +2647,24 @@
     },
     "prediction": {
       "cad": {
-        "prob": 0.2342,
+        "prob": 0.2662,
         "label": 0,
         "ci": [
-          0.1542,
-          0.3142
+          0.1862,
+          0.3462
         ]
       },
       "vessels": {
         "LAD": {
-          "prob": 0.1923,
+          "prob": 0.2453,
           "label": 0
         },
         "LCX": {
-          "prob": 0.1262,
+          "prob": 0.165,
           "label": 0
         },
         "RCA": {
-          "prob": 0.1376,
+          "prob": 0.2662,
           "label": 0
         }
       },
@@ -1533,138 +2673,328 @@
           {
             "feature": "Age",
             "value": 67.0,
-            "shap": 0.54
+            "shap": 1.0518
+          },
+          {
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.7833
           },
           {
             "feature": "EF-TTE",
             "value": 55.0,
-            "shap": -0.225
+            "shap": -0.5515
           },
           {
-            "feature": "LDL",
-            "value": 112.0,
-            "shap": 0.18
-          },
-          {
-            "feature": "BP",
-            "value": 110.0,
-            "shap": -0.18
+            "feature": "Tinversion",
+            "value": 1.0,
+            "shap": 0.5203
           },
           {
             "feature": "HTN",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.4392
           },
           {
-            "feature": "Current Smoker",
-            "value": 0.0,
-            "shap": 0.0
+            "feature": "BMI",
+            "value": 31.2175,
+            "shap": -0.3803
           },
           {
-            "feature": "DM",
+            "feature": "FBS",
+            "value": 93.0,
+            "shap": -0.3588
+          },
+          {
+            "feature": "TG",
+            "value": 90.0,
+            "shap": -0.2645
+          },
+          {
+            "feature": "Region RWMA",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.2393
+          },
+          {
+            "feature": "BP",
+            "value": 110.0,
+            "shap": -0.1891
+          },
+          {
+            "feature": "ESR",
+            "value": 20.0,
+            "shap": 0.1812
+          },
+          {
+            "feature": "Na",
+            "value": 141.0,
+            "shap": 0.1331
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.114
+          },
+          {
+            "feature": "VHD",
+            "value": "mild",
+            "shap": -0.1135
+          },
+          {
+            "feature": "Weight",
+            "value": 75.0,
+            "shap": -0.1127
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.012
+            "shap": -0.5307
           }
         ],
         "LAD": [
           {
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.8403
+          },
+          {
             "feature": "Age",
             "value": 67.0,
-            "shap": 0.54
+            "shap": 0.6336
           },
           {
             "feature": "EF-TTE",
             "value": 55.0,
-            "shap": -0.225
+            "shap": -0.5207
           },
           {
-            "feature": "LDL",
-            "value": 112.0,
-            "shap": 0.18
-          },
-          {
-            "feature": "BP",
-            "value": 110.0,
-            "shap": -0.18
+            "feature": "Region RWMA",
+            "value": 0.0,
+            "shap": -0.3169
           },
           {
             "feature": "HTN",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.1477
+          },
+          {
+            "feature": "St Depression",
+            "value": 1.0,
+            "shap": 0.1398
+          },
+          {
+            "feature": "PR",
+            "value": 70.0,
+            "shap": -0.1241
+          },
+          {
+            "feature": "Tinversion",
+            "value": 1.0,
+            "shap": 0.092
+          },
+          {
+            "feature": "CR",
+            "value": 0.8,
+            "shap": -0.0629
+          },
+          {
+            "feature": "BMI",
+            "value": 31.2175,
+            "shap": -0.0609
+          },
+          {
+            "feature": "Length",
+            "value": 155.0,
+            "shap": 0.0494
+          },
+          {
+            "feature": "TG",
+            "value": 90.0,
+            "shap": -0.0485
+          },
+          {
+            "feature": "FBS",
+            "value": 93.0,
+            "shap": -0.042
+          },
+          {
+            "feature": "Lymph",
+            "value": 36.0,
+            "shap": 0.0403
+          },
+          {
+            "feature": "WBC",
+            "value": 8700.0,
+            "shap": -0.0399
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.005
+            "shap": -0.0805
           }
         ],
         "LCX": [
           {
             "feature": "Age",
             "value": 67.0,
-            "shap": 0.54
+            "shap": 0.5024
           },
           {
-            "feature": "EF-TTE",
-            "value": 55.0,
-            "shap": -0.225
+            "feature": "TG",
+            "value": 90.0,
+            "shap": -0.4564
           },
           {
-            "feature": "LDL",
-            "value": 112.0,
-            "shap": 0.18
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.4427
+          },
+          {
+            "feature": "BMI",
+            "value": 31.2175,
+            "shap": -0.2709
           },
           {
             "feature": "BP",
             "value": 110.0,
-            "shap": -0.18
+            "shap": -0.2486
           },
           {
-            "feature": "HTN",
+            "feature": "CR",
+            "value": 0.8,
+            "shap": -0.232
+          },
+          {
+            "feature": "FBS",
+            "value": 93.0,
+            "shap": -0.2284
+          },
+          {
+            "feature": "PLT",
+            "value": 196.0,
+            "shap": 0.1747
+          },
+          {
+            "feature": "HDL",
+            "value": 42.0,
+            "shap": 0.1155
+          },
+          {
+            "feature": "K",
+            "value": 3.8,
+            "shap": -0.0836
+          },
+          {
+            "feature": "Length",
+            "value": 155.0,
+            "shap": -0.0758
+          },
+          {
+            "feature": "Sex",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.0736
+          },
+          {
+            "feature": "Na",
+            "value": 141.0,
+            "shap": 0.0652
+          },
+          {
+            "feature": "LDL",
+            "value": 112.0,
+            "shap": 0.0577
+          },
+          {
+            "feature": "DLP",
+            "value": 1.0,
+            "shap": -0.049
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.004
+            "shap": -0.0813
           }
         ],
         "RCA": [
           {
             "feature": "Age",
             "value": 67.0,
-            "shap": 0.54
+            "shap": 0.2579
           },
           {
-            "feature": "EF-TTE",
-            "value": 55.0,
-            "shap": -0.225
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.2146
           },
           {
-            "feature": "LDL",
-            "value": 112.0,
-            "shap": 0.18
+            "feature": "Neut",
+            "value": 51.0,
+            "shap": -0.1656
           },
           {
-            "feature": "BP",
-            "value": 110.0,
-            "shap": -0.18
+            "feature": "ESR",
+            "value": 20.0,
+            "shap": 0.1595
+          },
+          {
+            "feature": "DM",
+            "value": 0.0,
+            "shap": -0.1369
+          },
+          {
+            "feature": "Lymph",
+            "value": 36.0,
+            "shap": -0.1361
+          },
+          {
+            "feature": "Weight",
+            "value": 75.0,
+            "shap": -0.1021
+          },
+          {
+            "feature": "BMI",
+            "value": 31.2175,
+            "shap": -0.1003
+          },
+          {
+            "feature": "WBC",
+            "value": 8700.0,
+            "shap": 0.0951
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 1.0,
+            "shap": -0.0878
+          },
+          {
+            "feature": "K",
+            "value": 3.8,
+            "shap": -0.0854
+          },
+          {
+            "feature": "TG",
+            "value": 90.0,
+            "shap": -0.0618
+          },
+          {
+            "feature": "Sex",
+            "value": 0.0,
+            "shap": -0.0601
+          },
+          {
+            "feature": "Length",
+            "value": 155.0,
+            "shap": -0.0567
           },
           {
             "feature": "HTN",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.0534
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.006
+            "shap": 0.051
           }
         ]
       },
@@ -1675,7 +3005,7 @@
           "CAD": 0.5
         },
         "explanation_space": "calibrated_logit",
-        "cad_adjusted": false
+        "cad_adjusted": true
       }
     }
   },
@@ -1747,164 +3077,354 @@
     },
     "prediction": {
       "cad": {
-        "prob": 0.3486,
-        "label": 0,
+        "prob": 0.7169,
+        "label": 1,
         "ci": [
-          0.2686,
-          0.4286
+          0.6369,
+          0.7969
         ]
       },
       "vessels": {
         "LAD": {
-          "prob": 0.2942,
-          "label": 0
+          "prob": 0.575,
+          "label": 1
         },
         "LCX": {
-          "prob": 0.2018,
+          "prob": 0.2448,
           "label": 0
         },
         "RCA": {
-          "prob": 0.2184,
-          "label": 0
+          "prob": 0.6231,
+          "label": 1
         }
       },
       "explanations": {
         "CAD": [
           {
-            "feature": "Current Smoker",
-            "value": 1.0,
-            "shap": 0.6
-          },
-          {
-            "feature": "DM",
-            "value": 1.0,
-            "shap": 0.5
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -1.0818
           },
           {
             "feature": "Age",
             "value": 64.0,
-            "shap": 0.405
+            "shap": 0.4592
           },
           {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
+            "feature": "Tinversion",
+            "value": 1.0,
+            "shap": 0.4406
           },
           {
-            "feature": "LDL",
-            "value": 82.0,
-            "shap": -0.27
-          },
-          {
-            "feature": "EF-TTE",
-            "value": 50.0,
-            "shap": -0.0
+            "feature": "FBS",
+            "value": 112.0,
+            "shap": 0.4149
           },
           {
             "feature": "HTN",
             "value": 0.0,
-            "shap": 0.0
+            "shap": -0.396
+          },
+          {
+            "feature": "EF-TTE",
+            "value": 50.0,
+            "shap": 0.3436
+          },
+          {
+            "feature": "ESR",
+            "value": 67.0,
+            "shap": 0.2662
+          },
+          {
+            "feature": "DM",
+            "value": 1.0,
+            "shap": 0.2226
+          },
+          {
+            "feature": "Region RWMA",
+            "value": 0.0,
+            "shap": -0.2152
+          },
+          {
+            "feature": "BP",
+            "value": 100.0,
+            "shap": -0.164
+          },
+          {
+            "feature": "Atypical",
+            "value": 1.0,
+            "shap": -0.1318
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 1.0,
+            "shap": -0.126
+          },
+          {
+            "feature": "PR",
+            "value": 80.0,
+            "shap": 0.1135
+          },
+          {
+            "feature": "LDL",
+            "value": 82.0,
+            "shap": 0.1131
+          },
+          {
+            "feature": "Na",
+            "value": 140.0,
+            "shap": 0.08
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.012
+            "shap": 0.1659
           }
         ],
         "LAD": [
           {
-            "feature": "Current Smoker",
-            "value": 1.0,
-            "shap": 0.6
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.8792
           },
           {
-            "feature": "DM",
-            "value": 1.0,
-            "shap": 0.5
+            "feature": "Region RWMA",
+            "value": 0.0,
+            "shap": -0.3324
           },
           {
             "feature": "Age",
             "value": 64.0,
-            "shap": 0.405
+            "shap": 0.3238
           },
           {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
+            "feature": "ESR",
+            "value": 67.0,
+            "shap": 0.2052
+          },
+          {
+            "feature": "PR",
+            "value": 80.0,
+            "shap": 0.1751
+          },
+          {
+            "feature": "WBC",
+            "value": 11300.0,
+            "shap": 0.1699
+          },
+          {
+            "feature": "EF-TTE",
+            "value": 50.0,
+            "shap": 0.141
+          },
+          {
+            "feature": "St Depression",
+            "value": 1.0,
+            "shap": 0.1398
+          },
+          {
+            "feature": "Tinversion",
+            "value": 1.0,
+            "shap": 0.1315
+          },
+          {
+            "feature": "HTN",
+            "value": 0.0,
+            "shap": -0.1047
           },
           {
             "feature": "LDL",
             "value": 82.0,
-            "shap": -0.27
+            "shap": -0.0788
+          },
+          {
+            "feature": "HDL",
+            "value": 25.0,
+            "shap": 0.0713
+          },
+          {
+            "feature": "CR",
+            "value": 0.8,
+            "shap": -0.0606
+          },
+          {
+            "feature": "Lymph",
+            "value": 23.0,
+            "shap": 0.0528
+          },
+          {
+            "feature": "Length",
+            "value": 175.0,
+            "shap": 0.0505
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.005
+            "shap": 0.0917
           }
         ],
         "LCX": [
           {
-            "feature": "Current Smoker",
-            "value": 1.0,
-            "shap": 0.6
-          },
-          {
-            "feature": "DM",
-            "value": 1.0,
-            "shap": 0.5
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.4829
           },
           {
             "feature": "Age",
             "value": 64.0,
-            "shap": 0.405
+            "shap": 0.3459
           },
           {
             "feature": "BP",
             "value": 100.0,
-            "shap": -0.36
+            "shap": -0.2968
           },
           {
-            "feature": "LDL",
-            "value": 82.0,
-            "shap": -0.27
+            "feature": "PLT",
+            "value": 266.0,
+            "shap": -0.2577
+          },
+          {
+            "feature": "HDL",
+            "value": 25.0,
+            "shap": -0.2273
+          },
+          {
+            "feature": "CR",
+            "value": 0.8,
+            "shap": -0.1846
+          },
+          {
+            "feature": "BMI",
+            "value": 22.8571,
+            "shap": 0.1584
+          },
+          {
+            "feature": "Length",
+            "value": 175.0,
+            "shap": 0.1034
+          },
+          {
+            "feature": "Na",
+            "value": 140.0,
+            "shap": -0.0768
+          },
+          {
+            "feature": "TG",
+            "value": 147.0,
+            "shap": 0.0515
+          },
+          {
+            "feature": "DLP",
+            "value": 1.0,
+            "shap": -0.049
+          },
+          {
+            "feature": "Weight",
+            "value": 70.0,
+            "shap": 0.0484
+          },
+          {
+            "feature": "Systolic Murmur",
+            "value": 1.0,
+            "shap": -0.0481
+          },
+          {
+            "feature": "ESR",
+            "value": 67.0,
+            "shap": 0.0456
+          },
+          {
+            "feature": "FBS",
+            "value": 112.0,
+            "shap": 0.0448
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.004
+            "shap": -0.0072
           }
         ],
         "RCA": [
           {
-            "feature": "Current Smoker",
-            "value": 1.0,
-            "shap": 0.6
+            "feature": "Neut",
+            "value": 70.0,
+            "shap": 0.3899
           },
           {
             "feature": "DM",
             "value": 1.0,
-            "shap": 0.5
+            "shap": 0.3228
+          },
+          {
+            "feature": "ESR",
+            "value": 67.0,
+            "shap": 0.2264
           },
           {
             "feature": "Age",
             "value": 64.0,
-            "shap": 0.405
+            "shap": 0.1958
           },
           {
-            "feature": "BP",
-            "value": 100.0,
-            "shap": -0.36
+            "feature": "PLT",
+            "value": 266.0,
+            "shap": -0.1182
           },
           {
-            "feature": "LDL",
-            "value": 82.0,
-            "shap": -0.27
+            "feature": "WBC",
+            "value": 11300.0,
+            "shap": 0.1158
+          },
+          {
+            "feature": "Typical Chest Pain",
+            "value": 0.0,
+            "shap": -0.0989
+          },
+          {
+            "feature": "Atypical",
+            "value": 1.0,
+            "shap": -0.0887
+          },
+          {
+            "feature": "Lymph",
+            "value": 23.0,
+            "shap": 0.0744
+          },
+          {
+            "feature": "Length",
+            "value": 175.0,
+            "shap": 0.0731
+          },
+          {
+            "feature": "HB",
+            "value": 12.3,
+            "shap": -0.0619
+          },
+          {
+            "feature": "HDL",
+            "value": 25.0,
+            "shap": -0.0591
+          },
+          {
+            "feature": "BMI",
+            "value": 22.8571,
+            "shap": -0.0483
+          },
+          {
+            "feature": "HTN",
+            "value": 0.0,
+            "shap": -0.0478
+          },
+          {
+            "feature": "Dyspnea",
+            "value": 1.0,
+            "shap": -0.0436
           },
           {
             "feature": "(other)",
             "value": 0,
-            "shap": 0.006
+            "shap": -0.0124
           }
         ]
       },

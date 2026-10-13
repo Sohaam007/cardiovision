@@ -27,3 +27,16 @@
     - 'T inversion' in doc -> 'Tinversion' in CSV (no space)
     - 'Poor R progression' in doc -> 'Poor R Progression' in CSV (title case)
     Raw CSV column names are retained directly to ensure full reproducibility and schema stability.
+- Process Cleanup (Phase 1):
+  - Streamlined workflow to ONE implementer + automated verification gates (pytest, TypeScript check, vite build). Multi-agent adversarial loops removed.
+  - Human review marker retained for ML and leakage safety: 'HUMAN REVIEW REQUIRED: <file>' when touching ml/train.py or tests/test_no_leakage.py.
+- Feature Order and Schema (Phase 2):
+  - Frozen ordered list of 54 features exported to `models/feature_names.json`.
+  - Comprehensive clinical metadata exported to `models/feature_schema.json` with evidence-based reference ranges citing AHA, ADA, NKF, WHO, and ASE guidelines.
+- Training, Calibration & Serving Pipeline (Phases 3, 4, 5):
+  - Demo Holdout: 8 stratified representative patients (2 normal, 2 single-vessel, 2 double-vessel, 2 triple-vessel) isolated prior to model training (leaving N=295 for dev set).
+  - Validation: RepeatedStratifiedKFold (5 splits x 3 repeats = 15 folds, random seed 42) with inner 3-fold CV for hyperparameter selection.
+  - Calibration: Cross-fitted Platt scaling LogisticRegression(C=1e6) on decision margins yields calibrated probabilities and preserves additive TreeSHAP explainability in log-odds space.
+  - Zero shap dependency in production: Native XGBoost `pred_contribs=True` computes exact TreeSHAP values in < 15ms per patient.
+  - Constraint: Enforced P(CAD) >= max(P(LAD), P(LCX), P(RCA)) on live predictions and flagged via `meta.cad_adjusted`.
+
