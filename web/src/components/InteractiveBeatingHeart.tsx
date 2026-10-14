@@ -27,6 +27,7 @@ const BeatingHeartModel: React.FC<BeatingHeartModelProps> = ({
   const { actions, names } = useAnimations(animations, group);
   const heartOpacity = useStore((state) => state.heartOpacity);
   const showCavities = useStore((state) => state.showCavities);
+  const lastSoundRef = useRef<'s1' | 's2' | 'none'>('none');
 
   // Modulate material opacity when heartOpacity or showCavities changes
   useEffect(() => {
@@ -158,6 +159,7 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
   const setCardiacPhase = useStore((state) => state.setCardiacPhase);
   const setBeatingSpeed = useStore((state) => state.setBeatingSpeed);
   const toggleAudio = useStore((state) => state.toggleAudio);
+  const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
 
   // Local fallback state if not in fullScreen (e.g. standalone modal)
   const [localPlaying, setLocalPlaying] = useState<boolean>(true);
@@ -220,7 +222,13 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
 
   if (fullScreen) {
     return (
-      <div className="w-full h-full relative flex flex-col justify-between select-none overflow-hidden bg-slate-950">
+      <div
+        className={`w-full h-full relative flex flex-col justify-between select-none overflow-hidden transition-colors duration-500 ${
+          fluoroscopyMode
+            ? 'bg-gradient-to-b from-slate-300 via-slate-400 to-slate-200'
+            : 'bg-slate-950'
+        }`}
+      >
         <div className="relative w-full h-full flex-1 flex items-center justify-center overflow-hidden">
           <Suspense
             fallback={
@@ -234,10 +242,10 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
               camera={{ position: [0, 0.2, 2.5], fov: 45 }}
               gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
             >
-              <ambientLight intensity={0.9} />
-              <directionalLight position={[5, 8, 5]} intensity={1.4} />
-              <directionalLight position={[-5, -4, -5]} intensity={0.6} />
-              <pointLight position={[0, -2, 2]} intensity={0.5} color="#fda4af" />
+              <ambientLight intensity={fluoroscopyMode ? 1.8 : 0.9} color={fluoroscopyMode ? '#f8fafc' : '#ffffff'} />
+              <directionalLight position={[5, 8, 5]} intensity={fluoroscopyMode ? 2.2 : 1.4} />
+              <directionalLight position={[-5, -4, -5]} intensity={fluoroscopyMode ? 1.2 : 0.6} />
+              <pointLight position={[0, -2, 2]} intensity={0.5} color={fluoroscopyMode ? '#ffffff' : '#fda4af'} />
 
               <BeatingHeartModel
                 isPlaying={isPlaying}
@@ -248,6 +256,7 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
               />
 
               <CameraPresetController controlsRef={controlsRef} />
+              <CameraZoomController />
 
               <OrbitControls
                 ref={controlsRef}
