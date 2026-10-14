@@ -13,6 +13,7 @@ import { runUseStoreTests } from './useStore.test.ts';
 import { runVesselConfigTests } from './vesselConfig.test.ts';
 import { runSceneConfigTests } from './sceneConfig.test.ts';
 import { runClinicalScenarioTests } from './clinicalScenarios.test.ts';
+import { runIntegrationINT01Tests } from './integrationINT01.test.ts';
 
 const startTime = performance.now();
 
@@ -25,6 +26,7 @@ const suites = [
   { name: 'Vessel Anatomy & Color Interpolation Math (vesselConfig.test.ts)', runner: runVesselConfigTests },
   { name: 'Demand Rendering & Performance Contracts (sceneConfig.test.ts)', runner: runSceneConfigTests },
   { name: 'Real-World Clinical Scenarios (clinicalScenarios.test.ts)', runner: runClinicalScenarioTests },
+  { name: 'Integration & Fallback Contracts (integrationINT01.test.ts)', runner: runIntegrationINT01Tests },
 ];
 
 let totalPassed = 0;
