@@ -102,10 +102,11 @@ def create_pbr_material(name, base_color, roughness=0.45, specular=0.5, subsurfa
     return mat
 
 
-def build_heart_myocardium():
+def build_heart_myocardium(cutaway=True):
     """
-    Generate anatomical compound myocardium geometry:
+    Generate anatomical compound myocardium geometry matching docs/reference/Heart moving.mp4:
     - Primary Ventricular Myocardium (conical tapering towards apex, LV lateral bulge, anterior groove)
+    - Optional anterior cutaway window revealing internal ventricles and septum
     - Right & Left Atria
     - Ascending Aorta Root
     - Pulmonary Trunk
@@ -139,6 +140,12 @@ def build_heart_myocardium():
             dist = abs(co.x - 0.28) / 0.15
             indent = max(0.0, 1.0 - dist) * 0.055
             co.y += indent  # push towards center
+
+        # Cutaway dissection window (carve anterior chamber opening if cutaway=True)
+        if cutaway and co.y < -0.08 and -0.92 < co.z < 0.58:
+            wall_dist = math.sqrt(co.x * co.x + (co.z + 0.15) * (co.z + 0.15))
+            if wall_dist < 0.72:
+                co.y = 0.15 - 0.20 * math.sin(co.z * 3.0)
 
         # Elongate cardiac long axis
         co.z *= 1.15
@@ -191,6 +198,99 @@ def build_heart_myocardium():
     bpy.ops.object.shade_smooth()
     mat_svc = create_pbr_material("Mat_SVC", base_color=(0.192, 0.180, 0.505, 1.0), roughness=0.50, subsurface=0.10)
     svc.data.materials.append(mat_svc)
+
+
+def build_epicardial_adipose():
+    """Build golden-amber epicardial adipose fat pads along AV sulcus (matching reference video)."""
+    bpy.ops.mesh.primitive_torus_add(
+        major_radius=0.68,
+        minor_radius=0.08,
+        major_segments=36,
+        minor_segments=16,
+        location=(0.02, 0.05, 0.52),
+        rotation=(math.radians(72), math.radians(-10), math.radians(20))
+    )
+    fat = bpy.context.active_object
+    fat.name = "Epicardial_Adipose"
+    bpy.ops.object.shade_smooth()
+    mat_fat = create_pbr_material("Mat_Adipose", base_color=(0.82, 0.62, 0.18, 1.0), roughness=0.62, subsurface=0.20)
+    fat.data.materials.append(mat_fat)
+    return fat
+
+
+def build_aortic_arch_branches():
+    """Build the 3 major systemic arterial branches off the aortic arch."""
+    mat_art = bpy.data.materials.get("Mat_Aorta")
+    branches = [
+        ("Branch_Brachiocephalic", (-0.04, -0.04, 1.35), (math.radians(-6), 0, math.radians(-8))),
+        ("Branch_LeftCarotid", (0.08, -0.02, 1.38), (math.radians(-8), 0, 0)),
+        ("Branch_LeftSubclavian", (0.20, 0.00, 1.34), (math.radians(-8), 0, math.radians(10))),
+    ]
+    for bname, bloc, brot in branches:
+        bpy.ops.mesh.primitive_cylinder_add(radius=0.06, depth=0.32, location=bloc, rotation=brot)
+        bobj = bpy.context.active_object
+        bobj.name = bname
+        bpy.ops.object.shade_smooth()
+        if mat_art:
+            bobj.data.materials.append(mat_art)
+
+
+def build_internal_chamber_anatomy():
+    """
+    Build interior cross-section cutaway anatomy matching docs/reference/Heart moving.mp4:
+    - Muscular interventricular septum
+    - Valve rings (mitral & tricuspid)
+    - Fibrous Chordae Tendineae valve strings
+    - Papillary muscle anchor cones
+    """
+    # 1. Muscular Interventricular Septum (separating LV & RV)
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0.05, 0.02, -0.15))
+    septum = bpy.context.active_object
+    septum.name = "Chamber_Interventricular_Septum"
+    septum.scale = (0.16, 0.55, 0.90)
+    bpy.ops.object.shade_smooth()
+    mat_septum = create_pbr_material("Mat_Septum", base_color=(0.44, 0.10, 0.18, 1.0), roughness=0.52, subsurface=0.22)
+    septum.data.materials.append(mat_septum)
+
+    # 2. Left and Right Papillary Muscles
+    bpy.ops.mesh.primitive_cone_add(radius1=0.09, depth=0.30, location=(0.32, 0.04, -0.38), rotation=(math.radians(10), 0, math.radians(-12)))
+    pap_lv = bpy.context.active_object
+    pap_lv.name = "Papillary_Muscle_LV"
+    bpy.ops.object.shade_smooth()
+    pap_lv.data.materials.append(mat_septum)
+
+    bpy.ops.mesh.primitive_cone_add(radius1=0.08, depth=0.28, location=(-0.24, 0.05, -0.35), rotation=(math.radians(10), 0, math.radians(14)))
+    pap_rv = bpy.context.active_object
+    pap_rv.name = "Papillary_Muscle_RV"
+    bpy.ops.object.shade_smooth()
+    pap_rv.data.materials.append(mat_septum)
+
+    # 3. Mitral & Tricuspid Valve Rings
+    mat_valve = create_pbr_material("Mat_Valve", base_color=(0.95, 0.95, 0.96, 1.0), roughness=0.28, subsurface=0.15)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.18, minor_radius=0.025, location=(0.26, 0.04, 0.32), rotation=(math.radians(85), 0, math.radians(10)))
+    valve_m = bpy.context.active_object
+    valve_m.name = "Valve_Mitral_Ring"
+    bpy.ops.object.shade_smooth()
+    valve_m.data.materials.append(mat_valve)
+
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.17, minor_radius=0.024, location=(-0.20, 0.05, 0.30), rotation=(math.radians(85), 0, math.radians(-10)))
+    valve_t = bpy.context.active_object
+    valve_t.name = "Valve_Tricuspid_Ring"
+    bpy.ops.object.shade_smooth()
+    valve_t.data.materials.append(mat_valve)
+
+    # 4. Fibrous Chordae Tendineae (White tendon cords)
+    chordae_coords = [
+        ((0.29, 0.04, -0.05), (math.radians(4), 0, math.radians(-6))),
+        ((0.34, 0.03, -0.08), (math.radians(-4), 0, math.radians(-12))),
+        ((-0.21, 0.05, -0.05), (math.radians(4), 0, math.radians(6))),
+    ]
+    for i, (cloc, crot) in enumerate(chordae_coords):
+        bpy.ops.mesh.primitive_cylinder_add(radius=0.014, depth=0.42, location=cloc, rotation=crot)
+        cord = bpy.context.active_object
+        cord.name = f"Chordae_Tendineae_{i+1}"
+        bpy.ops.object.shade_smooth()
+        cord.data.materials.append(mat_valve)
 
 
 def create_coronary_spline(name, points, color_rgba, bevel_depth=0.046):
@@ -397,6 +497,23 @@ def render_clinical_views(output_dir, width=1280, height=720):
         render_still_frame(frame, path, width=width, height=height)
 
 
+def render_turntable_frames(output_dir, total_frames=24, width=640, height=360):
+    """Render 360-degree turntable frames for web interactive viewer or animation."""
+    abs_dir = os.path.abspath(output_dir)
+    os.makedirs(abs_dir, exist_ok=True)
+    scene = bpy.context.scene
+    scene.render.resolution_x = width
+    scene.render.resolution_y = height
+    scene.render.image_settings.file_format = 'PNG'
+    print(f"[CardioVision] Rendering {total_frames} turntable frames ({width}x{height}) to {abs_dir}...")
+    for f in range(1, total_frames + 1):
+        scene.frame_set(f)
+        frame_path = os.path.join(abs_dir, f"frame_{f:02d}.png")
+        scene.render.filepath = frame_path
+        bpy.ops.render.render(write_still=True)
+    print(f"[CardioVision] Successfully saved {total_frames} turntable frames to {abs_dir}")
+
+
 def export_glb(output_filepath):
     """
     Export cardiac model to compact glTF 2.0 binary (.glb).
@@ -431,9 +548,12 @@ def parse_cli_args():
     parser.add_argument("--lad-prob", type=float, default=0.94, help="LAD predicted probability (default: 0.94)")
     parser.add_argument("--lcx-prob", type=float, default=0.24, help="LCX predicted probability (default: 0.24)")
     parser.add_argument("--rca-prob", type=float, default=0.28, help="RCA predicted probability (default: 0.28)")
+    parser.add_argument("--cutaway", action="store_true", default=True, help="Generate anterior chamber cutaway anatomy")
+    parser.add_argument("--no-cutaway", dest="cutaway", action="store_false", help="Disable cutaway for solid myocardium")
     parser.add_argument("--colorblind", action="store_true", help="Enable colorblind-safe palette")
     parser.add_argument("--render-still", type=str, default="", help="Render still image to path")
     parser.add_argument("--render-views", type=str, default="", help="Render clinical multi-view images to directory")
+    parser.add_argument("--render-turntable-frames", type=str, default="", help="Render all turntable frames to directory")
     parser.add_argument("--export-glb", type=str, default="", help="Export scene to GLB file path")
     parser.add_argument("--total-frames", type=int, default=120, help="Turntable animation total frames (default: 120)")
     return parser.parse_args(argv)
@@ -444,11 +564,16 @@ def main():
     print("=" * 65)
     print(" CardioVision 3D Procedural Cardiac Turntable & Motion Generator")
     print(f" Risk Inputs: LAD={args.lad_prob:.2f}, LCX={args.lcx_prob:.2f}, RCA={args.rca_prob:.2f}")
+    print(f" Mode: {'Anatomical Cutaway Dissection' if args.cutaway else 'Full Exterior Surface'}")
     print(" Clinical Invariant: Uniform vessel coloration, zero focal lesions")
     print("=" * 65)
 
     clear_scene()
-    build_heart_myocardium()
+    build_heart_myocardium(cutaway=args.cutaway)
+    build_epicardial_adipose()
+    build_aortic_arch_branches()
+    if args.cutaway:
+        build_internal_chamber_anatomy()
     build_coronary_tree(lad_p=args.lad_prob, lcx_p=args.lcx_prob, rca_p=args.rca_prob, colorblind=args.colorblind)
     setup_lighting()
     setup_turntable(total_frames=args.total_frames)
@@ -461,6 +586,9 @@ def main():
 
     if args.render_views:
         render_clinical_views(args.render_views)
+
+    if args.render_turntable_frames:
+        render_turntable_frames(args.render_turntable_frames, total_frames=args.total_frames)
 
     print("[CardioVision] Blender pipeline execution completed successfully.")
 
