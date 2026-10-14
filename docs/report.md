@@ -1,7 +1,7 @@
 # CardioVision: Multimodal 3D Cardiovascular Risk Visualization & Prediction
 **Track A Technical Report | Multimodal AI Hackathon 2026**  
 **Authors:** Soham, Debdas, Soumyadeep, Adin  
-**Live Application:** [https://cardiovision.vercel.app](https://cardiovision.vercel.app) | **Live API:** [https://cardiovision-api.onrender.com](https://cardiovision-api.onrender.com) | **Repository:** [https://github.com/Sohaam007/cardiovision](https://github.com/Sohaam007/cardiovision)
+**Live Application:** [https://cardiovision.vercel.app](https://cardiovision.vercel.app) | **Live API:** [https://cardiovision-api.onrender.com](https://cardiovision-api.onrender.com) | **Repository:** [https://github.com/Sohaam007/cardiovision](https://github.com/Sohaam007/cardiovision) | **Video Demo:** [https://youtu.be/placeholder-cardiovision-demo](https://youtu.be/placeholder-cardiovision-demo)
 
 ---
 

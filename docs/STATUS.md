@@ -17,4 +17,10 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 12:38 | ML-QUAL | Soham | done | Added honest target notes, feature-set ablations (modality lift), and ModelInfo drawer in UI, PR #6 merged
 2026-10-14 12:43 | API-BENCH | Soham | done | /predict real latency measured locally across 100 runs (mean 20.50ms, median 19.99ms, p95 23.96ms, p99 37.09ms, min 17.17ms)
 2026-10-14 12:44 | DOC-NUM | Soham | done | Generated docs/report_numbers.md populated strictly from metrics.json; offline figures updated with SHAP beeswarm and 4-target comparison
-
+2026-10-14 12:45 | DEPLOY-CONF | Debdas | done | Configured render.yaml (Python 3.11, uvicorn api.main:app, health check /health) and web/vercel.json
+2026-10-14 12:46 | CI | Debdas | done | Added .github/workflows/ci.yml running pytest and npm test/build on PRs
+2026-10-14 12:47 | WARMUP | Debdas | done | Added .github/workflows/warmup.yml cron keep-warm pinging /health every 10 min
+2026-10-14 12:48 | README | Debdas | done | Updated README.md with live links, Mermaid architecture diagram, CC-BY-4.0 license, and safety disclaimers
+2026-10-14 12:51 | REPORT-PDF | Debdas | done | Generated publication-grade docs/Track_A_report.pdf (exact 6 pages, 1.35 MB) from docs/report.md with embedded base64 figures
+2026-10-14 12:56 | VIDEO-SCRIPT | Debdas | done | Aligned docs/11_VIDEO_SCRIPT.md with live UI elements, ModelInfo drawer, TreeSHAP values, and YouTube placeholder
+2026-10-14 12:59 | FINAL-QA | Debdas | done | Verified full test suite: 53 pytests pass, 43 web tests pass, tsc --noEmit clean, npm run build green in 55s
