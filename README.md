@@ -8,7 +8,7 @@
 [![Devpost Hackathon](https://img.shields.io/badge/Hackathon-Track_A_Multimodal_AI_2026-orange.svg)](https://devpost.com)
 
 > **CardioVision** is an interactive, non-invasive clinical decision-support and anatomical risk-stratification platform built for **Track A of the Multimodal AI Hackathon 2026**. 
-> The system ingests 54 multimodal patient features (demographics, symptom history, vital examination, 12-lead ECG, echocardiography, and laboratory biomarkers) to predict overall Coronary Artery Disease (CAD) risk alongside vessel-specific stenosis in the **Left Anterior Descending (LAD)**, **Left Circumflex (LCX)**, and **Right Coronary Artery (RCA)**. Predictions are rendered in real time onto an interactive 3D coronary anatomy model—procedurally shaded by predicted stenosis probability without ungrounded lesion location claims—complemented by sub-25ms native C++ TreeSHAP explainability in calibrated log-odds space, physiological reference ranges, and interactive what-if sensitivity levers.
+> The system ingests 54 multimodal patient features (demographics, symptom history, vital examination, 12-lead ECG, echocardiography, and laboratory biomarkers) to predict overall Coronary Artery Disease (CAD) risk alongside vessel-specific stenosis in the **Left Anterior Descending (LAD)**, **Left Circumflex (LCX)**, and **Right Coronary Artery (RCA)**. Predictions are rendered in real time onto an interactive 3D coronary anatomy model, procedurally shaded by predicted stenosis probability without ungrounded lesion location claims, complemented by sub-25ms native C++ TreeSHAP explainability in calibrated log-odds space, physiological reference ranges, and interactive what-if sensitivity levers.
 
 ---
 
@@ -44,10 +44,10 @@ Per the official **Multimodal AI Hackathon 2026 Submission Guidelines**, all fou
 
 ### Live Deployments & Primary Links
 
-- **Live Web Application (Vercel):** [https://cardiovision.vercel.app](https://cardiovision.vercel.app)
-- **Production API Server (Render):** [https://cardiovision-api.onrender.com](https://cardiovision-api.onrender.com)
-- **API Health Check:** [https://cardiovision-api.onrender.com/health](https://cardiovision-api.onrender.com/health)
-- **Interactive Swagger API Documentation:** [https://cardiovision-api.onrender.com/docs](https://cardiovision-api.onrender.com/docs)
+- **Live Web Application (Vercel):** [https://cardiovision-sigma.vercel.app](https://cardiovision-sigma.vercel.app)
+- **Production API Server (Render):** [https://cardiovision-vwkj.onrender.com](https://cardiovision-vwkj.onrender.com)
+- **API Health Check:** [https://cardiovision-vwkj.onrender.com/health](https://cardiovision-vwkj.onrender.com/health)
+- **Interactive Swagger API Documentation:** [https://cardiovision-vwkj.onrender.com/docs](https://cardiovision-vwkj.onrender.com/docs)
 - **Publication-Ready Technical Report (PDF, exact 6 pages):** [`docs/Track_A_report.pdf`](docs/Track_A_report.pdf)
 - **Automated CI/CD Pipeline:** [GitHub Actions Workflow](https://github.com/Sohaam007/cardiovision/actions/workflows/ci.yml)
 
@@ -67,7 +67,7 @@ Non-invasive examinations (resting ECG, echocardiography, blood biomarkers, phys
 CardioVision bridges advanced machine learning and anatomical 3D graphics into a zero-compromise clinical decision-support tool:
 - **Calibrated Multi-Target Modeling:** Predicts overall CAD alongside territory-specific stenosis in LAD, LCX, and RCA using 15-fold repeated stratified cross-validation and out-of-fold Platt scaling.
 - **Interactive 3D Anatomical Mapping:** Renders smooth procedural coronary vessels over an anatomical 3D heart and rib cage, color-coded continuously by predicted stenosis probability.
-- **Sub-25ms Native TreeSHAP:** Provides instant feature attribution in calibrated log-odds space using native C++ tree paths—requiring zero heavy runtime dependencies.
+- **Sub-25ms Native TreeSHAP:** Provides instant feature attribution in calibrated log-odds space using native C++ tree paths, requiring zero heavy runtime dependencies.
 - **What-If Sensitivity Simulation:** Empowers clinicians to adjust physiological levers (blood pressure, LDL, BMI, smoking) with immediate 3D visual feedback and delta risk badges.
 
 ---
@@ -102,10 +102,10 @@ flowchart LR
 - **Coronary Artery Disease (CAD):** Atherosclerotic plaque buildup inside the epicardial coronary arteries supplying blood to the myocardium.
 - **Significant Stenosis:** Defined clinically in the dataset as a lumen diameter narrowing of $\ge 50\%$ in one or more major epicardial vessels during catheterization.
 - **The Three Vascular Territories:**
-  - **LAD (Left Anterior Descending):** Known as the "widow-maker" artery; supplies 45–55% of the left ventricle including the anterior wall, apex, and septum.
+  - **LAD (Left Anterior Descending):** Known as the "widow-maker" artery; supplies 45-55% of the left ventricle including the anterior wall, apex, and septum.
   - **LCX (Left Circumflex):** Traverses the left atrioventricular groove to supply the posterolateral left ventricle.
   - **RCA (Right Coronary Artery):** Courses through the right coronary sulcus to supply the right ventricle, inferior wall, and cardiac conduction nodes.
-- **Regional Wall Motion Abnormality (RWMA):** An echocardiographic assessment indicating abnormal contraction or hypokinesis in a ventricular wall segment. While associated with ischemia, it is a clinical feature—not a spatial coordinate.
+- **Regional Wall Motion Abnormality (RWMA):** An echocardiographic assessment indicating abnormal contraction or hypokinesis in a ventricular wall segment. While associated with ischemia, it is a clinical feature, not a spatial coordinate.
 - **Multimodal Feature Categories (54 Features Total):**
   1. *Demographics (5):* Age, Sex, BMI, Weight, Height.
   2. *History & Physical Examination (25):* Chest pain type (Typical, Atypical, Non-anginal), Dyspnea, Hypertension, Diabetes, Smoking status, Blood pressure, Pulse rate.
@@ -462,7 +462,7 @@ cd ..
 
 Run the backend and frontend services in separate terminal windows:
 
-#### Terminal 1 — FastAPI Backend Server:
+#### Terminal 1 - FastAPI Backend Server:
 ```bash
 uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
@@ -470,7 +470,7 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 - Health Check: [http://localhost:8000/health](http://localhost:8000/health)
 - Interactive API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-#### Terminal 2 — Vite + React 3D Frontend:
+#### Terminal 2 - Vite + React 3D Frontend:
 ```bash
 cd web
 npm run dev
@@ -554,6 +554,6 @@ Submitted to **Track A: Cardiovascular Risk Visualization & Prediction** at the 
 ---
 
 <p align="center">
-  <b>CardioVision</b> — Developed for Track A, Multimodal AI Hackathon 2026<br/>
+  <b>CardioVision</b> - Developed for Track A, Multimodal AI Hackathon 2026<br/>
   <i>Bridging Machine Learning Rigor and 3D Anatomical Intuition for Cardiovascular Decision Support.</i>
 </p>
