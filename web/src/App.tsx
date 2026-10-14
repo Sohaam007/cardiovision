@@ -11,6 +11,8 @@ import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
 import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
 import { InteractiveBeatingHeart } from './components/InteractiveBeatingHeart';
+import { SceneCanvas } from './scene/SceneCanvas';
+import { DissectionControls } from './components/DissectionControls';
 import { DraggableToolsMenu } from './components/DraggableToolsMenu';
 import { PatientFindingsHUD } from './components/PatientFindingsHUD';
 import { ECGMonitorHUD } from './components/ECGMonitorHUD';
@@ -238,6 +240,8 @@ export const App: React.FC = () => {
               <WebGLFallback />
             ) : viewerMode === 'blender' ? (
               <BlenderTurntableEmbed onOpenModal={() => setIsBlenderStudioOpen(true)} />
+            ) : viewerMode === 'procedural' ? (
+              <SceneCanvas />
             ) : (
               <InteractiveBeatingHeart fullScreen />
             )}
@@ -257,6 +261,19 @@ export const App: React.FC = () => {
                 title="3D Photorealistic Beating Heart Model"
               >
                 <span>🫀 3D Beating</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewerMode('procedural')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === 'procedural'
+                    ? 'bg-cyan-600 text-white shadow-md shadow-cyan-950/60 ring-1 ring-cyan-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="3D Anatomical Procedural Model with Surgical Dissection & Myocardial Cutaway"
+              >
+                <span>⚙️ 3D Procedural</span>
               </button>
 
               <button
@@ -311,6 +328,9 @@ export const App: React.FC = () => {
 
           {/* 3. Consolidated Draggable Floating Tools HUD */}
           <DraggableToolsMenu />
+
+          {/* 3b. Procedural Dissection Controls (Active strictly when viewerMode === 'procedural') */}
+          {viewerMode === 'procedural' && <DissectionControls />}
 
           {/* 4. Floating Risk Legend HUD (Movable & Collapsible) */}
           <FloatingRiskLegend />
