@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { SceneCanvas } from './scene/SceneCanvas';
 import { PersonaPicker } from './components/PersonaPicker';
 import { ClinicalPanel } from './components/ClinicalPanel';
 import { SafetyModal } from './components/SafetyModal';
@@ -7,15 +6,14 @@ import { FloatingRiskLegend } from './components/FloatingRiskLegend';
 import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 import { WebGLFallback } from './components/WebGLFallback';
 import { ModelInfoDrawer } from './components/ModelInfoDrawer';
-import { DissectionControls } from './components/DissectionControls';
 import { DoctorInspectionDrawer } from './components/DoctorInspectionDrawer';
 import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
 import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
 import { DraggableToolsMenu } from './components/DraggableToolsMenu';
 import { PatientFindingsHUD } from './components/PatientFindingsHUD';
-import { CardiacCycleControlsHUD } from './components/CardiacCycleControlsHUD';
 import { ECGMonitorHUD } from './components/ECGMonitorHUD';
+import { InteractiveBeatingHeart } from './components/InteractiveBeatingHeart';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -216,7 +214,7 @@ export const App: React.FC = () => {
             ) : viewerMode === 'blender' ? (
               <BlenderTurntableEmbed onOpenModal={() => setIsBlenderStudioOpen(true)} />
             ) : (
-              <SceneCanvas />
+              <InteractiveBeatingHeart fullScreen />
             )}
           </WebGLErrorBoundary>
 
@@ -225,8 +223,7 @@ export const App: React.FC = () => {
             <div className="bg-[#090d16]/90 backdrop-blur-md border border-slate-800 text-[11px] text-slate-300 px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               <span className="font-semibold text-white">
-                {viewerMode === 'realistic' && '3D Beating Heart'}
-                {viewerMode === 'procedural' && '3D Procedural Anatomy'}
+                {viewerMode === 'realistic' && '3D Beating Heart (Cycles Photorealistic)'}
                 {viewerMode === '2d' && '2D Angiogram Suite'}
                 {viewerMode === 'blender' && 'Blender Studio Turntable'}
               </span>
@@ -250,19 +247,6 @@ export const App: React.FC = () => {
                 title="3D Photorealistic Beating Heart Model"
               >
                 <span>🫀 3D Beating</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setViewerMode('procedural')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                  viewerMode === 'procedural'
-                    ? 'bg-cyan-600 text-white shadow-md shadow-cyan-950/60 ring-1 ring-cyan-400/50'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                }`}
-                title="3D Procedural Myocardium & Chamber Dissection Model"
-              >
-                <span>⚙️ 3D Procedural</span>
               </button>
 
               <button
@@ -312,9 +296,6 @@ export const App: React.FC = () => {
           {/* Patient Findings & Direct Structure Navigation HUD Overlay */}
           <div className="absolute top-12 left-3 right-3 sm:top-14 sm:left-4 sm:right-4 z-20 pointer-events-auto flex flex-col gap-1.5 max-w-full">
             <PatientFindingsHUD />
-            <div className="self-start">
-              <CardiacCycleControlsHUD />
-            </div>
           </div>
 
           {/* Consolidated Draggable Floating Tools HUD */}
@@ -325,9 +306,6 @@ export const App: React.FC = () => {
 
           {/* Systematic Real-Time ECG Oscilloscope Monitor HUD */}
           <ECGMonitorHUD />
-
-          {/* Surgical Dissection Controls (Active in 3D procedural mode) */}
-          {viewerMode === 'procedural' && <DissectionControls />}
 
           {/* Interactive Sensitivity & What-If Studio HUD Overlay */}
           <InteractiveSensitivityHUD isOpen={isSensitivityOpen} onClose={closeSensitivity} />

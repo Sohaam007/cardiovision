@@ -83,49 +83,47 @@ export const FloatingRiskLegend: React.FC = () => {
       offsetY: e.clientY - rect.top,
     };
     setIsDragging(true);
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  useEffect(() => {
     if (!isDragging) return;
-    e.stopPropagation();
 
-    const parent = containerRef.current?.parentElement;
-    const parentRect = parent?.getBoundingClientRect() || { left: 0, top: 0 };
-    const menuWidth = containerRef.current?.offsetWidth || 300;
-    const menuHeight = containerRef.current?.offsetHeight || 320;
+    const onPointerMove = (e: PointerEvent) => {
+      const parent = containerRef.current?.parentElement;
+      const parentRect = parent?.getBoundingClientRect() || { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+      const menuWidth = containerRef.current?.offsetWidth || 300;
+      const menuHeight = containerRef.current?.offsetHeight || 320;
 
-    const rawX = e.clientX - parentRect.left - dragOffsetRef.current.offsetX;
-    const rawY = e.clientY - parentRect.top - dragOffsetRef.current.offsetY;
+      const rawX = e.clientX - parentRect.left - dragOffsetRef.current.offsetX;
+      const rawY = e.clientY - parentRect.top - dragOffsetRef.current.offsetY;
 
-    const bounded = clampAndSnap({ x: rawX, y: rawY }, menuWidth, menuHeight);
-    setPosition(bounded);
-  };
+      const bounded = clampAndSnap({ x: rawX, y: rawY }, menuWidth, menuHeight);
+      setPosition(bounded);
+    };
 
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (isDragging) {
-      e.stopPropagation();
+    const onPointerUp = () => {
       setIsDragging(false);
-      try {
-        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch {
-        // Safe fallback
-      }
-    }
-  };
+    };
 
-  // Prevent wheel and touch bleed into 3D OrbitControls
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    };
+  }, [isDragging, clampAndSnap]);
+
+  // Prevent wheel bleed into 3D OrbitControls
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    const stopPropagation = (e: Event) => e.stopPropagation();
-    el.addEventListener('wheel', stopPropagation, { passive: false });
-    el.addEventListener('pointerdown', stopPropagation);
+    const stopWheel = (e: Event) => e.stopPropagation();
+    el.addEventListener('wheel', stopWheel, { passive: false });
 
     return () => {
-      el.removeEventListener('wheel', stopPropagation);
-      el.removeEventListener('pointerdown', stopPropagation);
+      el.removeEventListener('wheel', stopWheel);
     };
   }, []);
 
@@ -139,8 +137,6 @@ export const FloatingRiskLegend: React.FC = () => {
       className={`absolute top-0 left-0 z-20 select-none transition-shadow pointer-events-auto ${
         isDragging ? 'cursor-grabbing shadow-2xl scale-[1.01]' : 'shadow-xl'
       }`}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
       data-testid="floating-risk-legend-window"
     >
       {isCollapsed ? (

@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { cardiacAudio } from '../audio/cardiacAudio';
+import { useStore } from '../store/useStore';
 
 interface BeatingHeartModelProps {
   isPlaying: boolean;
@@ -88,13 +89,87 @@ const BeatingHeartModel: React.FC<BeatingHeartModelProps> = ({
 // Pre-load the asset so there is zero hitch on tab selection
 useGLTF.preload('/beating_heart.glb', '/draco/gltf/');
 
-export const InteractiveBeatingHeart: React.FC = () => {
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [speed, setSpeed] = useState<number>(1.0);
-  const [phase, setPhase] = useState<'auto' | 'systole' | 'diastole'>('auto');
-  const [isAudioMuted, setIsAudioMuted] = useState<boolean>(true);
+const CameraPresetController: React.FC<{ controlsRef: React.RefObject<OrbitControlsImpl> }> = ({ controlsRef }) => {
+  const cameraPreset = useStore((state) => state.cameraPreset);
+  const { camera } = useThree();
+
+  useEffect(() => {
+    if (!cameraPreset) return;
+    if (cameraPreset === 'anterior') {
+      camera.position.set(0, 0.2, 2.5);
+    } else if (cameraPreset === 'lateral') {
+      camera.position.set(-2.0, 0.2, 1.2);
+    } else if (cameraPreset === 'posterior') {
+      camera.position.set(0, 0.2, -2.5);
+    }
+    if (controlsRef.current) {
+      controlsRef.current.target.set(0, -0.1, 0);
+      controlsRef.current.update();
+    }
+  }, [cameraPreset, camera, controlsRef]);
+
+  return null;
+};
+
+interface InteractiveBeatingHeartProps {
+  fullScreen?: boolean;
+}
+
+export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = ({ fullScreen = false }) => {
+  // Store values for synchronized control
+  const storeIsPlaying = useStore((state) => state.isPlaying);
+  const storeSpeed = useStore((state) => state.beatingSpeed);
+  const storePhase = useStore((state) => state.cardiacPhase);
+  const storeAudioMuted = useStore((state) => state.isAudioMuted);
+  const togglePlayback = useStore((state) => state.togglePlayback);
+  const setCardiacPhase = useStore((state) => state.setCardiacPhase);
+  const setBeatingSpeed = useStore((state) => state.setBeatingSpeed);
+  const toggleAudio = useStore((state) => state.toggleAudio);
+
+  // Local fallback state if not in fullScreen (e.g. standalone modal)
+  const [localPlaying, setLocalPlaying] = useState<boolean>(true);
+  const [localSpeed, setLocalSpeed] = useState<number>(1.0);
+  const [localPhase, setLocalPhase] = useState<'auto' | 'systole' | 'diastole'>('auto');
+  const [localAudioMuted, setLocalAudioMuted] = useState<boolean>(true);
   const [lastSound, setLastSound] = useState<'s1' | 's2' | 'none'>('none');
   const controlsRef = useRef<OrbitControlsImpl>(null);
+
+  const isPlaying = fullScreen ? storeIsPlaying : localPlaying;
+  const speed = fullScreen ? storeSpeed : localSpeed;
+  const phase = fullScreen ? storePhase : localPhase;
+  const isAudioMuted = fullScreen ? storeAudioMuted : localAudioMuted;
+
+  const setIsPlaying = (p: boolean) => {
+    if (fullScreen) {
+      if (storeIsPlaying !== p) togglePlayback();
+    } else {
+      setLocalPlaying(p);
+    }
+  };
+
+  const setSpeed = (s: number) => {
+    if (fullScreen) {
+      setBeatingSpeed(s);
+    } else {
+      setLocalSpeed(s);
+    }
+  };
+
+  const setPhase = (ph: 'auto' | 'systole' | 'diastole') => {
+    if (fullScreen) {
+      setCardiacPhase(ph);
+    } else {
+      setLocalPhase(ph);
+    }
+  };
+
+  const setIsAudioMuted = (m: boolean) => {
+    if (fullScreen) {
+      if (storeAudioMuted !== m) toggleAudio();
+    } else {
+      setLocalAudioMuted(m);
+    }
+  };
 
   useEffect(() => {
     cardiacAudio.setMuted(isAudioMuted);
@@ -107,9 +182,64 @@ export const InteractiveBeatingHeart: React.FC = () => {
   };
 
   const calculatedBPM = Math.round(72 * speed);
-
   const avValvesOpen = phase === 'diastole' || (phase === 'auto' && isPlaying);
   const semilunarValvesOpen = phase === 'systole';
+
+  if (fullScreen) {
+    return (
+      <div className="w-full h-full relative flex flex-col justify-between select-none overflow-hidden bg-slate-950">
+        <div className="relative w-full h-full flex-1 flex items-center justify-center overflow-hidden">
+          <Suspense
+            fallback={
+              <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
+                <div className="w-10 h-10 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-xs font-mono">Loading Photorealistic Beating Heart (1.39 MB)...</span>
+              </div>
+            }
+          >
+            <Canvas
+              camera={{ position: [0, 0.2, 2.5], fov: 45 }}
+              gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+            >
+              <ambientLight intensity={0.9} />
+              <directionalLight position={[5, 8, 5]} intensity={1.4} />
+              <directionalLight position={[-5, -4, -5]} intensity={0.6} />
+              <pointLight position={[0, -2, 2]} intensity={0.5} color="#fda4af" />
+
+              <BeatingHeartModel
+                isPlaying={isPlaying}
+                speed={speed}
+                phase={phase}
+                isAudioMuted={isAudioMuted}
+                onSoundTrigger={(s) => setLastSound(s)}
+              />
+
+              <CameraPresetController controlsRef={controlsRef} />
+
+              <OrbitControls
+                ref={controlsRef}
+                makeDefault
+                enableDamping
+                dampingFactor={0.08}
+                minDistance={1.2}
+                maxDistance={5.0}
+                rotateSpeed={0.8}
+              />
+            </Canvas>
+          </Suspense>
+
+          {/* Reset Camera Button */}
+          <button
+            onClick={resetCamera}
+            className="absolute top-4 right-4 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors shadow-lg z-10"
+            title="Reset Camera Orientation"
+          >
+            Reset View
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex flex-col items-center gap-3 select-none">
@@ -139,6 +269,8 @@ export const InteractiveBeatingHeart: React.FC = () => {
               isAudioMuted={isAudioMuted}
               onSoundTrigger={(s) => setLastSound(s)}
             />
+
+            <CameraPresetController controlsRef={controlsRef} />
 
             <OrbitControls
               ref={controlsRef}

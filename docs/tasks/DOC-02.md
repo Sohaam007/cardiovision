@@ -1,5 +1,5 @@
 # DOC-02 Demo video
-Owner: Debdas   Status: todo
+Owner: Soumyadeep   Status: todo
 Reads: docs/11_VIDEO_SCRIPT.md
 Do:
 - Record following the script against the deployed site; 3-10 minutes.
