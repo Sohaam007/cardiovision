@@ -73,7 +73,9 @@ export interface DemoPatient {
   prediction: PredictResponse;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:8000';
+const API_BASE =
+  import.meta.env.VITE_API_URL?.replace(/\/$/, '') ||
+  (import.meta.env.PROD ? 'https://cardiovision-vwkj.onrender.com' : 'http://localhost:8000');
 const TIMEOUT_MS = 8000;
 
 let currentPredictController: AbortController | null = null;

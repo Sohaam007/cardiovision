@@ -6,7 +6,7 @@
 ---
 
 ## 0:00 - 0:45 | Introduction, Clinical Scope & Mandatory Safety Disclaimer
-- **Visual:** Browser opens to the live CardioVision deployment (`https://cardiovision.vercel.app`). The interface opens with the persistent clinical disclaimer banner and the First-Load Clinical Safety Modal centered.
+- **Visual:** Browser opens to the live CardioVision deployment (`https://cardiovision-sigma.vercel.app`). The interface opens with the persistent clinical disclaimer banner and the First-Load Clinical Safety Modal centered.
 - **Narrator:**
   "Welcome to CardioVision, our submission for Track A: Multimodal Cardiovascular Risk Visualization and Prediction.
   Coronary artery disease is the leading cause of global mortality. While invasive catheterization remains the definitive diagnostic gold standard, clinicians urgently need reliable, non-invasive risk stratification to prioritize diagnostic and procedural workflows.

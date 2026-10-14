@@ -11,10 +11,10 @@ CardioVision is an interactive clinical decision-support and visual risk stratif
 
 ## Live Deployments & Demo Links
 
-- **Live Web Application (Vercel):** [https://cardiovision.vercel.app](https://cardiovision.vercel.app)
-- **Production API Server (Render):** [https://cardiovision-api.onrender.com](https://cardiovision-api.onrender.com)
-- **API Health Check:** [https://cardiovision-api.onrender.com/health](https://cardiovision-api.onrender.com/health)
-- **Interactive API Documentation:** [https://cardiovision-api.onrender.com/docs](https://cardiovision-api.onrender.com/docs)
+- **Live Web Application (Vercel):** [https://cardiovision-sigma.vercel.app](https://cardiovision-sigma.vercel.app)
+- **Production API Server (Render):** [https://cardiovision-vwkj.onrender.com](https://cardiovision-vwkj.onrender.com)
+- **API Health Check:** [https://cardiovision-vwkj.onrender.com/health](https://cardiovision-vwkj.onrender.com/health)
+- **Interactive API Documentation:** [https://cardiovision-vwkj.onrender.com/docs](https://cardiovision-vwkj.onrender.com/docs)
 - **Video Walkthrough (YouTube):** [https://youtu.be/placeholder-cardiovision-demo](https://youtu.be/placeholder-cardiovision-demo) *(3-10 min walkthrough)*
 
 ---
