@@ -32,5 +32,6 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 18:53 | OPS-02 | Debdas | done | PR #17 reviewed, audit resolution documented in DECISIONS.md, merged to main, branch deleted
 2026-10-14 08:38 | PR-08 | Soham | done | Merged final submission bundle (CI failure audited; remediated via PR #9)
 2026-10-14 08:42 | PR-09 | Debdas | done | Pinned httpx==0.28.1, upgraded CI runner to Node 22; restored CI green on main
+2026-10-14 19:36 | DOC-DEVPOST | Soham | done | PR #19 Devpost README restructured, live production URLs retained, zero em dashes verified, squashed into main (1039fae), branch deleted
 
 
