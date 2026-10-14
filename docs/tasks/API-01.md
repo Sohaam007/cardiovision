@@ -1,5 +1,6 @@
 # API-01 FastAPI serving with contract
-Owner: Soham   Status: todo
+Owner: Soham   Status: done
+
 Reads: docs/04_API_CONTRACT.md, docs/03_ML_SPEC.md
 Do:
 - Implement /health, /schema, /demo, /predict per contract; load models once at startup.
