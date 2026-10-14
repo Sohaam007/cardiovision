@@ -72,6 +72,10 @@ export interface AppState {
   loadPersona: (persona: DemoPatient) => void;
   setIsLoadingPrediction: (loading: boolean) => void;
   setModelServerUnavailable: (unavailable: boolean) => void;
+  isModelInfoOpen: boolean;
+  openModelInfo: () => void;
+  closeModelInfo: () => void;
+  toggleModelInfo: () => void;
 }
 
 const DEFAULT_VESSELS: Record<VesselKey, VesselData> = {
@@ -268,6 +272,10 @@ export const useStore = create<AppState>()((set) => ({
       modelServerUnavailable: unavailable,
       apiStatus: unavailable ? 'unavailable' : 'live',
     }),
+  isModelInfoOpen: false,
+  openModelInfo: () => set({ isModelInfoOpen: true }),
+  closeModelInfo: () => set({ isModelInfoOpen: false }),
+  toggleModelInfo: () => set((state) => ({ isModelInfoOpen: !state.isModelInfoOpen })),
 }));
 
 if (typeof window !== 'undefined') {
