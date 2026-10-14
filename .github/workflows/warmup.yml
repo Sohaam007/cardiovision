@@ -34,7 +34,7 @@ jobs:
       - name: Send Health Ping to Render
         if: steps.check.outputs.enabled == 'true'
         run: |
-          API_URL="${{ vars.LIVE_API_URL || 'https://cardiovision-api.onrender.com' }}"
+          API_URL="${{ vars.LIVE_API_URL || 'https://cardiovision-vwkj.onrender.com' }}"
           echo "Pinging health endpoint at $API_URL/health ..."
           RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 15 "$API_URL/health")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
