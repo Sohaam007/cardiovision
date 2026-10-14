@@ -1,4 +1,4 @@
-# CardioVision — Team Handoff Guide
+# CardioVision - Team Handoff Guide
 
 **GitHub Repository URL:** `https://github.com/Sohaam007/cardiovision.git`
 
@@ -112,13 +112,14 @@ Type in Antigravity:
 
 | Phase & Window | Time (IST) | Soham | Soumyadeep | Adin | Debdas |
 |---|---|---|---|---|---|
-| **Hours 0–2** | 13 Oct 20:30 – 22:30 | **ML-01** (EDA, features, leakage test) | **3D-01** (scene skeleton, fake probs) | **UI-01** (dashboard shell) | **OPS-01** (Vercel + Render deploys, CI) |
-| **Hours 2–8** | 13 Oct 22:30 – 14 Oct 04:30 | **ML-02** (baselines & CV comparison) | **3D-01** finish, **3D-02** (interactions) | **UI-01** finish, **UI-02** (SHAP/measurement cards) | Docs 08/09, report skeleton |
-| **Hours 8–12** | 14 Oct 04:30 – 08:30 | **ML-03** (final models, calibration, SHAP export) | Finish **3D-02** | **UI-02** (what-if panel) | **OPS-02** (CI tuning, warm-up setup) |
-| **Hours 12–14** | 14 Oct 08:30 – 10:30 | **API-01** (FastAPI serving + parity test) | **INT-01** (integration) | **INT-01** (integration support) | QA & smoke testing |
+| **Hours 0-2** | 13 Oct 20:30 - 22:30 | **ML-01** (EDA, features, leakage test) | **3D-01** (scene skeleton, fake probs) | **UI-01** (dashboard shell) | **OPS-01** (Vercel + Render deploys, CI) |
+| **Hours 2-8** | 13 Oct 22:30 - 14 Oct 04:30 | **ML-02** (baselines & CV comparison) | **3D-01** finish, **3D-02** (interactions) | **UI-01** finish, **UI-02** (SHAP/measurement cards) | Docs 08/09, report skeleton |
+| **Hours 8-12** | 14 Oct 04:30 - 08:30 | **ML-03** (final models, calibration, SHAP export) | Finish **3D-02** | **UI-02** (what-if panel) | **OPS-02** (CI tuning, warm-up setup) |
+| **Hours 12-14** | 14 Oct 08:30 - 10:30 | **API-01** (FastAPI serving + parity test) | **INT-01** (integration) | **INT-01** (integration support) | QA & smoke testing |
 | **Hour 14** | **14 Oct 10:30** | <center>**API CONTRACT FROZEN & FIRST INTEGRATED BUILD**</center> | | | |
-| **Hours 14–24** | 14 Oct 10:30 – 20:30 | Bug fixes, calibration plots, metrics check | Camera presets, mobile/touch perf pass | UI polish, accessibility, demo fallback mode | **OPS-02** final deploy, **DOC-01** report draft |
-| **Hours 24–30** | 14 Oct 20:30 – 15 Oct 02:30 | Verification of `metrics.json` | QA on low-power devices | QA & visual verification | **DOC-02** video recording & YouTube upload |
-| **Hours 30–33** | 15 Oct 02:30 – 05:30 | Final report numbers sync | Code freeze | Code freeze | Final PDF check (<= 6 pages) & submission prep |
+| **Hours 14-24** | 14 Oct 10:30 - 20:30 | Bug fixes, calibration plots, metrics check | Camera presets, mobile/touch perf pass | UI polish, accessibility, demo fallback mode | **OPS-02** final deploy, **DOC-01** report draft |
+| **Hours 24-30** | 14 Oct 20:30 - 15 Oct 02:30 | Verification of `metrics.json` | QA on low-power devices | QA & visual verification | **DOC-02** video recording & YouTube upload |
+| **Hours 30-33** | 15 Oct 02:30 - 05:30 | Final report numbers sync | Code freeze | Code freeze | Final PDF check (<= 6 pages) & submission prep |
 | **Hour 33** | **15 Oct 05:30** | <center>**STRICT CODE FREEZE**</center> | | | |
-| **Hours 33–36** | 15 Oct 05:30 – 08:30 | **Early Submission Buffer** — Submit portal entry, verify live links logged out | | | |
+| **Hours 33-36** | 15 Oct 05:30 - 08:30 | **Early Submission Buffer** - Submit portal entry, verify live links logged out | | | |
+
