@@ -20,6 +20,8 @@ export const DraggableToolsMenu: React.FC = () => {
   const toggleECG = useStore((state) => state.toggleECG);
   const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
   const toggleFluoroscopyMode = useStore((state) => state.toggleFluoroscopyMode);
+  const showTorso = useStore((state) => state.showTorso);
+  const toggleTorso = useStore((state) => state.toggleTorso);
 
   const isPlaying = useStore((state) => state.isPlaying);
   const togglePlayback = useStore((state) => state.togglePlayback);
@@ -297,6 +299,21 @@ export const DraggableToolsMenu: React.FC = () => {
                 >
                   <span>⚡ Cine X-Ray</span>
                   <span className={`w-1.5 h-1.5 rounded-full ml-auto ${fluoroscopyMode ? 'bg-white' : 'bg-slate-600'}`} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={toggleTorso}
+                  className={`px-2 py-1.5 rounded-lg text-[11px] font-medium border transition-all flex items-center gap-1.5 ${
+                    showTorso
+                      ? 'bg-sky-950/80 text-sky-200 border-sky-500 shadow-sm shadow-sky-950/50'
+                      : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
+                  }`}
+                  data-testid="toggle-torso"
+                  title="Toggle anatomical holographic thoracic torso and ribcage housing"
+                >
+                  <span>👤 Torso</span>
+                  <span className={`w-1.5 h-1.5 rounded-full ml-auto ${showTorso ? 'bg-sky-400' : 'bg-slate-600'}`} />
                 </button>
               </div>
             </div>

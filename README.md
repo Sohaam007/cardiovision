@@ -1,5 +1,6 @@
 # CardioVision: Multimodal 3D Cardiovascular Risk Visualization & Prediction
 
+[![Team: Lv. 9](https://img.shields.io/badge/Team-Lv._9-amber.svg?style=flat&logo=target)](https://github.com/Sohaam007/cardiovision)
 [![CI Verification](https://github.com/Sohaam007/cardiovision/actions/workflows/ci.yml/badge.svg)](https://github.com/Sohaam007/cardiovision/actions/workflows/ci.yml)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB.svg?logo=python)](https://python.org)
@@ -7,7 +8,7 @@
 [![Sub-25ms Latency](https://img.shields.io/badge/Inference-Sub--25ms-success.svg)](https://fastapi.tiangolo.com)
 [![Devpost Hackathon](https://img.shields.io/badge/Hackathon-Track_A_Multimodal_AI_2026-orange.svg)](https://devpost.com)
 
-> **CardioVision** is an interactive, non-invasive clinical decision-support and anatomical risk-stratification platform built for **Track A of the Multimodal AI Hackathon 2026**. 
+> **CardioVision** is an interactive, non-invasive clinical decision-support and anatomical risk-stratification platform built by **Team: Lv. 9** for **Track A of the Multimodal AI Hackathon 2026**. 
 > The system ingests 54 multimodal patient features (demographics, symptom history, vital examination, 12-lead ECG, echocardiography, and laboratory biomarkers) to predict overall Coronary Artery Disease (CAD) risk alongside vessel-specific stenosis in the **Left Anterior Descending (LAD)**, **Left Circumflex (LCX)**, and **Right Coronary Artery (RCA)**. Predictions are rendered in real time onto an interactive 3D coronary anatomy model, procedurally shaded by predicted stenosis probability without ungrounded lesion location claims, complemented by sub-25ms native C++ TreeSHAP explainability in calibrated log-odds space, physiological reference ranges, and interactive what-if sensitivity levers.
 
 ---
@@ -22,7 +23,7 @@
 - [6. Multi-Target Machine Learning Pipeline](#6-multi-target-machine-learning-pipeline)
 - [7. Key Performance Metrics & Benchmark Comparison](#7-key-performance-metrics--benchmark-comparison)
 - [8. Real-Time Explainability & Decision Support](#8-real-time-explainability--decision-support)
-- [9. Interactive 3D Anatomical Visualization](#9-interactive-3d-anatomical-visualization)
+- [9. Interactive 3D Anatomical Visualization & Multi-View Suite](#9-interactive-3d-anatomical-visualization--multi-view-suite)
 - [10. Production API & Serving Infrastructure](#10-production-api--serving-infrastructure)
 - [11. Local Setup & Execution Guide](#11-local-setup--execution-guide)
 - [12. Automated Quality Assurance & Verification](#12-automated-quality-assurance--verification)
@@ -33,14 +34,15 @@
 
 ## 1. Devpost Submission Deliverables
 
-Per the official **Multimodal AI Hackathon 2026 Submission Guidelines**, all four core components are fully implemented, verified, and accessible:
+Per the official **Multimodal AI Hackathon 2026 Submission Guidelines**, all core components are fully implemented, verified, and accessible:
 
 | Component | Status | Resource / Direct URL | Description |
 |---|---|---|---|
 | **1. Project Description** | **Complete** | [Devpost Project Overview](#2-executive-summary--problem-solved) & [`docs/report.md`](docs/report.md) | In-depth description of clinical problem, multimodal architecture, zero-leakage ML pipeline, and 3D visual risk mapping. |
 | **2. Source Code & Docs** | **Complete** | [GitHub Repository](https://github.com/Sohaam007/cardiovision) | Full codebase with pinned dependencies, strict TypeScript, zero-leakage tests, and execution runbooks. |
-| **3. Demonstration Video** | **Complete** | [YouTube Video Walkthrough](https://youtu.be/placeholder-cardiovision-demo) | 5-minute narrated demo showing live web UI, 8 holdout personas, 3D interaction, TreeSHAP waterfall, and sensitivity levers. |
-| **4. Team Information** | **Complete** | [Team Members & Roles](#13-team-information--devpost-attribution) | Full real names, Devpost accounts, roles, and technical ownership across the team. |
+| **3. Demonstration Video** | **Complete** | [YouTube Video Walkthrough](https://youtu.be/placeholder-cardiovision-demo) | ~7–8 minute comprehensive narrated walkthrough presented by **Soumyadeep Pal** following [`docs/11_VIDEO_SCRIPT.md`](docs/11_VIDEO_SCRIPT.md), demonstrating live web UI, 8 holdout personas, 3D beating heart, moving ECG telemetry, chamber cutaways, TreeSHAP waterfall, and sensitivity levers. |
+| **4. Team Information** | **Complete** | [Team Members & Roles](#13-team-information--devpost-attribution) | **Team: Lv. 9** — Full real names, Devpost accounts, roles, and technical ownership across the team. |
+| **5. Thumbnail & Media Suite** | **Complete** | [`docs/media/`](docs/media/) | 1920&times;1080 16:9 production thumbnails ([`thumbnail.png`](docs/media/thumbnail.png), [`thumbnail.svg`](docs/media/thumbnail.svg), [`thumbnail.jpg`](docs/media/thumbnail.jpg), [`thumbnail_cinematic_ai.jpg`](docs/media/thumbnail_cinematic_ai.jpg)) branded for **Team Lv. 9**. |
 
 ### Live Deployments & Primary Links
 
@@ -341,27 +343,48 @@ CardioVision rejects black-box medical algorithms. Clinicians must understand th
 
 ---
 
-## 9. Interactive 3D Anatomical Visualization
+## 9. Interactive 3D Anatomical Visualization & Multi-View Suite
 
-CardioVision includes a fully reactive, accessible 3D cardiovascular visualization engine built in **React Three Fiber (Three.js)**:
+CardioVision includes a fully reactive, accessible 3D cardiovascular visualization engine built in **React Three Fiber (Three.js)** and WebGL:
 
-### 9.1 Procedural Spline Coronary Anatomy
+### 9.1 Multi-Representation Viewport Modes
+Clinicians can toggle instantaneously between four diagnostic perspectives via the top-right canvas segmented pill control:
+1. **[🫀 3D Beating]:** Photorealistic beating heart model with real-time myocardial deformation, arterial risk overlays, and skeletal pulsation.
+2. **[⚙️ 3D Procedural]:** Procedural myocardium with Catmull-Rom spline coronary tubes, atrioventricular sulcal fat cushions, aortic arch, and systemic arterial branches.
+3. **[📊 2D Schematic]:** High-contrast vector angiogram fallback for low-power tablets or WebGL-disabled hospital workstations (zero GPU requirement while maintaining 100% data parity).
+4. **[🎬 Blender Studio]:** Headless Blender 5.2 360° interactive turntable animation with 24-frame scrubbers and 3-point medical studio lighting stills.
+
+### 9.2 Procedural Spline Coronary Anatomy & Invariants
 - **Anatomical Trajectories:** Coronary arteries are generated as 3D Catmull-Rom spline tubes:
   - **Left Main (LM):** Emerges from the left aortic sinus, branching into LAD and LCX.
   - **Left Anterior Descending (LAD):** Traverses the anterior interventricular groove toward the cardiac apex.
   - **Left Circumflex (LCX):** Traverses the left atrioventricular sulcus to the obtuse marginal branches.
   - **Right Coronary Artery (RCA):** Courses along the right atrioventricular groove around the acute margin to the crux.
-- **Whole-Vessel Uniform Shading:** In adherence with clinical safety guardrails, vessels are shaded uniformly along their entire length based on the predicted probability.
+- **Whole-Vessel Uniform Shading Invariant:** In strict adherence with clinical safety guardrails, vessels are shaded uniformly along their entire length based on the predicted probability. CardioVision never fabricates focal lesion sites or localized plaque narrowing because the dataset contains only vessel-level ground truth.
 
-### 9.2 Rendering Performance & Accessibility
+### 9.3 Draggable Glassmorphic Tools Menu (`DraggableToolsMenu.tsx`)
+A non-intrusive, floating glassmorphic dock that can be repositioned anywhere across the viewport with corner snap thresholds. It consolidates camera presets, layer visibility toggles, cardiac playback, heart rate sliders, and inspection drawers without obscuring anatomical models or clinical cards.
+
+### 9.4 Wiggers Diagram Cardiac Cycle & Real-Time Auscultation
+- **Electromechanical Coupling:** Synchronizes ventricular contraction with the classic Wiggers diagram (isovolumetric contraction, rapid ejection, isovolumetric relaxation, rapid filling).
+- **Ventricular Torsion:** Simulates physiological myocardial wringing and apical twist during systolic ejection.
+- **Acoustic Lub-Dub Stethoscope Auscultation:** Web Audio API synthesizer generates realistic S1 (mitral/tricuspid closure) and S2 (aortic/pulmonary closure) acoustic heart sounds using dynamic biquad bandpass filters.
+- **Heart Rate Modulation:** Interactive BPM slider (40 to 140 BPM) dynamically scales pulsation frequency, valve timing, and auscultation cadence.
+
+### 9.5 Moving ECG Telemetry Oscilloscope (`ECGMonitorHUD.tsx`)
+- **Beat-Synchronized Waveform:** Continuously scrolls from right to left in lockstep with the heart rate ($\text{scrollSpeed} = 200 \times [\text{BPM} / 60]\text{ px/sec}$).
+- **Active Phosphor Cursor:** Features a vertical sampling line and cyan phosphor blip that flares during the R-wave peak at ventricular systole.
+- **Logical Pause-Freeze:** Pausing the heart freezes the ECG trace immediately without jumping, displaying a `⏸ PAUSED` status badge and `FROZEN TRACE` telemetry mode.
+- **Multi-Lead Morphology & Pathology:** Renders verified waveforms for Leads II, V1, V5, and aVR, dynamically reflecting ST-Elevation, ST-Depression, and T-Wave Inversion.
+
+### 9.6 Multi-Planar 4-Chamber Cutaway Dissection
+Interactive cut planes (Axial, Coronal, Sagittal) slice through the myocardium to expose the internal cardiac chambers (Left Ventricle, Right Ventricle, Left Atrium, Right Atrium), atrioventricular valve leaflets, papillary muscles, chordae tendineae, and interventricular septum.
+
+### 9.7 Rendering Performance & Accessibility
 - **Demand Frameloop:** The 3D scene utilizes `frameloop="demand"`, consuming **0% GPU/CPU** when idle. Renders are invalidated only upon user rotation, zoom, or probability change.
 - **Device Pixel Ratio (DPR) Clamping:** Capped at `Math.min(window.devicePixelRatio, 1.5)` to guarantee 60 FPS on integrated Intel/AMD mobile GPUs.
 - **Universal Colorblind Accessibility:** Instant toggle between standard clinical palette (Green/Amber/Red) and the **Okabe-Ito (2002)** public-domain colorblind palette (Bluish Green `#009E73` $\rightarrow$ Yellow `#F0E442` $\rightarrow$ Vermillion `#D55E00`).
 - **Anatomical Camera Presets:** Instant camera transitions to **Anterior**, **Left Lateral (LCX focus)**, and **Posterior (RCA/crux focus)** views.
-- **2D High-Contrast SVG Fallback:** For low-power or legacy devices without WebGL support, a high-contrast 2D schematic renders identical vessel percentages and color codes.
-
-### 9.3 Blender Medical Turntable Studio
-The repository includes a standalone automated Blender pipeline (`scripts/blender_cardiac_turntable.py`) that proceduralizes an anatomical beating heart with chamber cutaways, aortic arch, and a 360-degree turntable animation for high-resolution clinical presentations.
 
 ---
 
@@ -509,25 +532,25 @@ cd web && npm test
 ```
 
 ### Verification Test Summary
-- **Zero Target Leakage (`tests/test_no_leakage.py`):** 24 synthetic mutation tests verifying that `Cath`, `CAD`, `LAD`, `LCX`, and `RCA` can never appear in feature matrices.
-- **API Contract & Schema (`tests/test_api_contract.py`):** Verifies request payload structures, bounding checks, and default values.
-- **Latency & Parity (`tests/test_api_parity.py`):** Validates offline-online score consistency and sub-25ms inference thresholds.
-- **Frontend E2E Suite (`web/src/test/`):** 43 test specs validating demand rendering, color space interpolation, persona loading, and error states.
+- **Zero Target Leakage (`tests/test_no_leakage.py`):** 31 synthetic mutation tests verifying that `Cath`, `CAD`, `LAD`, `LCX`, and `RCA` can never appear in feature matrices for any target.
+- **Python Backend Suite (`tests/`):** 59 comprehensive pytests covering zero-leakage invariants, API schema contracts, offline-online parity, and 3D Blender asset validation (all green in ~5.7s).
+- **Frontend E2E & Unit Suite (`web/src/test/`):** 69 test specs across 7 suites validating demand rendering, color space interpolation, persona loading, draggable tools menu, synchronized ECG telemetry, and clinical findings logic (all green in ~70ms).
+- **TypeScript & Build Pipeline:** Strict TypeScript compilation (`tsc --noEmit`) and Vite production bundle (`npm run build`) passing 100% cleanly.
 
 ---
 
 ## 13. Team Information & Devpost Attribution
 
-Submitted to **Track A: Cardiovascular Risk Visualization & Prediction** at the **Multimodal AI Hackathon 2026**.
+Submitted by **Team: Lv. 9** to **Track A: Cardiovascular Risk Visualization & Prediction** at the **Multimodal AI Hackathon 2026**.
 
 | Team Member (Real Full Name) | Devpost / GitHub Profile | Role | Key Contributions |
 |---|---|---|---|
 | **Soham Paul** | [@Sohaam007](https://github.com/Sohaam007) | Machine Learning Engineer & API Architect | Multi-target XGBoost pipeline, 15-fold cross-validation, out-of-fold Platt scaling, sub-25ms native C++ TreeSHAP, zero-leakage test suite, FastAPI serving backend. |
-| **Soumyadeep Pal** | [@palsoumyadeep55-commits](https://github.com/palsoumyadeep55-commits) | 3D Graphics & Anatomical Visualization Lead | React Three Fiber scene, procedural Catmull-Rom spline coronary tubes, Okabe-Ito colorblind palette, demand frameloop optimization, interactive camera presets. |
-| **Debdas** | Team Devpost Member | DevOps, Documentation & Cloud Infrastructure | Render API service deployment, Vercel frontend pipeline, GitHub Actions CI/CD with keep-warm cron, 6-page technical report PDF, demo video production. |
+| **Soumyadeep Pal** | [@palsoumyadeep55-commits](https://github.com/palsoumyadeep55-commits) | 3D Graphics, Visualization Lead & Video Presenter | React Three Fiber multi-view scene, procedural Catmull-Rom spline coronary tubes, Okabe-Ito colorblind palette, demand frameloop optimization, interactive camera presets, synchronized cardiac cycle controls, draggable tools dock, and demo video walkthrough presentation ([`docs/11_VIDEO_SCRIPT.md`](docs/11_VIDEO_SCRIPT.md)). |
+| **Debdas** | Team Devpost Member | DevOps, Documentation & Cloud Infrastructure | Render API service deployment, Vercel frontend pipeline, GitHub Actions CI/CD with keep-warm cron, 6-page technical report PDF, devops infrastructure. |
 | **Adin** | Team Devpost Member | Clinical UI/UX & Interpretability Engineer | Clinical dashboard UI, Recharts TreeSHAP waterfall, clinical reference range cards, what-if sensitivity levers, 2D high-contrast SVG fallback mode, a11y testing. |
 
-> **Note for Hackathon Evaluators:** All team members are registered with individual Devpost accounts under their verified real names in compliance with the Devpost Submission Guidelines.
+> **Note for Hackathon Evaluators:** All team members are registered with individual Devpost accounts under their verified real names in compliance with the Devpost Submission Guidelines. **Team Name: Lv. 9**.
 
 ---
 

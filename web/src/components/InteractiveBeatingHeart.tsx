@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { cardiacAudio } from '../audio/cardiacAudio';
 import { useStore } from '../store/useStore';
+import { Torso } from '../scene/Torso';
 
 interface BeatingHeartModelProps {
   isPlaying: boolean;
@@ -239,7 +240,7 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
             }
           >
             <Canvas
-              camera={{ position: [0, 0.2, 2.5], fov: 45 }}
+              camera={{ position: [0, 0.25, 3.0], fov: 45 }}
               gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
             >
               <ambientLight intensity={fluoroscopyMode ? 1.8 : 0.9} color={fluoroscopyMode ? '#f8fafc' : '#ffffff'} />
@@ -247,13 +248,19 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
               <directionalLight position={[-5, -4, -5]} intensity={fluoroscopyMode ? 1.2 : 0.6} />
               <pointLight position={[0, -2, 2]} intensity={0.5} color={fluoroscopyMode ? '#ffffff' : '#fda4af'} />
 
-              <BeatingHeartModel
-                isPlaying={isPlaying}
-                speed={speed}
-                phase={phase}
-                isAudioMuted={isAudioMuted}
-                onSoundTrigger={(s) => setLastSound(s)}
-              />
+              {/* Anatomical Holographic Torso Housing */}
+              <Torso showRibs={false} />
+
+              {/* Beating Heart Apparatus */}
+              <group position={[-0.16, 0.02, 0]} scale={[0.89, 0.89, 0.89]} name="CardiacApparatus">
+                <BeatingHeartModel
+                  isPlaying={isPlaying}
+                  speed={speed}
+                  phase={phase}
+                  isAudioMuted={isAudioMuted}
+                  onSoundTrigger={(s) => setLastSound(s)}
+                />
+              </group>
 
               <CameraPresetController controlsRef={controlsRef} />
               <CameraZoomController />
@@ -264,7 +271,7 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
                 enableDamping
                 dampingFactor={0.08}
                 minDistance={1.2}
-                maxDistance={5.0}
+                maxDistance={5.5}
                 rotateSpeed={0.8}
               />
             </Canvas>
@@ -296,7 +303,7 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
           }
         >
           <Canvas
-            camera={{ position: [0, 0.2, 2.5], fov: 45 }}
+            camera={{ position: [0, 0.25, 3.0], fov: 45 }}
             gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
           >
             <ambientLight intensity={0.9} />
@@ -304,15 +311,20 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
             <directionalLight position={[-5, -4, -5]} intensity={0.6} />
             <pointLight position={[0, -2, 2]} intensity={0.5} color="#fda4af" />
 
-            <BeatingHeartModel
-              isPlaying={isPlaying}
-              speed={speed}
-              phase={phase}
-              isAudioMuted={isAudioMuted}
-              onSoundTrigger={(s) => setLastSound(s)}
-            />
+            <Torso showRibs={false} />
+
+            <group position={[-0.16, 0.02, 0]} scale={[0.89, 0.89, 0.89]}>
+              <BeatingHeartModel
+                isPlaying={isPlaying}
+                speed={speed}
+                phase={phase}
+                isAudioMuted={isAudioMuted}
+                onSoundTrigger={(s) => setLastSound(s)}
+              />
+            </group>
 
             <CameraPresetController controlsRef={controlsRef} />
+            <CameraZoomController />
 
             <OrbitControls
               ref={controlsRef}
@@ -320,7 +332,7 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
               enableDamping
               dampingFactor={0.08}
               minDistance={1.2}
-              maxDistance={5.0}
+              maxDistance={5.5}
               rotateSpeed={0.8}
             />
           </Canvas>
