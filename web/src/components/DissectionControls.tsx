@@ -14,7 +14,6 @@ export const DissectionControls: React.FC = () => {
   const cardiacCyclePhase = useStore((state) => state.cardiacCyclePhase);
   const setCardiacCyclePhase = useStore((state) => state.setCardiacCyclePhase);
   const force2DFallback = useStore((state) => state.force2DFallback);
-  const setForce2DFallback = useStore((state) => state.setForce2DFallback);
 
   // Heartbeat controls
   const isBeating = useStore((state) => state.isBeating);
@@ -40,19 +39,9 @@ export const DissectionControls: React.FC = () => {
   ];
 
   return (
-    <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2 pointer-events-auto">
+    <div className="absolute top-16 right-4 z-20 flex flex-col items-end gap-2 pointer-events-auto">
       {/* Primary Action Buttons Row */}
       <div className="flex items-center gap-2">
-        {/* 2D / 3D Mode Toggle */}
-        <button
-          onClick={() => setForce2DFallback(!force2DFallback)}
-          className="bg-slate-900/85 backdrop-blur-md border border-slate-700/80 hover:border-slate-600 text-[11px] text-slate-300 hover:text-white px-2.5 py-2 rounded-xl shadow-xl flex items-center gap-1.5 transition-all"
-          title="Toggle between 3D WebGL anatomical view and 2D high-contrast schematic"
-        >
-          <span className={`w-2 h-2 rounded-full ${force2DFallback ? 'bg-amber-400' : 'bg-cyan-400'}`} />
-          <span>{force2DFallback ? 'Switch to 3D View' : '2D Mode'}</span>
-        </button>
-
         {!force2DFallback && (
           <>
             {/* Live Cardiac Beating Motion Toggle Button */}

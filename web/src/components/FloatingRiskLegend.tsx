@@ -7,6 +7,8 @@ export const FloatingRiskLegend: React.FC = () => {
   const toggleColorblindMode = useStore((state) => state.toggleColorblindMode);
   const showTorso = useStore((state) => state.showTorso);
   const toggleTorso = useStore((state) => state.toggleTorso);
+  const chamberCutaway = useStore((state) => state.chamberCutaway);
+  const toggleChamberCutaway = useStore((state) => state.toggleChamberCutaway);
   const heartOpacity = useStore((state) => state.heartOpacity);
   const setHeartOpacity = useStore((state) => state.setHeartOpacity);
   const setCameraPreset = useStore((state) => state.setCameraPreset);
@@ -14,7 +16,13 @@ export const FloatingRiskLegend: React.FC = () => {
   const selectedVessel = useStore((state) => state.selectedVessel);
   const setSelectedVessel = useStore((state) => state.setSelectedVessel);
   const predictions = useStore((state) => state.predictions);
+  const isSensitivityOpen = useStore((state) => state.isSensitivityOpen);
+  const toggleSensitivity = useStore((state) => state.toggleSensitivity);
+  const viewerMode = useStore((state) => state.viewerMode);
+  const force2DFallback = useStore((state) => state.force2DFallback);
+  const webglError = useStore((state) => state.webglError);
 
+  const is2D = viewerMode === '2d' || force2DFallback || webglError;
   const activePalette = colorblindMode ? PALETTES.colorblind : PALETTES.standard;
 
   return (
@@ -156,56 +164,80 @@ export const FloatingRiskLegend: React.FC = () => {
 
         {/* 3. Integrated Controls: Opacity & Torso & Colorblind Toggle */}
         <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/80">
-          {/* Heart Opacity Slider */}
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] text-slate-300 font-medium whitespace-nowrap">
-              Heart Opacity:
-            </span>
-            <div className="flex items-center gap-2 flex-1 max-w-[140px]">
-              <input
-                type="range"
-                min="0.10"
-                max="1.00"
-                step="0.05"
-                value={heartOpacity}
-                onChange={(e) => setHeartOpacity(parseFloat(e.target.value))}
-                className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-cyan-400 focus:outline-none"
-              />
-              <span className="font-mono text-[10px] text-slate-400 w-7 text-right">
-                {(heartOpacity * 100).toFixed(0)}%
-              </span>
-            </div>
-          </div>
+          {!is2D && (
+            <>
+              {/* Heart Opacity Slider */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] text-slate-300 font-medium whitespace-nowrap">
+                  Heart Opacity:
+                </span>
+                <div className="flex items-center gap-2 flex-1 max-w-[140px]">
+                  <input
+                    type="range"
+                    min="0.10"
+                    max="1.00"
+                    step="0.05"
+                    value={heartOpacity}
+                    onChange={(e) => setHeartOpacity(parseFloat(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-cyan-400 focus:outline-none"
+                  />
+                  <span className="font-mono text-[10px] text-slate-400 w-7 text-right">
+                    {(heartOpacity * 100).toFixed(0)}%
+                  </span>
+                </div>
+              </div>
 
-          {/* Toggles Row */}
-          <div className="flex items-center justify-between gap-2 pt-1">
-            {/* Torso Toggle */}
-            <button
-              onClick={toggleTorso}
-              className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
-                showTorso
-                  ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60'
-                  : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
-              }`}
-            >
-              <span>Torso Shell</span>
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  showTorso ? 'bg-cyan-400' : 'bg-slate-600'
-                }`}
-              />
-            </button>
+              {/* 3D Toggles Row */}
+              <div className="flex items-center justify-between gap-1.5 pt-1">
+                {/* Cutaway Toggle */}
+                <button
+                  onClick={toggleChamberCutaway}
+                  className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                    chamberCutaway
+                      ? 'bg-purple-950/80 text-purple-300 border-purple-700/60'
+                      : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
+                  }`}
+                  title="Toggle anatomical cutaway revealing interior ventricular cavities, septum, and chordae tendineae"
+                >
+                  <span>Cutaway</span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      chamberCutaway ? 'bg-purple-400' : 'bg-slate-600'
+                    }`}
+                  />
+                </button>
 
-            {/* Colorblind Toggle */}
+                {/* Torso Toggle */}
+                <button
+                  onClick={toggleTorso}
+                  className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                    showTorso
+                      ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60'
+                      : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <span>Torso</span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      showTorso ? 'bg-cyan-400' : 'bg-slate-600'
+                    }`}
+                  />
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Colorblind Toggle Row */}
+          <div className="flex items-center justify-between gap-1.5 pt-1">
             <button
               onClick={toggleColorblindMode}
-              className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+              className={`w-full px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
                 colorblindMode
                   ? 'bg-amber-950/80 text-amber-300 border-amber-700/60'
                   : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
               }`}
             >
-              <span>Colorblind</span>
+              <span>Colorblind Palette (Okabe-Ito)</span>
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
                   colorblindMode ? 'bg-amber-400' : 'bg-slate-600'
@@ -213,6 +245,22 @@ export const FloatingRiskLegend: React.FC = () => {
               />
             </button>
           </div>
+
+          {/* Interactive Sensitivity & What-If Studio Toggle Button */}
+          <button
+            onClick={toggleSensitivity}
+            className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-2 shadow-sm ${
+              isSensitivityOpen
+                ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
+                : 'bg-purple-950/80 hover:bg-purple-900 text-purple-200 border-purple-700/70 hover:border-purple-600'
+            }`}
+            title="Open interactive 3D risk sensitivity sliders (BP, LDL, FBS, TG, Smoking) and what-if analysis"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            <span>{isSensitivityOpen ? 'Close Sensitivity Studio' : '⚡ 3D Sensitivity & What-If'}</span>
+          </button>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 # OPS-02 Final deploy, warm-up, QA
-Owner: Debdas   Status: todo
+Owner: Debdas   Status: done
 Reads: docs/07_DEPLOY.md
 Do:
 - Set env vars; redeploy; set up the judging-window ping (cron-job.org or GitHub Actions schedule).

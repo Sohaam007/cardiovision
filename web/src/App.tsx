@@ -9,6 +9,9 @@ import { WebGLFallback } from './components/WebGLFallback';
 import { ModelInfoDrawer } from './components/ModelInfoDrawer';
 import { DissectionControls } from './components/DissectionControls';
 import { DoctorInspectionDrawer } from './components/DoctorInspectionDrawer';
+import { BlenderStudioModal } from './components/BlenderStudioModal';
+import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
+import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -16,15 +19,22 @@ export const App: React.FC = () => {
   const selectedVessel = useStore((state) => state.selectedVessel);
   const colorblindMode = useStore((state) => state.colorblindMode);
   const toggleColorblindMode = useStore((state) => state.toggleColorblindMode);
+  const openModelInfo = useStore((state) => state.openModelInfo);
   const prediction = useStore((state) => state.prediction);
   const setSchema = useStore((state) => state.setSchema);
   const setDemoPatients = useStore((state) => state.setDemoPatients);
   const loadPersona = useStore((state) => state.loadPersona);
   const setApiStatus = useStore((state) => state.setApiStatus);
   const setDemoMode = useStore((state) => state.setDemoMode);
+  const viewerMode = useStore((state) => state.viewerMode);
+  const setViewerMode = useStore((state) => state.setViewerMode);
   const force2DFallback = useStore((state) => state.force2DFallback);
   const webglError = useStore((state) => state.webglError);
+  const isSensitivityOpen = useStore((state) => state.isSensitivityOpen);
+  const closeSensitivity = useStore((state) => state.closeSensitivity);
+  const toggleSensitivity = useStore((state) => state.toggleSensitivity);
   const [isModelInfoOpen, setIsModelInfoOpen] = useState(false);
+  const [isBlenderStudioOpen, setIsBlenderStudioOpen] = useState(false);
 
   // Initial asset loading & health check
   useEffect(() => {
@@ -102,8 +112,9 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden font-sans">
       {/* 1. First-Load Clinical Safety Modal, Model Info, & Doctor Inspection Drawer */}
       <SafetyModal />
-      <ModelInfoDrawer isOpen={isModelInfoOpen} onClose={() => setIsModelInfoOpen(false)} />
+      <ModelInfoDrawer isOpen={isModelInfoOpen} onClose={() => { setIsModelInfoOpen(false); useStore.getState().closeModelInfo(); }} />
       <DoctorInspectionDrawer />
+      <BlenderStudioModal isOpen={isBlenderStudioOpen} onClose={() => setIsBlenderStudioOpen(false)} />
 
       {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner */}
       <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 text-center font-medium tracking-wide shadow-md z-30">
@@ -142,14 +153,28 @@ export const App: React.FC = () => {
         {/* Global Controls & Status */}
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => setIsModelInfoOpen(true)}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-cyan-800/80 bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-200 transition-all flex items-center gap-1.5 shadow-sm"
-            title="View cross-validation metrics, calibration, and clinical limitations"
+            onClick={() => setIsBlenderStudioOpen(true)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-purple-700 bg-purple-950/90 text-purple-300 hover:bg-purple-900 transition-all flex items-center gap-1.5 shadow-sm"
+            title="Inspect Blender 5.2 medical studio renders, 360° turntable animation, and 3D assets"
+          >
+            <svg className="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span>Blender Studio Renders</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsModelInfoOpen(true);
+              openModelInfo();
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-cyan-700 bg-cyan-950/90 text-cyan-300 hover:bg-cyan-900 transition-all flex items-center gap-1.5 shadow-sm"
+            title="Inspect 15-fold cross-validation metrics, feature ablations, and clinical limitations"
           >
             <svg className="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Model Info</span>
+            <span>Model Info &amp; Caveats</span>
           </button>
 
           <button
@@ -182,14 +207,25 @@ export const App: React.FC = () => {
         {/* Left Column: 3D Canvas Viewport */}
         <div className="flex-1 relative h-[50vh] lg:h-auto bg-slate-950">
           <WebGLErrorBoundary fallback={<WebGLFallback />}>
-            {force2DFallback || webglError ? <WebGLFallback /> : <SceneCanvas />}
+            {viewerMode === '2d' || force2DFallback || webglError ? (
+              <WebGLFallback />
+            ) : viewerMode === 'blender' ? (
+              <BlenderTurntableEmbed onOpenModal={() => setIsBlenderStudioOpen(true)} />
+            ) : (
+              <SceneCanvas />
+            )}
           </WebGLErrorBoundary>
 
           {/* Viewport HUD Overlays */}
           <div className="absolute top-4 left-4 pointer-events-none z-10 hidden sm:flex flex-col gap-1.5">
             <div className="bg-slate-950/80 backdrop-blur border border-slate-800 text-[11px] text-slate-300 px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2">
-              <span className="text-cyan-400 font-medium">3D Controls:</span>
-              <span>Left-drag = Rotate &bull; Right-drag = Pan &bull; Scroll = Zoom</span>
+              <span className="text-cyan-400 font-medium">Mode:</span>
+              <span>
+                {viewerMode === 'realistic' && '3D Beating Heart (Cinema 4D Skeletal Pulsation)'}
+                {viewerMode === 'procedural' && '3D Procedural Model (Anatomical Cavity & Dissection)'}
+                {viewerMode === '2d' && '2D Clinical Angiogram & Hemodynamic Suite'}
+                {viewerMode === 'blender' && 'Blender 5.2 Medical Cycles Turntable (PBR Studio)'}
+              </span>
             </div>
             <div className="bg-slate-950/80 backdrop-blur border border-slate-800 text-[11px] text-slate-400 px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2">
               <span className="text-amber-400 font-medium">Clinical Invariant:</span>
@@ -197,8 +233,84 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Surgical Dissection & 2D/3D Controls HUD */}
-          <DissectionControls />
+          {/* Segmented Mode Selector & Sensitivity What-If Toggle in Viewport Top-Right */}
+          <div className="absolute top-4 right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2">
+            <div className="flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/80 shadow-2xl">
+              <button
+                type="button"
+                onClick={() => setViewerMode('realistic')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === 'realistic'
+                    ? 'bg-rose-600 text-white shadow-md shadow-rose-950/60 ring-1 ring-rose-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="3D Photorealistic Beating Heart Model"
+              >
+                <span>🫀 3D Beating</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewerMode('procedural')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === 'procedural'
+                    ? 'bg-cyan-600 text-white shadow-md shadow-cyan-950/60 ring-1 ring-cyan-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="3D Procedural Myocardium & Chamber Dissection Model (Previous Model)"
+              >
+                <span>⚙️ 3D Procedural</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewerMode('2d')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === '2d'
+                    ? 'bg-amber-600 text-white shadow-md shadow-amber-950/60 ring-1 ring-amber-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="2D Clinical Angiogram & Hemodynamic Suite with Live Flow, ECG, and Cavities"
+              >
+                <span>🔬 2D Angiogram</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewerMode('blender')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === 'blender'
+                    ? 'bg-purple-600 text-white shadow-md shadow-purple-950/60 ring-1 ring-purple-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="Blender 5.2 360° Studio Turntable & Offline Renderings"
+              >
+                <span>🎬 Blender Studio</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleSensitivity}
+              className={`backdrop-blur-md border text-xs px-2.5 py-2 rounded-xl shadow-xl flex items-center gap-1.5 transition-all font-semibold ${
+                isSensitivityOpen
+                  ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
+                  : 'bg-slate-900/90 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
+              }`}
+              title="Toggle interactive 3D model sensitivity sliders and what-if simulation"
+            >
+              <svg className="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              <span>{isSensitivityOpen ? 'Close Sensitivity' : '⚡ 3D Sensitivity'}</span>
+            </button>
+          </div>
+
+          {/* Surgical Dissection Controls (Active in 3D procedural mode) */}
+          {viewerMode === 'procedural' && <DissectionControls />}
+
+          {/* Interactive Sensitivity & What-If Studio HUD Overlay */}
+          <InteractiveSensitivityHUD isOpen={isSensitivityOpen} onClose={closeSensitivity} />
 
           {/* Floating Risk Legend HUD (Anterior/Lateral/Posterior presets, percentages, opacity slider, torso toggle, selected vessel details) */}
           <div className="absolute bottom-4 left-4 z-10">

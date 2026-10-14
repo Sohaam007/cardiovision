@@ -9,6 +9,8 @@ Rule: no asset goes into the repo without a row here. Attribution text goes in t
 | Z-Anatomy meshes (only if used instead of raw BodyParts3D) | https://github.com/Z-Anatomy/Models-of-human-anatomy | CC BY-SA 4.0 (derived from BodyParts3D, share-alike) | "Z-Anatomy - The libre 3D atlas of anatomy - CC-BY-SA 4.0" plus the BodyParts3D line | Decimated |
 | Procedural heart / vessel tubes | our own code | repo license | n/a | n/a |
 | Torso shell | procedural (our code) | repo license | n/a | n/a |
+| Beating Heart (Cutaway & Motion Model) | https://skfb.ly/oyyPK by jalmer | CC BY 4.0 | "Beating-heart" by jalmer licensed under CC-BY-4.0 | Optimized with Draco mesh compression & JPEG textures (1.33 MB, 34.5k triangles) |
+| Realistic Human Heart Reference | https://skfb.ly/oyBCT by neshallads | CC BY 4.0 | "Realistic Human Heart" by neshallads licensed under CC-BY-4.0 | Reference high-res ZBrush sculpt |
 
 ## Practical notes
 - If you use a BodyParts3D (older) or Z-Anatomy mesh, share-alike applies to the mesh derivative; keep the GLB under the same license and say so in the footer. Using the procedural heart avoids this entirely.

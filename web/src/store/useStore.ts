@@ -13,6 +13,8 @@ export interface VesselData {
   label?: number;
 }
 
+export type ViewerMode = 'realistic' | 'procedural' | '2d' | 'blender';
+
 export interface AppState {
   // 3D Scene state
   prediction: {
@@ -23,8 +25,10 @@ export interface AppState {
   heartOpacity: number;
   selectedVessel: VesselKey | null;
   hoveredVessel: VesselKey | null;
+  chamberCutaway: boolean;
   cameraPreset: 'anterior' | 'lateral' | 'posterior' | null;
   flyToVesselTarget: VesselKey | null;
+  viewerMode: ViewerMode;
   force2DFallback: boolean;
   webglError: boolean;
   isTweening: boolean;
@@ -61,11 +65,13 @@ export interface AppState {
   toggleColorblindMode: () => void;
   setShowTorso: (show: boolean) => void;
   toggleTorso: () => void;
+  toggleChamberCutaway: () => void;
   setHeartOpacity: (opacity: number) => void;
   setSelectedVessel: (vessel: VesselKey | null, flyTo?: boolean) => void;
   setHoveredVessel: (vessel: VesselKey | null) => void;
   setCameraPreset: (preset: 'anterior' | 'lateral' | 'posterior' | null) => void;
   flyToVessel: (vessel: VesselKey | null) => void;
+  setViewerMode: (mode: ViewerMode) => void;
   setForce2DFallback: (force: boolean) => void;
   setWebglError: (error: boolean) => void;
   setIsTweening: (tweening: boolean) => void;
@@ -99,6 +105,14 @@ export interface AppState {
   loadPersona: (persona: DemoPatient) => void;
   setIsLoadingPrediction: (loading: boolean) => void;
   setModelServerUnavailable: (unavailable: boolean) => void;
+  isModelInfoOpen: boolean;
+  openModelInfo: () => void;
+  closeModelInfo: () => void;
+  toggleModelInfo: () => void;
+  isSensitivityOpen: boolean;
+  openSensitivity: () => void;
+  closeSensitivity: () => void;
+  toggleSensitivity: () => void;
 }
 
 const DEFAULT_VESSELS: Record<VesselKey, VesselData> = {
@@ -121,8 +135,10 @@ export const useStore = create<AppState>()((set) => ({
   heartOpacity: 0.92,
   selectedVessel: null,
   hoveredVessel: null,
+  chamberCutaway: false,
   cameraPreset: null,
   flyToVesselTarget: null,
+  viewerMode: 'realistic',
   force2DFallback: false,
   webglError: false,
   isTweening: false,
@@ -173,6 +189,7 @@ export const useStore = create<AppState>()((set) => ({
 
   setShowTorso: (show: boolean) => set({ showTorso: show }),
   toggleTorso: () => set((state) => ({ showTorso: !state.showTorso })),
+  toggleChamberCutaway: () => set((state) => ({ chamberCutaway: !state.chamberCutaway })),
 
   setHeartOpacity: (opacity: number) =>
     set({ heartOpacity: Math.max(0.1, Math.min(1, opacity)) }),
@@ -203,7 +220,16 @@ export const useStore = create<AppState>()((set) => ({
       cameraPreset: null,
     })),
 
-  setForce2DFallback: (force: boolean) => set({ force2DFallback: force }),
+  setViewerMode: (mode: ViewerMode) =>
+    set({
+      viewerMode: mode,
+      force2DFallback: mode === '2d',
+    }),
+  setForce2DFallback: (force: boolean) =>
+    set({
+      force2DFallback: force,
+      viewerMode: force ? '2d' : 'realistic',
+    }),
   setWebglError: (error: boolean) => set({ webglError: error }),
   setIsTweening: (tweening: boolean) => set({ isTweening: tweening }),
 
@@ -231,6 +257,7 @@ export const useStore = create<AppState>()((set) => ({
       hoveredVessel: null,
       cameraPreset: null,
       flyToVesselTarget: null,
+      viewerMode: 'realistic',
       force2DFallback: false,
       webglError: false,
       isTweening: false,
@@ -310,4 +337,12 @@ export const useStore = create<AppState>()((set) => ({
       modelServerUnavailable: unavailable,
       apiStatus: unavailable ? 'unavailable' : 'live',
     }),
+  isModelInfoOpen: false,
+  openModelInfo: () => set({ isModelInfoOpen: true }),
+  closeModelInfo: () => set({ isModelInfoOpen: false }),
+  toggleModelInfo: () => set((state) => ({ isModelInfoOpen: !state.isModelInfoOpen })),
+  isSensitivityOpen: false,
+  openSensitivity: () => set({ isSensitivityOpen: true }),
+  closeSensitivity: () => set({ isSensitivityOpen: false }),
+  toggleSensitivity: () => set((state) => ({ isSensitivityOpen: !state.isSensitivityOpen })),
 }));

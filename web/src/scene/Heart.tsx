@@ -1,5 +1,6 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, Suspense } from 'react';
 import * as THREE from 'three';
+import { useGLTF, useAnimations } from '@react-three/drei';
 import { useThree, useFrame } from '@react-three/fiber';
 import { useStore } from '../store/useStore';
 import { InternalHeartStructures } from './InternalHeartStructures';
@@ -278,7 +279,7 @@ function createHeartTextures(): {
   return { diffuse: diffuseTex, bump: bumpTex, roughness: roughTex };
 }
 
-export const Heart: React.FC = () => {
+const ProceduralHeart: React.FC = () => {
   const heartOpacity = useStore((state) => state.heartOpacity);
   const colorblindMode = useStore((state) => state.colorblindMode);
   const isCutOpen = useStore((state) => state.isCutOpen);
@@ -365,10 +366,7 @@ export const Heart: React.FC = () => {
 
     for (let i = 0; i < pos.count; i++) {
       v.fromBufferAttribute(pos, i);
-
-      // Height parameter t in [0, 1] from inferior (-1) to superior (+1)
       const t = Math.max(0, Math.min(1, (v.y + 1.0) / 2.0));
-
       // Conical tapering toward the apex (-y)
       const taper = 0.28 + 0.72 * Math.sqrt(t);
       v.x *= taper;
@@ -400,7 +398,6 @@ export const Heart: React.FC = () => {
 
       // Elongate along long axis
       v.y *= 1.18;
-
       pos.setXYZ(i, v.x, v.y, v.z);
     }
 
@@ -842,5 +839,106 @@ export const Heart: React.FC = () => {
         </mesh>
       </group>
     </group>
+  );
+};
+
+/**
+ * Photorealistic Beating Heart Model (Beating_heart.glb)
+ * Incorporates Cinema 4D reference cardiac motion and anatomical chamber cutaway dissection.
+ */
+interface RealisticBeatingHeartProps {
+  heartOpacity: number;
+}
+
+const RealisticBeatingHeart: React.FC<RealisticBeatingHeartProps> = ({ heartOpacity }) => {
+  const group = useRef<THREE.Group>(null);
+  const { scene, animations } = useGLTF('/beating_heart.glb', '/draco/gltf/');
+  const { actions, names } = useAnimations(animations, group);
+  const invalidate = useThree((state) => state.invalidate);
+
+  // Play skeletal heartbeat animation
+  useEffect(() => {
+    if (names.length > 0 && names[0]) {
+      const action = actions[names[0]];
+      if (action) {
+        action.play();
+      }
+    }
+  }, [actions, names]);
+
+  // Adjust material opacity and transparency based on heartOpacity store state
+  useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.material) {
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          mats.forEach((mat) => {
+            mat.transparent = heartOpacity < 0.98;
+            mat.opacity = heartOpacity;
+            mat.depthWrite = heartOpacity > 0.85;
+          });
+        }
+      }
+    });
+    invalidate();
+  }, [scene, heartOpacity, invalidate]);
+
+  return (
+    <group ref={group} name="RealisticBeatingHeartGLB" dispose={null}>
+      <primitive
+        object={scene}
+        position={[0, -0.83, 0]}
+        scale={[10.0, 10.0, 10.0]}
+      />
+    </group>
+  );
+};
+
+/**
+ * Boundary wrapper catching potential GLTF network or parsing errors
+ */
+class GLTFErrorBoundary extends React.Component<
+  { fallback: React.ReactNode; children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { fallback: React.ReactNode; children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+// Pre-load asset for zero-latency presentation
+useGLTF.preload('/beating_heart.glb', '/draco/gltf/');
+
+export const Heart: React.FC = () => {
+  const heartOpacity = useStore((state) => state.heartOpacity);
+  const viewerMode = useStore((state) => state.viewerMode);
+
+  const fallback = <ProceduralHeart />;
+
+  // If user explicitly selected the procedural representation, render it directly
+  if (viewerMode === 'procedural') {
+    return fallback;
+  }
+
+  // Default to photorealistic beating heart with procedural fallback on error/loading
+  return (
+    <GLTFErrorBoundary fallback={fallback}>
+      <Suspense fallback={fallback}>
+        <RealisticBeatingHeart heartOpacity={heartOpacity} />
+      </Suspense>
+    </GLTFErrorBoundary>
   );
 };
