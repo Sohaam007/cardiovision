@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useStore } from '../store/useStore.ts';
 
 interface Position {
@@ -6,13 +6,78 @@ interface Position {
   y: number;
 }
 
+// Generate an anatomically accurate P-Q-R-S-T beat path relative to startX and beatWidth W
+function generateSingleBeatPath(
+  startX: number,
+  w: number,
+  lead: 'II' | 'V1' | 'V5' | 'aVR',
+  hasSTElevation: boolean,
+  hasSTDepression: boolean,
+  hasTInversion: boolean
+): string {
+  // Center isoelectric baseline is Y = 28 (in a 56px high oscilloscope canvas)
+  const baseline = 28;
+
+  const isAVR = lead === 'aVR';
+  const isV1 = lead === 'V1';
+  const isV5 = lead === 'V5';
+
+  // P wave deflection
+  const pSign = isAVR ? 1 : -1;
+  const pHeight = 7.5;
+  const pPeakY = baseline + pSign * pHeight;
+
+  // Q dip
+  const qDepth = isAVR ? -3.5 : 3.5;
+  const qY = baseline + qDepth;
+
+  // R spike
+  let rPeakY = baseline - 22; // default tall R peak
+  if (isAVR) rPeakY = baseline + 21; // inverted QS complex
+  else if (isV1) rPeakY = baseline - 11; // small r wave in V1
+  else if (isV5) rPeakY = baseline - 24; // tall lateral R wave in V5
+
+  if (hasSTElevation && !isAVR) rPeakY -= 2;
+
+  // S wave
+  let sDepthY = baseline + 22;
+  if (isAVR) sDepthY = baseline - 8;
+  else if (isV1) sDepthY = baseline + 24; // deeper S in V1
+
+  // ST segment shift
+  let stY = baseline;
+  if (hasSTElevation) stY = isAVR ? baseline + 8 : baseline - 9;
+  else if (hasSTDepression) stY = isAVR ? baseline - 8 : baseline + 9;
+
+  // T wave deflection
+  const tInvert = hasTInversion || isAVR;
+  const tPeakY = tInvert ? baseline + 10 : baseline - 11.5;
+
+  // Seamless beat trajectory from startX to startX + w
+  return `M ${startX.toFixed(1)} ${baseline}
+    L ${(startX + 0.08 * w).toFixed(1)} ${baseline}
+    Q ${(startX + 0.12 * w).toFixed(1)} ${pPeakY.toFixed(1)} ${(startX + 0.16 * w).toFixed(1)} ${baseline}
+    L ${(startX + 0.20 * w).toFixed(1)} ${baseline}
+    L ${(startX + 0.215 * w).toFixed(1)} ${qY.toFixed(1)}
+    L ${(startX + 0.24 * w).toFixed(1)} ${rPeakY.toFixed(1)}
+    L ${(startX + 0.265 * w).toFixed(1)} ${sDepthY.toFixed(1)}
+    L ${(startX + 0.28 * w).toFixed(1)} ${baseline}
+    L ${(startX + 0.32 * w).toFixed(1)} ${stY.toFixed(1)}
+    Q ${(startX + 0.38 * w).toFixed(1)} ${tPeakY.toFixed(1)} ${(startX + 0.44 * w).toFixed(1)} ${baseline}
+    L ${(startX + w).toFixed(1)} ${baseline}`;
+}
+
 export const ECGMonitorHUD: React.FC = () => {
   const showECG = useStore((state) => state.showECG);
   const toggleECG = useStore((state) => state.toggleECG);
   const isPlaying = useStore((state) => state.isPlaying);
+  const isBeating = useStore((state) => state.isBeating);
   const heartRateBpm = useStore((state) => state.heartRateBpm);
   const cardiacPhase = useStore((state) => state.cardiacPhase);
   const patientInputs = useStore((state) => state.patientInputs);
+
+  // Logical heartbeat active status: active when playback is running AND beating is enabled
+  const isHeartActive = isPlaying && isBeating;
 
   // Clinical findings from patient inputs
   const rawPulseRate = Number(patientInputs['PR'] || heartRateBpm || 72);
@@ -32,32 +97,50 @@ export const ECGMonitorHUD: React.FC = () => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
 
-  // Animation phase timer
-  const [phaseTime, setPhaseTime] = useState<number>(0);
+  // Real-time scrolling offset and animation frame references
+  const [scrollOffset, setScrollOffset] = useState<number>(0);
+  const scrollOffsetRef = useRef<number>(0);
   const lastTimestampRef = useRef<number>(0);
   const animFrameRef = useRef<number | null>(null);
 
-  // Heart beat period in seconds
+  // Standard calibrated beat width in pixels: 200px per beat across 600px viewBox (3 beats visible)
+  const beatWidth = 200;
+  // Heart beat period in seconds: e.g. at 60 BPM, beatPeriod = 1.0s; at 120 BPM, beatPeriod = 0.5s
   const beatPeriod = 60 / currentBpm;
+  // Scroll velocity in pixels per second: exactly moves 1 beatWidth per cardiac beatPeriod
+  const scrollSpeed = beatWidth / beatPeriod;
 
-  // Real-time animated oscilloscope loop
+  // Real-time animated ECG motion loop synchronized with heartbeat
   useEffect(() => {
     if (!showECG) return;
 
     const animate = (timestamp: number) => {
-      if (!lastTimestampRef.current) lastTimestampRef.current = timestamp;
+      if (!lastTimestampRef.current) {
+        lastTimestampRef.current = timestamp;
+      }
       const delta = (timestamp - lastTimestampRef.current) / 1000;
       lastTimestampRef.current = timestamp;
 
-      if (isPlaying) {
+      // Only advance the ECG wave when the heartbeat is actively running
+      if (isHeartActive) {
         if (cardiacPhase === 'auto') {
-          setPhaseTime((prev) => (prev + delta / beatPeriod) % 1.0);
+          // Advance scroll offset continuously in lockstep with the heart rate speed
+          scrollOffsetRef.current = (scrollOffsetRef.current + scrollSpeed * delta) % 1000000;
+          setScrollOffset(scrollOffsetRef.current);
         } else if (cardiacPhase === 'systole') {
-          setPhaseTime(0.18);
+          // Frozen at systolic peak (R-wave centered on monitor)
+          const targetOffset = beatWidth * 0.24;
+          scrollOffsetRef.current = targetOffset;
+          setScrollOffset(targetOffset);
         } else if (cardiacPhase === 'diastole') {
-          setPhaseTime(0.65);
+          // Frozen at diastolic baseline
+          const targetOffset = beatWidth * 0.65;
+          scrollOffsetRef.current = targetOffset;
+          setScrollOffset(targetOffset);
         }
       }
+      // When isHeartActive is false (paused), delta is consumed but scrollOffset is NOT incremented,
+      // perfectly pausing the ECG wave in place without jumping.
 
       animFrameRef.current = requestAnimationFrame(animate);
     };
@@ -65,9 +148,36 @@ export const ECGMonitorHUD: React.FC = () => {
     animFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
     };
-  }, [showECG, isPlaying, cardiacPhase, beatPeriod]);
+  }, [showECG, isHeartActive, cardiacPhase, scrollSpeed, beatWidth]);
+
+  // Generate continuous seamless multi-beat moving path
+  const movingWaveformPath = useMemo(() => {
+    // Current cyclic offset within one beat period [0, beatWidth)
+    const offset = scrollOffset % beatWidth;
+    // Generate 5 consecutive beats starting from -offset - beatWidth to cover [-200, 800]
+    let pathD = '';
+    for (let i = -1; i <= 3; i++) {
+      const beatStartX = i * beatWidth - offset;
+      const beat = generateSingleBeatPath(
+        beatStartX,
+        beatWidth,
+        selectedLead,
+        hasSTElevation,
+        hasSTDepression,
+        hasTInversion
+      );
+      pathD += ` ${beat}`;
+    }
+    return pathD;
+  }, [scrollOffset, beatWidth, selectedLead, hasSTElevation, hasSTDepression, hasTInversion]);
+
+  // Current cardiac phase derived from live scroll position
+  const currentNormalizedPhase = (scrollOffset % beatWidth) / beatWidth;
+  const isSystolePhase = currentNormalizedPhase >= 0.16 && currentNormalizedPhase <= 0.38;
 
   // Initial placement at bottom-center of viewport
   useEffect(() => {
@@ -191,9 +301,18 @@ export const ECGMonitorHUD: React.FC = () => {
             className="flex items-center gap-2 cursor-pointer hover:opacity-90"
             title="Click to expand ECG Oscilloscope Monitor"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isHeartActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+              }`}
+            />
             <span className="font-semibold text-white tracking-tight">ECG Lead {selectedLead}</span>
             <span className="font-mono text-emerald-400 font-bold">{currentBpm} BPM</span>
+            {!isHeartActive && (
+              <span className="text-[10px] text-amber-400 font-bold px-1 rounded bg-amber-950/80 border border-amber-700/60">
+                PAUSED
+              </span>
+            )}
           </div>
 
           <button
@@ -232,11 +351,20 @@ export const ECGMonitorHUD: React.FC = () => {
               </svg>
 
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isHeartActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                  }`}
+                />
                 <span className="font-bold text-white tracking-wide">ECG Telemetry</span>
                 <span className="text-[10px] font-mono text-emerald-400/90 font-semibold px-1.5 py-0.2 rounded bg-emerald-950/60 border border-emerald-800/60">
                   Lead {selectedLead}
                 </span>
+                {!isHeartActive && (
+                  <span className="text-[9.5px] font-mono font-bold text-amber-300 px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-600/80 animate-pulse">
+                    ⏸ PAUSED
+                  </span>
+                )}
               </div>
             </div>
 
@@ -334,31 +462,10 @@ export const ECGMonitorHUD: React.FC = () => {
                 <rect width="100%" height="100%" fill="url(#ecgMajorGrid)" />
               </svg>
 
-              {/* Dynamic Oscilloscope P-Q-R-S-T Waveform */}
+              {/* Dynamic Oscilloscope Moving P-Q-R-S-T Waveform (In Sync with Heartbeat) */}
               <svg viewBox="0 0 600 56" preserveAspectRatio="none" className="w-full h-full relative z-10">
                 <path
-                  d={`M 0 28
-                      L 40 28
-                      Q 60 19 75 28
-                      L 95 28
-                      L 102 32
-                      L 115 ${hasSTElevation ? 4 : 6}
-                      L 128 50
-                      L 135 28
-                      L 155 ${hasSTElevation ? 19 : hasSTDepression ? 37 : 28}
-                      Q 185 ${hasTInversion ? 38 : 16} 210 28
-                      L 280 28
-                      L 300 28
-                      Q 320 19 335 28
-                      L 355 28
-                      L 362 32
-                      L 375 ${hasSTElevation ? 4 : 6}
-                      L 388 50
-                      L 395 28
-                      L 415 ${hasSTElevation ? 19 : hasSTDepression ? 37 : 28}
-                      Q 445 ${hasTInversion ? 38 : 16} 470 28
-                      L 540 28
-                      L 600 28`}
+                  d={movingWaveformPath}
                   fill="none"
                   stroke="#10b981"
                   strokeWidth="2.0"
@@ -366,39 +473,46 @@ export const ECGMonitorHUD: React.FC = () => {
                   className="drop-shadow-[0_0_6px_rgba(16,185,129,0.85)]"
                 />
 
-                {/* Sweeping Beam Bar */}
+                {/* Sampling Lead Marker & Phosphor Beam Cursor */}
                 <line
-                  x1={phaseTime * 600}
+                  x1="510"
                   y1="0"
-                  x2={phaseTime * 600}
+                  x2="510"
                   y2="56"
-                  stroke="#38bdf8"
-                  strokeWidth="2"
+                  stroke={isHeartActive ? '#38bdf8' : '#f59e0b'}
+                  strokeWidth="1.5"
+                  strokeDasharray="2 2"
                   className="drop-shadow-[0_0_6px_#38bdf8]"
-                  opacity="0.85"
+                  opacity={isHeartActive ? 0.75 : 0.45}
                 />
 
-                {/* Phosphor Glow Point */}
+                {/* Active Phosphor Pulse Blip */}
                 <circle
-                  cx={phaseTime * 600}
-                  cy="28"
-                  r="3.5"
-                  fill="#38bdf8"
-                  className="drop-shadow-[0_0_6px_#38bdf8]"
+                  cx="510"
+                  cy={isSystolePhase ? (hasSTElevation ? 10 : 8) : 28}
+                  r={isSystolePhase ? 4.5 : 3.0}
+                  fill={isHeartActive ? (isSystolePhase ? '#34d399' : '#38bdf8') : '#f59e0b'}
+                  className={isHeartActive && isSystolePhase ? 'drop-shadow-[0_0_8px_#34d399]' : 'drop-shadow-[0_0_6px_#38bdf8]'}
                 />
               </svg>
             </div>
 
             {/* Subtext Footer */}
             <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 px-1 font-mono">
-              <span className="flex items-center gap-1">
-                <span className="text-slate-500">Phase:</span>
-                <span className="text-amber-300 font-semibold">
-                  {phaseTime <= 0.35 ? 'Ventricular Systole' : 'Diastolic Filling'}
-                </span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-slate-500">Telemetry:</span>
+                {isHeartActive ? (
+                  <span className={`font-semibold ${isSystolePhase ? 'text-emerald-300' : 'text-amber-300'}`}>
+                    {isSystolePhase ? 'Ventricular Systole' : 'Diastolic Filling'}
+                  </span>
+                ) : (
+                  <span className="text-amber-400 font-bold">
+                    PAUSED — Click ▶ in Tools Menu to Resume
+                  </span>
+                )}
               </span>
               <span className="text-slate-500 hidden sm:inline">
-                25mm/s &bull; 10mm/mV &bull; Calibrated
+                {isHeartActive ? `${currentBpm} BPM • 25mm/s • Calibrated` : 'FROZEN TRACE'}
               </span>
             </div>
           </div>
