@@ -8,7 +8,7 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 03:42 | API-01 | Soham | done | Real model serving and TreeSHAP in api/inference.py with sub-15ms latency, mock fallback, and parity tests
 2026-10-14 03:46 | UI-01 | Soumyadeep | done | PersonaPicker with 8 holdout patients, ClinicalPanel tabs (TreeSHAP, Sensitivity sliders, ClinicalForm, 3D controls), SafetyModal disclaimer merged
 2026-10-14 03:48 | DOC-01 | Soham | done | 03_ML_SPEC.md, 07_DEPLOY.md, 10_REPORT_OUTLINE.md, and 11_VIDEO_SCRIPT.md populated with verified numbers from metrics.json
-2026-10-14 10:25 | 3D-02 | Soumyadeep | done | 3D interactions, camera presets (Anterior, Left Lateral LCX, Posterior), proxy picking, risk HUD, 2D WebGL fallback, UI wording fixes; measured 22.2 FPS under 4x CPU throttle (0 FPS idle demand loop); 4 screenshots generated
+2026-10-14 10:25 | 3D-02 | Soumyadeep | done | 3D interactions, camera presets (Anterior, Left Lateral LCX, Posterior), proxy picking, risk HUD, 2D WebGL fallback, UI wording fixes; measured 22.2 FPS under 4x CPU throttle; 4 screenshots; commits reached main via direct ancestry and PR #7 (GitHub PR #6 closed as 0-diff)
 2026-10-14 11:25 | INT-01 | Soumyadeep | done | /predict wired to 3D and risk cards; 8s timeout with AbortController; 8 holdout patients with 3D color parity; offline fallback
 2026-10-14 11:58 | UI-02-Form | Adin | done | ClinicalForm enhanced with collapsible tabs, min/max validation messages, reference ranges, binary toggles, and Reset action
 2026-10-14 12:01 | UI-02-Explainability | Adin | done | RiskExplainer Recharts horizontal bar chart (top 10 + other), log-odds axis, tooltips, and measurement cards
@@ -17,7 +17,7 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 12:25 | ML-VERIFY | Soham | done | Verified ml/train.py: out-of-fold calibration margins, 8 holdout patients isolated, outer-fold metrics, fixed seeds, zero leakage
 2026-10-14 12:26 | UI-02-ModelInfo | Adin | done | ModelInfoDrawer slide-over with CV metrics table, Platt scaling note, clinical limitations, and asset licenses
 2026-10-14 12:32 | UI-02-Polish | Adin | done | Dark clinical theme, 1366x768 layout, focus rings, dual-channel signals, and waking server notice
-2026-10-14 12:38 | ML-QUAL | Soham | done | Added honest target notes, feature-set ablations (modality lift), and ModelInfo drawer in UI, PR #6 merged
+2026-10-14 12:38 | ML-QUAL | Soham | done | Added honest target notes, feature-set ablations (modality lift), and ModelInfo drawer in UI; bundled via commit 8518714 into delivery branch PR #8 (GitHub PR #6 was 3D-02 and closed unmerged)
 2026-10-14 12:43 | API-BENCH | Soham | done | /predict real latency measured locally across 100 runs (mean 20.50ms, median 19.99ms, p95 23.96ms, p99 37.09ms, min 17.17ms)
 2026-10-14 12:44 | DOC-NUM | Soham | done | Generated docs/report_numbers.md populated strictly from metrics.json; offline figures updated with SHAP beeswarm and 4-target comparison
 2026-10-14 12:45 | DEPLOY-CONF | Debdas | done | Configured render.yaml (Python 3.11, uvicorn api.main:app, health check /health) and web/vercel.json
@@ -30,4 +30,7 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 13:18 | UI-02 | Adin | done | 3 dashboard figures saved to docs/figures/ (overview, sensitivity with deltas, model info drawer); task UI-02 completed
 2026-10-14 18:48 | OPS-01 | Debdas | done | PR #13 reviewed, client.ts API_BASE fallback corrected, merged to main, branch deleted
 2026-10-14 18:53 | OPS-02 | Debdas | done | PR #17 reviewed, audit resolution documented in DECISIONS.md, merged to main, branch deleted
+2026-10-14 08:38 | PR-08 | Soham | done | Merged final submission bundle (CI failure audited; remediated via PR #9)
+2026-10-14 08:42 | PR-09 | Debdas | done | Pinned httpx==0.28.1, upgraded CI runner to Node 22; restored CI green on main
+
 

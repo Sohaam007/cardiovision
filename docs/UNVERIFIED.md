@@ -22,6 +22,8 @@ Status options:
 | 2026-10-14 00:16 | #3 | DOC-WF | Remote GitHub Actions CI | .github/workflows not yet created in repo (OPS-02 pending); verified locally | Debdas | verified | Create .github/workflows in OPS-02 and verify remote checks pass |
 | 2026-10-14 01:10 | #1 | 3D-01 | 60 FPS on non-GPU laptop | Demand rendering verified in tests; physical frame rate profiling on low-end non-GPU hardware | Soumyadeep | verified | Measured 22.2 FPS active tween (45.06 ms avg delta) and 0 FPS idle on demand loop under 4x CPU throttling in Edge headless |
 | 2026-10-14 18:45 | #13 | OPS-01 | Local host pytest and npm build execution | Host Windows OS lacks Python and Node binaries; verified remote live endpoints and GitHub Actions CI | Debdas | open | Verify on remote CI runner or machine with Python 3.11 and Node 22 |
+| 2026-10-14 08:45 | #9 | OPS-CI | CI clean runner dependency parity | PR #8 revealed host dev environment masked missing httpx and Node 22 requirement | Debdas | verified | PR #9 pinned httpx==0.28.1 and Node 22 in CI; all GitHub Actions checks green |
+
 
 ---
 
