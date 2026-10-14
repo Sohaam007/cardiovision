@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { InteractiveBeatingHeart } from './InteractiveBeatingHeart';
 
 interface BlenderStudioModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type TabType = 'turntable' | 'scrubber' | 'anterior' | 'lateral' | 'posterior';
+type TabType = 'interactive' | 'turntable' | 'scrubber' | 'video' | 'anterior' | 'lateral' | 'posterior';
 
 export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('turntable');
+  const [activeTab, setActiveTab] = useState<TabType>('interactive');
   const [scrubberFrame, setScrubberFrame] = useState<number>(1);
   const totalFrames = 24;
 
@@ -62,8 +63,18 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, 
         {/* Tab Selection */}
         <div className="flex items-center gap-1 px-6 pt-3 border-b border-slate-800 bg-slate-900/40 text-xs font-medium overflow-x-auto">
           <button
+            onClick={() => setActiveTab('interactive')}
+            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'interactive'
+                ? 'border-purple-500 text-purple-300 bg-purple-950/30 font-semibold'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span>🎮 Interactive 3D Beating Heart</span>
+          </button>
+          <button
             onClick={() => setActiveTab('turntable')}
-            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === 'turntable'
                 ? 'border-purple-500 text-purple-300 bg-purple-950/30'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -73,17 +84,27 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, 
           </button>
           <button
             onClick={() => setActiveTab('scrubber')}
-            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === 'scrubber'
                 ? 'border-purple-500 text-purple-300 bg-purple-950/30'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>🖐️ Interactive 360° Scrub</span>
+            <span>🖐️ 360° Angle Scrubber</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('video')}
+            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'video'
+                ? 'border-purple-500 text-purple-300 bg-purple-950/30'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span>🎥 Reference Video (Heart moving.mp4)</span>
           </button>
           <button
             onClick={() => setActiveTab('anterior')}
-            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === 'anterior'
                 ? 'border-purple-500 text-purple-300 bg-purple-950/30'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -93,7 +114,7 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, 
           </button>
           <button
             onClick={() => setActiveTab('lateral')}
-            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === 'lateral'
                 ? 'border-purple-500 text-purple-300 bg-purple-950/30'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -103,7 +124,7 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, 
           </button>
           <button
             onClick={() => setActiveTab('posterior')}
-            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === 'posterior'
                 ? 'border-purple-500 text-purple-300 bg-purple-950/30'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -115,6 +136,35 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, 
 
         {/* Modal Body / Active Content */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center">
+          {activeTab === 'interactive' && (
+            <div className="w-full flex flex-col items-center">
+              <InteractiveBeatingHeart />
+            </div>
+          )}
+
+          {activeTab === 'video' && (
+            <div className="w-full flex flex-col items-center gap-4">
+              <div className="relative rounded-xl overflow-hidden border border-purple-900/60 shadow-xl bg-black max-w-2xl w-full aspect-video flex items-center justify-center">
+                <video
+                  src="/heart_moving.mp4"
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="text-center max-w-lg">
+                <p className="text-xs text-slate-300 font-medium">
+                  Cinema 4D Anatomical Reference Animation (Heart moving.mp4)
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Direct anatomical reference showing anterior ventricular cutaway, internal valve apparatus, chordae tendineae, and rhythmic myocardial contraction.
+                </p>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'turntable' && (
             <div className="w-full flex flex-col items-center gap-4">
               <div className="relative rounded-xl overflow-hidden border border-purple-900/60 shadow-xl bg-black max-w-2xl w-full aspect-video flex items-center justify-center">
@@ -126,7 +176,7 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, 
               </div>
               <div className="text-center max-w-lg">
                 <p className="text-xs text-slate-300 font-medium">
-                  360° Looping Turntable Animation (24 key angles, 116 KB WebP asset)
+                  360° Looping Turntable Animation (24 key angles, 260 KB WebP asset)
                 </p>
                 <p className="text-[11px] text-slate-400 mt-1">
                   Features high-contrast PBR shaders with continuous linear risk color interpolation calibrated to Patient #002.
@@ -241,6 +291,18 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, 
 
           <div className="flex items-center gap-2">
             <a
+              href="/beating_heart.glb"
+              download="beating_heart.glb"
+              className="px-3 py-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-700/60 flex items-center gap-1.5 transition-colors font-medium"
+              title="Download Cinema 4D reference animated beating heart GLB model (1.33 MB, Draco-compressed)"
+            >
+              <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>Beating Heart GLB (1.33 MB)</span>
+            </a>
+
+            <a
               href="/blender/cardiac_model.glb"
               download="cardiac_model.glb"
               className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors font-medium"
@@ -248,7 +310,7 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({ isOpen, 
               <svg className="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              <span>Download 3D Asset (.glb, 318 KB)</span>
+              <span>Procedural GLB (432 KB)</span>
             </a>
 
             <button

@@ -34,3 +34,9 @@ context_bundle.md
 # Agents Internal
 .agents/
 
+# Large reference raw archives and uncompressed meshes
+docs/reference/*.zip
+docs/reference/Beating_heart.glb
+docs/reference/realistic_human_heart.glb
+web/public/heart_moving.mp4
+

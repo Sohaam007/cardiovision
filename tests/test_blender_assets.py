@@ -116,3 +116,17 @@ def test_rendered_clinical_views_assets():
         with open(view_path, "rb") as f:
             header = f.read(8)
             assert header == b"\x89PNG\r\n\x1a\n", f"{view} is not a valid PNG image"
+
+
+def test_beating_heart_glb_asset():
+    """Verify beating_heart.glb exists in web/public, is valid glTF binary, and < 5 MB."""
+    glb_path = PROJECT_ROOT / "web" / "public" / "beating_heart.glb"
+    assert glb_path.exists(), f"GLB model missing at {glb_path}"
+    file_size_bytes = glb_path.stat().st_size
+    assert file_size_bytes > 500_000, "GLB model is suspiciously small"
+    assert file_size_bytes < 5 * 1024 * 1024, "GLB exceeds 5MB performance budget"
+
+    # glTF binary header magic check
+    with open(glb_path, "rb") as f:
+        magic = f.read(4)
+        assert magic == b"glTF", "File is not a valid glTF binary file"
