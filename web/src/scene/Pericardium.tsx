@@ -71,6 +71,7 @@ export const Pericardium: React.FC = () => {
   const isCutOpen = useStore((state) => state.isCutOpen);
   const dissectionPlane = useStore((state) => state.dissectionPlane);
   const cutDepth = useStore((state) => state.cutDepth);
+  const isInvertedCut = useStore((state) => state.isInvertedCut);
 
   const pericardiumRef = useRef<THREE.Group>(null);
 
@@ -78,14 +79,16 @@ export const Pericardium: React.FC = () => {
   const clippingPlane = useMemo(() => {
     if (!isCutOpen) return null;
 
+    let plane: THREE.Plane;
     if (dissectionPlane === 'coronal') {
-      return new THREE.Plane(new THREE.Vector3(0, 0, -1), 0.52 - cutDepth * 0.92);
+      plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0.52 - cutDepth * 0.92);
     } else if (dissectionPlane === 'short_axis') {
-      return new THREE.Plane(new THREE.Vector3(0, -1, 0), 0.45 - cutDepth * 1.05);
+      plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0.45 - cutDepth * 1.05);
     } else {
-      return new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0.40 - cutDepth * 0.85);
+      plane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0.40 - cutDepth * 0.85);
     }
-  }, [isCutOpen, dissectionPlane, cutDepth]);
+    return isInvertedCut ? plane.negate() : plane;
+  }, [isCutOpen, dissectionPlane, cutDepth, isInvertedCut]);
 
   // Biomechanical motion: subtle compliance with cardiac contraction and ejection
   useFrame((state) => {

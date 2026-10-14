@@ -43,9 +43,9 @@ export const DraggableToolsMenu: React.FC = () => {
   const zoomOut = useStore((state) => state.zoomOut);
   const resetZoom = useStore((state) => state.resetZoom);
 
-  // Widget state
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const [position, setPosition] = useState<Position>({ x: 16, y: 72 });
+  // Widget state (collapsed by default to prevent HUD collision on initial viewport entry)
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
+  const [position, setPosition] = useState<Position>({ x: 16, y: 16 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -75,6 +75,16 @@ export const DraggableToolsMenu: React.FC = () => {
 
     return { x: clampedX, y: clampedY };
   }, []);
+
+  // Initial placement at top-left with boundary clamping
+  useEffect(() => {
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const menuWidth = containerRef.current?.offsetWidth || 288;
+      const menuHeight = containerRef.current?.offsetHeight || 300;
+      setPosition(clampAndSnap({ x: 16, y: 16 }, menuWidth, menuHeight));
+    }
+  }, [clampAndSnap]);
 
   // Dragging event listeners
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -144,68 +154,56 @@ export const DraggableToolsMenu: React.FC = () => {
       }`}
       data-testid="draggable-tools-menu"
     >
-      {isCollapsed ? (
-        /* Collapsed Floating Chip / Pill */
+      <div
+        className="bg-card/95 backdrop-blur-md border border-border shadow-2xl overflow-hidden flex flex-col text-card-foreground text-xs w-72 rounded-2xl transition-all duration-300 ease-in-out"
+      >
+        {/* Draggable Header */}
         <div
           onPointerDown={handlePointerDown}
-          className="bg-slate-900/95 backdrop-blur-md border border-slate-700/80 hover:border-cyan-500/50 rounded-full px-3 py-1.5 flex items-center gap-2 cursor-grab text-xs text-slate-200 shadow-2xl hover:bg-slate-800"
-          title="Click to expand viewport tools or drag to reposition"
-          data-testid="tools-collapsed-pill"
+          onClick={isCollapsed ? () => setIsCollapsed(false) : undefined}
+          className={`bg-muted/40 border-border/80 px-3.5 py-2.5 flex items-center justify-between cursor-grab active:cursor-grabbing hover:bg-muted/60 transition-colors ${
+            isCollapsed ? 'border-b-0 cursor-pointer' : 'border-b'
+          }`}
+          title={isCollapsed ? "Click to expand viewport tools or drag to reposition" : "Drag to reposition tools HUD"}
+          data-testid={isCollapsed ? "tools-collapsed-pill" : "tools-drag-handle"}
         >
-          <span className="text-cyan-400 font-bold">⠿</span>
-          <span className="font-semibold text-slate-100 flex items-center gap-1.5">
-            <span>🛠️ Viewport Tools</span>
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-primary text-sm font-bold">⠿</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-foreground tracking-wide text-xs">
+                {isCollapsed ? '🛠️ Viewport Tools' : 'Viewport Tools'}
+              </span>
+              {!isCollapsed && (
+                <span className="text-[10px] font-mono uppercase bg-primary/20 text-primary border border-primary/40 px-1.5 py-0.2 rounded">
+                  HUD
+                </span>
+              )}
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setIsCollapsed(false);
+              setIsCollapsed(!isCollapsed);
             }}
-            className="w-5 h-5 rounded-full bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors text-[10px]"
-            title="Expand Tools HUD"
-            aria-label="Expand Tools HUD"
-            data-testid="expand-tools-btn"
+            className="w-6 h-6 rounded-lg bg-secondary/80 hover:bg-secondary text-secondary-foreground hover:text-foreground flex items-center justify-center text-xs transition-colors border border-border shrink-0"
+            title={isCollapsed ? "Expand Tools HUD" : "Minimize to floating chip"}
+            aria-label={isCollapsed ? "Expand Tools HUD" : "Collapse Tools Menu"}
+            data-testid={isCollapsed ? "expand-tools-btn" : "collapse-tools-btn"}
           >
-            ▼
+            {isCollapsed ? '▼' : '▲'}
           </button>
         </div>
-      ) : (
-        /* Expanded Glassmorphic HUD Panel */
-        <div className="w-72 bg-[#090d16]/95 backdrop-blur-md border border-slate-800/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-200 text-xs">
-          {/* Draggable Header */}
-          <div
-            onPointerDown={handlePointerDown}
-            className="bg-slate-900/90 border-b border-slate-800/80 px-3.5 py-2.5 flex items-center justify-between cursor-grab active:cursor-grabbing hover:bg-slate-800/60 transition-colors"
-            title="Drag to reposition tools HUD"
-            data-testid="tools-drag-handle"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-cyan-400 text-sm font-bold">⠿</span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-white tracking-wide text-xs">Viewport Tools</span>
-                <span className="text-[10px] font-mono uppercase bg-cyan-950 text-cyan-300 border border-cyan-800/60 px-1.5 py-0.2 rounded">
-                  HUD
-                </span>
-              </div>
-            </div>
 
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsCollapsed(true);
-              }}
-              className="w-6 h-6 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/60"
-              title="Minimize to floating chip"
-              aria-label="Collapse Tools Menu"
-              data-testid="collapse-tools-btn"
-            >
-              ▲
-            </button>
-          </div>
-
-          <div className="p-3 flex flex-col gap-3 max-h-[75vh] overflow-y-auto">
+        {/* Smooth Expandable Body via CSS Grid */}
+        <div
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+            isCollapsed ? 'grid-rows-[0fr] opacity-0 pointer-events-none' : 'grid-rows-[1fr] opacity-100'
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="p-3 flex flex-col gap-3 max-h-[75vh] overflow-y-auto no-scrollbar">
             {/* 0. Viewport Representation Mode */}
             <div>
               <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
@@ -545,7 +543,8 @@ export const DraggableToolsMenu: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
-  );
+  </div>
+);
 };

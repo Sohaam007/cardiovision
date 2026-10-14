@@ -1,11 +1,12 @@
-import React, { useMemo, useEffect, useRef, Suspense } from 'react';
+import React, { useMemo, useEffect, useRef, useState, Suspense } from 'react';
 import * as THREE from 'three';
-import { useGLTF, useAnimations } from '@react-three/drei';
+import { useGLTF, useAnimations, Html } from '@react-three/drei';
 import { useThree, useFrame } from '@react-three/fiber';
 import { useStore } from '../store/useStore';
 import { InternalHeartStructures } from './InternalHeartStructures';
 import { getVesselColorThree } from './vesselConfig';
 import { computeCardiacMotion } from './cardiacMotion';
+import { cardiacAudio } from '../audio/cardiacAudio';
 
 /**
  * Generates photorealistic high-resolution procedural textures:
@@ -691,12 +692,24 @@ const VesselLumen: React.FC<{
   );
 };
 
-const ProceduralHeart: React.FC = () => {
+interface ProceduralHeartProps {
+  visible?: boolean;
+  opacityMultiplier?: number;
+  isCutOpenActive?: boolean;
+}
+
+const ProceduralHeart: React.FC<ProceduralHeartProps> = ({
+  visible = true,
+  opacityMultiplier = 1.0,
+  isCutOpenActive = true,
+}) => {
   const heartOpacity = useStore((state) => state.heartOpacity);
+  const showCavities = useStore((state) => state.showCavities);
   const colorblindMode = useStore((state) => state.colorblindMode);
   const isCutOpen = useStore((state) => state.isCutOpen);
   const dissectionPlane = useStore((state) => state.dissectionPlane);
   const cutDepth = useStore((state) => state.cutDepth);
+  const isInvertedCut = useStore((state) => state.isInvertedCut);
   const ladProb = useStore((state) => state.prediction.vessels.LAD?.prob ?? 0.5);
   const selectedVessel = useStore((state) => state.selectedVessel);
   const hoveredVessel = useStore((state) => state.hoveredVessel);
@@ -718,18 +731,20 @@ const ProceduralHeart: React.FC = () => {
   const clippingPlane = useMemo(() => {
     if (!isCutOpen) return null;
 
+    let plane: THREE.Plane;
     if (dissectionPlane === 'coronal') {
-      return new THREE.Plane(new THREE.Vector3(0, 0, -1), 0.52 - cutDepth * 0.92);
+      plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0.52 - cutDepth * 0.92);
     } else if (dissectionPlane === 'short_axis') {
-      return new THREE.Plane(new THREE.Vector3(0, -1, 0), 0.45 - cutDepth * 1.05);
+      plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0.45 - cutDepth * 1.05);
     } else {
-      return new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0.40 - cutDepth * 0.85);
+      plane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0.40 - cutDepth * 0.85);
     }
-  }, [isCutOpen, dissectionPlane, cutDepth]);
+    return isInvertedCut ? plane.negate() : plane;
+  }, [isCutOpen, dissectionPlane, cutDepth, isInvertedCut]);
 
   useEffect(() => {
     invalidate();
-  }, [heartOpacity, isCutOpen, dissectionPlane, cutDepth, invalidate]);
+  }, [heartOpacity, isCutOpen, dissectionPlane, cutDepth, isInvertedCut, invalidate]);
 
   // Live cardiac biomechanical animation loop matching physiological Wiggers cycle
   useFrame((state) => {
@@ -1065,7 +1080,9 @@ const ProceduralHeart: React.FC = () => {
     return new THREE.TubeGeometry(curve, 14, 0.072, 18, false);
   }, []);
 
-  const isTranslucent = heartOpacity < 0.85;
+  const effectiveOpacity = (showCavities ? Math.min(heartOpacity, 0.42) : heartOpacity) * opacityMultiplier;
+  const isTranslucent = effectiveOpacity < 0.98 || showCavities;
+  const isDepthWrite = !showCavities && effectiveOpacity > 0.85;
 
   // Solid, dense, glistening PBR material with surgical clearcoat
   const myocardiumMaterial = useMemo(() => {
@@ -1080,13 +1097,13 @@ const ProceduralHeart: React.FC = () => {
       clearcoat: 1.0,
       clearcoatRoughness: 0.12,
       transparent: isTranslucent,
-      opacity: heartOpacity,
-      depthWrite: true,
+      opacity: effectiveOpacity,
+      depthWrite: isDepthWrite,
       clippingPlanes: clippingPlane ? [clippingPlane] : [],
       clipShadows: true,
       side: clippingPlane ? THREE.DoubleSide : THREE.FrontSide,
     });
-  }, [textures, heartOpacity, isTranslucent, clippingPlane]);
+  }, [textures, effectiveOpacity, isTranslucent, isDepthWrite, clippingPlane]);
 
   // Soft, glistening amber-yellow adipose tissue material
   const adiposeMaterial = useMemo(() => {
@@ -1099,13 +1116,13 @@ const ProceduralHeart: React.FC = () => {
       transmission: 0.12,
       ior: 1.45,
       transparent: isTranslucent,
-      opacity: heartOpacity,
-      depthWrite: true,
+      opacity: effectiveOpacity,
+      depthWrite: isDepthWrite,
       clippingPlanes: clippingPlane ? [clippingPlane] : [],
       clipShadows: true,
       side: THREE.DoubleSide,
     });
-  }, [heartOpacity, isTranslucent, clippingPlane]);
+  }, [effectiveOpacity, isTranslucent, isDepthWrite, clippingPlane]);
 
   const greatVesselMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
@@ -1115,13 +1132,13 @@ const ProceduralHeart: React.FC = () => {
       clearcoat: 1.0,
       clearcoatRoughness: 0.10,
       transparent: isTranslucent,
-      opacity: heartOpacity,
-      depthWrite: true,
+      opacity: effectiveOpacity,
+      depthWrite: isDepthWrite,
       clippingPlanes: clippingPlane ? [clippingPlane] : [],
       clipShadows: true,
       side: clippingPlane ? THREE.DoubleSide : THREE.FrontSide,
     });
-  }, [heartOpacity, isTranslucent, clippingPlane]);
+  }, [effectiveOpacity, isTranslucent, isDepthWrite, clippingPlane]);
 
   const venousMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
@@ -1131,13 +1148,13 @@ const ProceduralHeart: React.FC = () => {
       clearcoat: 0.85,
       clearcoatRoughness: 0.14,
       transparent: isTranslucent,
-      opacity: heartOpacity,
-      depthWrite: true,
+      opacity: effectiveOpacity,
+      depthWrite: isDepthWrite,
       clippingPlanes: clippingPlane ? [clippingPlane] : [],
       clipShadows: true,
       side: clippingPlane ? THREE.DoubleSide : THREE.FrontSide,
     });
-  }, [heartOpacity, isTranslucent, clippingPlane]);
+  }, [effectiveOpacity, isTranslucent, isDepthWrite, clippingPlane]);
 
   const lumenCapMaterial = useMemo(() => {
     return new THREE.MeshBasicMaterial({
@@ -1157,13 +1174,16 @@ const ProceduralHeart: React.FC = () => {
       clearcoatRoughness: 0.10,
       emissive: isLadSelected ? baseColor : '#000000',
       emissiveIntensity: isLadSelected ? 0.40 : isLadHovered ? 0.20 : 0.0,
+      transparent: isTranslucent,
+      opacity: effectiveOpacity,
+      depthWrite: isDepthWrite,
       clippingPlanes: clippingPlane ? [clippingPlane] : [],
       clipShadows: true,
     });
-  }, [ladColor, isLadSelected, isLadHovered, clippingPlane]);
+  }, [ladColor, isLadSelected, isLadHovered, isTranslucent, effectiveOpacity, isDepthWrite, clippingPlane]);
 
   return (
-    <group name="CardiacAnatomyRoot">
+    <group name="CardiacAnatomyRoot" visible={visible}>
       {/* ============================================================== */}
       {/* 1. VENTRICULAR MYOCARDIUM BODY, 3D FAT, & EPICARDIAL VESSELS   */}
       {/*    Undergoes inward systolic contraction & apex wringing twist  */}
@@ -1214,7 +1234,7 @@ const ProceduralHeart: React.FC = () => {
         </group>
 
         {/* Internal Surgical Dissection Structures (Synchronized sectioning) */}
-        <InternalHeartStructures />
+        {isCutOpen && isCutOpenActive && <InternalHeartStructures />}
       </group>
 
       {/* ============================================================== */}
@@ -1402,54 +1422,268 @@ const ProceduralHeart: React.FC = () => {
 };
 
 /**
- * Photorealistic Beating Heart Model (Beating_heart.glb)
+ * Photorealistic Beating Heart Model (beating_heart.glb)
  * Incorporates Cinema 4D reference cardiac motion and anatomical chamber cutaway dissection.
  */
 interface RealisticBeatingHeartProps {
   heartOpacity: number;
+  isCutOpenActive?: boolean;
+  visible?: boolean;
 }
 
-const RealisticBeatingHeart: React.FC<RealisticBeatingHeartProps> = ({ heartOpacity }) => {
+const RealisticBeatingHeart: React.FC<RealisticBeatingHeartProps> = ({
+  heartOpacity,
+  isCutOpenActive = true,
+  visible = true,
+}) => {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF('/beating_heart.glb', '/draco/gltf/');
   const { actions, names } = useAnimations(animations, group);
   const invalidate = useThree((state) => state.invalidate);
 
-  // Play skeletal heartbeat animation
-  useEffect(() => {
-    if (names.length > 0 && names[0]) {
-      const action = actions[names[0]];
-      if (action) {
-        action.play();
-      }
-    }
-  }, [actions, names]);
+  const isCutOpen = useStore((state) => state.isCutOpen);
+  const dissectionPlane = useStore((state) => state.dissectionPlane);
+  const cutDepth = useStore((state) => state.cutDepth);
+  const isInvertedCut = useStore((state) => state.isInvertedCut);
+  const isBeating = useStore((state) => state.isBeating);
+  const isPlaying = useStore((state) => state.isPlaying);
+  const beatingSpeed = useStore((state) => state.beatingSpeed);
+  const cardiacPhase = useStore((state) => state.cardiacPhase);
+  const isAudioMuted = useStore((state) => state.isAudioMuted);
+  const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
+  const showCalibers = useStore((state) => state.showCalibers);
+  const lastSoundRef = useRef<'s1' | 's2' | 'none'>('none');
 
-  // Adjust material opacity and transparency based on heartOpacity store state
+  // Synchronized surgical clipping plane matching ProceduralHeart & Vessels
+  const clippingPlane = useMemo(() => {
+    if (!isCutOpen) return null;
+
+    let plane: THREE.Plane;
+    if (dissectionPlane === 'coronal') {
+      plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0.52 - cutDepth * 0.92);
+    } else if (dissectionPlane === 'short_axis') {
+      plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0.45 - cutDepth * 1.05);
+    } else {
+      plane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0.40 - cutDepth * 0.85);
+    }
+    return isInvertedCut ? plane.negate() : plane;
+  }, [isCutOpen, dissectionPlane, cutDepth, isInvertedCut]);
+
+  // Attach dynamic clipping plane and set DoubleSide when cut open, hide any Icosphere
   useEffect(() => {
+    scene.traverse((child) => {
+      if (child.name && child.name.toLowerCase().includes('icosphere')) {
+        child.visible = false;
+      }
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.material) {
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          mats.forEach((mat) => {
+            // beating_heart.glb is pre-sculpted in coronal cutaway section by Blender
+            // Only apply artificial clipping if doing transverse (short_axis) or sagittal cut
+            if (isCutOpen && dissectionPlane !== 'coronal') {
+              mat.clippingPlanes = clippingPlane ? [clippingPlane] : [];
+            } else {
+              mat.clippingPlanes = clippingPlane ? [clippingPlane] : [];
+              if (dissectionPlane === 'coronal') {
+                mat.clippingPlanes = []; // prevent cutting away the sculpted back wall!
+              }
+            }
+            mat.clipShadows = true;
+            mat.side = isCutOpen ? THREE.DoubleSide : THREE.FrontSide;
+            mat.needsUpdate = true;
+          });
+        }
+      }
+    });
+    invalidate();
+  }, [scene, clippingPlane, isCutOpen, dissectionPlane, invalidate]);
+
+  // Adjust material opacity and transparency based on heartOpacity & fluoroscopyMode
+  useEffect(() => {
+    // Solid, opaque myocardium per Screenshot 025654 unless cine X-ray fluoroscopy is active
+    const effectiveOpacity = fluoroscopyMode ? 0.25 : heartOpacity;
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
         if (mesh.material) {
           const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
           mats.forEach((mat) => {
-            mat.transparent = heartOpacity < 0.98;
-            mat.opacity = heartOpacity;
-            mat.depthWrite = heartOpacity > 0.85;
+            mat.transparent = effectiveOpacity < 0.98 || fluoroscopyMode;
+            mat.opacity = effectiveOpacity;
+            if ('roughness' in mat) {
+              (mat as THREE.MeshStandardMaterial).roughness = 0.28;
+            }
+            if ('metalness' in mat) {
+              (mat as THREE.MeshStandardMaterial).metalness = 0.05;
+            }
+            mat.needsUpdate = true;
           });
         }
       }
     });
     invalidate();
-  }, [scene, heartOpacity, invalidate]);
+  }, [scene, heartOpacity, fluoroscopyMode, invalidate]);
+
+  // Synchronize skeletal animation actions with cardiacPhase, isPlaying, isBeating, and beatingSpeed
+  useEffect(() => {
+    if (names.length > 0 && names[0]) {
+      const action = actions[names[0]];
+      if (action) {
+        const clipDuration = action.getClip().duration || 1.0;
+        action.setEffectiveTimeScale(beatingSpeed);
+
+        if (cardiacPhase === 'systole') {
+          action.paused = true;
+          action.time = clipDuration * 0.25;
+        } else if (cardiacPhase === 'diastole') {
+          action.paused = true;
+          action.time = clipDuration * 0.70;
+        } else {
+          // Auto beating phase
+          if (isPlaying && isBeating) {
+            action.paused = false;
+            action.play();
+          } else {
+            action.paused = true;
+          }
+        }
+      }
+    }
+    invalidate();
+  }, [actions, names, isPlaying, isBeating, beatingSpeed, cardiacPhase, invalidate]);
+
+  // Synchronized physiological S1/S2 heart sound playback during auto beating
+  useFrame(() => {
+    if (names.length > 0 && names[0]) {
+      const action = actions[names[0]];
+      if (action && !action.paused && isPlaying && isBeating && cardiacPhase === 'auto') {
+        const clipDuration = action.getClip().duration || 1.0;
+        const progress = (action.time % clipDuration) / clipDuration;
+        if (progress >= 0.04 && progress <= 0.12 && lastSoundRef.current !== 's1') {
+          if (!isAudioMuted) cardiacAudio.playS1();
+          lastSoundRef.current = 's1';
+        } else if (progress >= 0.36 && progress <= 0.44 && lastSoundRef.current !== 's2') {
+          if (!isAudioMuted) cardiacAudio.playS2();
+          lastSoundRef.current = 's2';
+        } else if (progress > 0.50 && progress < 0.90 && lastSoundRef.current !== 'none') {
+          lastSoundRef.current = 'none';
+        }
+      }
+    }
+  });
 
   return (
-    <group ref={group} name="RealisticBeatingHeartGLB" dispose={null}>
+    <group ref={group} name="RealisticBeatingHeartGLB" visible={visible} dispose={null}>
       <primitive
         object={scene}
         position={[0, -0.83, 0]}
         scale={[10.0, 10.0, 10.0]}
       />
+      {/* Anatomical chambers and valves are natively sculpted in beating_heart.glb */}
+      {false && isCutOpen && isCutOpenActive && <InternalHeartStructures />}
+
+      {/* Floating Anatomical Landmark Badges when Labels is Active */}
+      {visible && showCalibers && isCutOpen && (
+        <group name="AnatomicalCavityLabels">
+          <Html position={[0.26, -0.22, 0.24]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+            <span className="px-2 py-0.5 rounded bg-card/90 border border-border text-[10px] font-bold text-foreground font-mono shadow-md whitespace-nowrap select-none">
+              Left Ventricle
+            </span>
+          </Html>
+          <Html position={[-0.26, -0.18, 0.28]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+            <span className="px-2 py-0.5 rounded bg-card/90 border border-border text-[10px] font-bold text-foreground font-mono shadow-md whitespace-nowrap select-none">
+              Right Ventricle
+            </span>
+          </Html>
+          <Html position={[0.06, 0.78, 0.08]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+            <span className="px-2 py-0.5 rounded bg-card/90 border border-border text-[10px] font-bold text-foreground font-mono shadow-md whitespace-nowrap select-none">
+              Aorta
+            </span>
+          </Html>
+          <Html position={[0.22, 0.62, 0.16]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+            <span className="px-2 py-0.5 rounded bg-card/90 border border-border text-[10px] font-bold text-foreground font-mono shadow-md whitespace-nowrap select-none">
+              Pulmonary Trunk
+            </span>
+          </Html>
+        </group>
+      )}
+    </group>
+  );
+};
+
+/**
+ * Photorealistic Complete Human Heart Model (realistic_human_heart.glb)
+ * Depicts the full anatomical heart (with intact anterior wall and sulcal vasculature).
+ * Displayed by default on entry; switches to cut-open beating heart upon cavity inspection.
+ */
+interface RealisticWholeHeartProps {
+  heartOpacity: number;
+  visible?: boolean;
+}
+
+const RealisticWholeHeart: React.FC<RealisticWholeHeartProps> = ({
+  heartOpacity,
+  visible = true,
+}) => {
+  const group = useRef<THREE.Group>(null);
+  const { scene } = useGLTF('/realistic_human_heart.glb', '/draco/gltf/');
+  const invalidate = useThree((state) => state.invalidate);
+  const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
+  const showCalibers = useStore((state) => state.showCalibers);
+
+  // Subtle physiological heartbeat motion synchronized with BPM and Wiggers cycle
+  useFrame((state) => {
+    if (!group.current) return;
+    const { isBeating, heartRateBpm, beatingSpeed } = useStore.getState();
+    const motion = computeCardiacMotion(state.clock.getElapsedTime(), heartRateBpm, beatingSpeed, isBeating);
+    const radial = 1.05 - motion.contraction * 0.025;
+    const vertical = 1.05 - motion.shortening * 0.02;
+    group.current.scale.set(radial, vertical, radial);
+  });
+
+  useEffect(() => {
+    const effectiveOpacity = fluoroscopyMode ? 0.25 : heartOpacity;
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.material) {
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          mats.forEach((mat) => {
+            mat.transparent = effectiveOpacity < 0.98 || fluoroscopyMode;
+            mat.opacity = effectiveOpacity;
+            mat.depthWrite = !fluoroscopyMode && effectiveOpacity > 0.85;
+            mat.needsUpdate = true;
+          });
+        }
+      }
+    });
+    invalidate();
+  }, [scene, heartOpacity, fluoroscopyMode, invalidate]);
+
+  return (
+    <group ref={group} name="RealisticWholeHeartGLB" visible={visible} dispose={null}>
+      <primitive
+        object={scene}
+        position={[0.02, 0.05, -0.06]}
+        rotation={[-0.04, 0.10, -0.04]}
+        scale={[1.05, 1.05, 1.05]}
+      />
+      {visible && showCalibers && (
+        <group name="AnatomicalWholeLabels">
+          <Html position={[0.06, 0.82, 0.08]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+            <span className="px-2 py-0.5 rounded bg-card/90 border border-border text-[10px] font-bold text-foreground font-mono shadow-md whitespace-nowrap select-none">
+              Aorta
+            </span>
+          </Html>
+          <Html position={[0.22, 0.65, 0.16]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+            <span className="px-2 py-0.5 rounded bg-card/90 border border-border text-[10px] font-bold text-foreground font-mono shadow-md whitespace-nowrap select-none">
+              Pulmonary Trunk
+            </span>
+          </Html>
+        </group>
+      )}
     </group>
   );
 };
@@ -1478,27 +1712,97 @@ class GLTFErrorBoundary extends React.Component<
   }
 }
 
-// Pre-load asset for zero-latency presentation
+// Pre-load assets for zero-latency presentation
 useGLTF.preload('/beating_heart.glb', '/draco/gltf/');
+useGLTF.preload('/realistic_human_heart.glb', '/draco/gltf/');
 
 export const Heart: React.FC = () => {
-  const heartOpacity = useStore((state) => state.heartOpacity);
   const viewerMode = useStore((state) => state.viewerMode);
+  const heartOpacity = useStore((state) => state.heartOpacity);
   const isCutOpen = useStore((state) => state.isCutOpen);
+  const showCavities = useStore((state) => state.showCavities);
+  const isHeartCutOpen = isCutOpen || showCavities;
+  const invalidate = useThree((state) => state.invalidate);
 
-  const fallback = <ProceduralHeart />;
+  // Transition state: 0.0 = procedural, 1.0 = realistic
+  const targetT = viewerMode === 'realistic' ? 1.0 : 0.0;
+  const [transitionProgress, setTransitionProgress] = useState<number>(targetT);
 
-  // If user explicitly selected the procedural representation or when cut open, render procedural
-  if (viewerMode === 'procedural' || isCutOpen) {
-    return fallback;
-  }
+  // Smooth 250ms cross-fading between photorealistic and procedural representations
+  useEffect(() => {
+    const target = viewerMode === 'realistic' ? 1.0 : 0.0;
+    if (typeof requestAnimationFrame === 'undefined') {
+      setTransitionProgress(target);
+      return;
+    }
 
-  // Default to photorealistic beating heart with procedural fallback on error/loading
+    if (Math.abs(transitionProgress - target) < 0.001) {
+      return;
+    }
+
+    let animId: number;
+    const startT = transitionProgress;
+    const startTime = performance.now();
+    const durationMs = 250; // Smooth 250ms cross-fade duration
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1.0, elapsed / durationMs);
+      const nextT = startT + (target - startT) * progress;
+      setTransitionProgress(nextT);
+      invalidate();
+
+      if (progress < 1.0) {
+        animId = requestAnimationFrame(step);
+      }
+    };
+
+    animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [viewerMode, invalidate]);
+
+  const isRealisticVisible = transitionProgress > 0.001 || viewerMode === 'realistic';
+  const isProceduralVisible = transitionProgress < 0.999 || viewerMode === 'procedural';
+
+  const proceduralOpacityMultiplier = Math.max(0, Math.min(1, 1.0 - transitionProgress));
+  const realisticHeartOpacity = heartOpacity * Math.max(0, Math.min(1, transitionProgress));
+
+  // Render InternalHeartStructures on active dominant representation to prevent duplicate geometry
+  const isRealisticDominant = transitionProgress >= 0.5;
+
   return (
-    <GLTFErrorBoundary fallback={fallback}>
-      <Suspense fallback={fallback}>
-        <RealisticBeatingHeart heartOpacity={heartOpacity} />
-      </Suspense>
-    </GLTFErrorBoundary>
+    <group name="DualRepresentationHeartRoot">
+      {/* Procedural Heart Model */}
+      <ProceduralHeart
+        visible={isProceduralVisible}
+        opacityMultiplier={proceduralOpacityMultiplier}
+        isCutOpenActive={isCutOpen && !isRealisticDominant}
+      />
+
+      {/* Photorealistic Blender Beating Heart Model */}
+      <GLTFErrorBoundary
+        fallback={
+          <ProceduralHeart
+            visible={true}
+            opacityMultiplier={1.0}
+            isCutOpenActive={isCutOpen}
+          />
+        }
+      >
+        <Suspense fallback={null}>
+          {/* Whole realistic heart shown by default when closed */}
+          <RealisticWholeHeart
+            visible={isRealisticVisible && !isHeartCutOpen}
+            heartOpacity={realisticHeartOpacity}
+          />
+          {/* Cut open beating heart shown when cut open / cavities active (Screenshot 6) */}
+          <RealisticBeatingHeart
+            visible={isRealisticVisible && isHeartCutOpen}
+            heartOpacity={realisticHeartOpacity}
+            isCutOpenActive={isCutOpen && isRealisticDominant}
+          />
+        </Suspense>
+      </GLTFErrorBoundary>
+    </group>
   );
 };

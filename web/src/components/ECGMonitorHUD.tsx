@@ -6,65 +6,114 @@ interface Position {
   y: number;
 }
 
-// Generate an anatomically accurate P-Q-R-S-T beat path relative to startX and beatWidth W
+// Generate a clinically authentic, patient-individualized P-Q-R-S-T ECG beat path
 function generateSingleBeatPath(
   startX: number,
   w: number,
   lead: 'II' | 'V1' | 'V5' | 'aVR',
   hasSTElevation: boolean,
   hasSTDepression: boolean,
-  hasTInversion: boolean
+  hasTInversion: boolean,
+  hasQWave: boolean = false,
+  hasLVH: boolean = false,
+  hasPoorRProgression: boolean = false,
+  hasBBB: boolean = false,
+  bpm: number = 72,
+  beatIdx: number = 0
 ): string {
   // Center isoelectric baseline is Y = 28 (in a 56px high oscilloscope canvas)
-  const baseline = 28;
+  // Subtle biological respiratory sinus wander (~0.15Hz breathing oscillation)
+  const respWander = Math.sin((startX + 50) * 0.012) * 0.9;
+  const baseline = 28 + respWander;
 
   const isAVR = lead === 'aVR';
   const isV1 = lead === 'V1';
   const isV5 = lead === 'V5';
 
-  // P wave deflection
+  // Heart rate modulates the active systole/depolarization ratio vs diastolic TP rest
+  // At 120 bpm, active cycle fills ~75% of beat; at 50 bpm, active cycle fills ~40%
+  const activeFraction = Math.min(0.85, Math.max(0.40, 0.48 + (bpm - 60) * 0.0035));
+  const aw = w * activeFraction;
+
+  // Subtle physiological beat-to-beat amplitude variance (biological micro-noise)
+  const ampVar = 1.0 + 0.03 * Math.sin(beatIdx * 2.7);
+
+  // 1. P-Wave (Atrial Depolarization)
   const pSign = isAVR ? 1 : -1;
-  const pHeight = 7.5;
+  const pHeight = (isV1 ? 3.5 : 7.2) * ampVar;
   const pPeakY = baseline + pSign * pHeight;
 
-  // Q dip
-  const qDepth = isAVR ? -3.5 : 3.5;
-  const qY = baseline + qDepth;
+  // 2. Q-Wave (Septal Depolarization)
+  // If pathological Q-Wave: deep negative plunge (>25% R-wave height) indicating infarction necrosis
+  const qDepth = hasQWave && !isAVR ? 11.5 : (isAVR ? -4.0 : 2.5);
+  const qY = baseline + qDepth * ampVar;
 
-  // R spike
-  let rPeakY = baseline - 22; // default tall R peak
-  if (isAVR) rPeakY = baseline + 21; // inverted QS complex
-  else if (isV1) rPeakY = baseline - 11; // small r wave in V1
-  else if (isV5) rPeakY = baseline - 24; // tall lateral R wave in V5
+  // 3. R-Wave Spike (Ventricular Depolarization)
+  let rHeight = 22.5;
+  if (isAVR) {
+    rHeight = -21.0; // Inverted global vector (dominant negative cavity complex)
+  } else if (isV1) {
+    rHeight = hasPoorRProgression ? 2.5 : 7.5; // Small r-wave in right precordium, blunted if poor R
+  } else if (isV5) {
+    rHeight = (hasLVH ? 28.0 : 24.5); // Dominant tall lateral R-wave, exaggerated in LVH
+  } else if (hasLVH) {
+    rHeight = 26.5; // High voltage criteria
+  }
+  const rPeakY = baseline - rHeight * ampVar;
 
-  if (hasSTElevation && !isAVR) rPeakY -= 2;
+  // 4. S-Wave (Basal Ventricular Depolarization)
+  let sDepth = 14.0;
+  if (isAVR) {
+    sDepth = -6.0;
+  } else if (isV1) {
+    sDepth = (hasLVH ? 27.0 : 23.5); // Deep dominant S-wave in V1
+  } else if (isV5) {
+    sDepth = 5.0; // Small shallow s-wave in V5
+  }
+  const sDepthY = baseline + sDepth * ampVar;
 
-  // S wave
-  let sDepthY = baseline + 22;
-  if (isAVR) sDepthY = baseline - 8;
-  else if (isV1) sDepthY = baseline + 24; // deeper S in V1
+  // 5. ST-Segment Shift (Plateau Repolarization)
+  let stShift = 0;
+  if (hasSTElevation) {
+    stShift = isAVR ? 7.0 : -8.5; // Elevated J-point (convex coved STEMI), reciprocal in aVR
+  } else if (hasSTDepression) {
+    stShift = isAVR ? -7.0 : 8.5; // Depressed J-point (subendocardial ischemia), reciprocal in aVR
+  }
+  const stY = baseline + stShift;
 
-  // ST segment shift
-  let stY = baseline;
-  if (hasSTElevation) stY = isAVR ? baseline + 8 : baseline - 9;
-  else if (hasSTDepression) stY = isAVR ? baseline - 8 : baseline + 9;
-
-  // T wave deflection
+  // 6. T-Wave (Ventricular Repolarization)
   const tInvert = hasTInversion || isAVR;
-  const tPeakY = tInvert ? baseline + 10 : baseline - 11.5;
+  let tHeight = (tInvert ? -11.0 : 11.5) * ampVar;
+  if (hasSTElevation && !isAVR) {
+    tHeight = 14.5 * ampVar; // Hyperacute / merged T-wave in acute injury
+  }
+  const tPeakY = baseline - tHeight;
 
-  // Seamless beat trajectory from startX to startX + w
-  return `M ${startX.toFixed(1)} ${baseline}
-    L ${(startX + 0.08 * w).toFixed(1)} ${baseline}
-    Q ${(startX + 0.12 * w).toFixed(1)} ${pPeakY.toFixed(1)} ${(startX + 0.16 * w).toFixed(1)} ${baseline}
-    L ${(startX + 0.20 * w).toFixed(1)} ${baseline}
-    L ${(startX + 0.215 * w).toFixed(1)} ${qY.toFixed(1)}
-    L ${(startX + 0.24 * w).toFixed(1)} ${rPeakY.toFixed(1)}
-    L ${(startX + 0.265 * w).toFixed(1)} ${sDepthY.toFixed(1)}
-    L ${(startX + 0.28 * w).toFixed(1)} ${baseline}
-    L ${(startX + 0.32 * w).toFixed(1)} ${stY.toFixed(1)}
-    Q ${(startX + 0.38 * w).toFixed(1)} ${tPeakY.toFixed(1)} ${(startX + 0.44 * w).toFixed(1)} ${baseline}
-    L ${(startX + w).toFixed(1)} ${baseline}`;
+  // Coordinate segmentation along active width aw
+  const pStart = startX + 0.04 * aw;
+  const pMid = startX + 0.11 * aw;
+  const pEnd = startX + 0.18 * aw;
+  const prEnd = startX + 0.28 * aw;
+  const qX = startX + (hasQWave ? 0.30 : 0.32) * aw;
+  const rX = startX + (hasBBB ? 0.38 : 0.36) * aw;
+  const sX = startX + (hasBBB ? 0.44 : 0.41) * aw;
+  const stStartX = startX + 0.45 * aw;
+  const stMidX = startX + 0.58 * aw;
+  const tPeakX = startX + 0.72 * aw;
+  const tEndX = startX + 0.88 * aw;
+  const beatEnd = startX + w;
+
+  return `M ${startX.toFixed(1)} ${baseline.toFixed(1)}
+    L ${pStart.toFixed(1)} ${baseline.toFixed(1)}
+    Q ${pMid.toFixed(1)} ${pPeakY.toFixed(1)} ${pEnd.toFixed(1)} ${baseline.toFixed(1)}
+    L ${prEnd.toFixed(1)} ${baseline.toFixed(1)}
+    L ${qX.toFixed(1)} ${qY.toFixed(1)}
+    L ${rX.toFixed(1)} ${rPeakY.toFixed(1)}
+    L ${sX.toFixed(1)} ${sDepthY.toFixed(1)}
+    L ${stStartX.toFixed(1)} ${stY.toFixed(1)}
+    L ${stMidX.toFixed(1)} ${stY.toFixed(1)}
+    Q ${tPeakX.toFixed(1)} ${tPeakY.toFixed(1)} ${tEndX.toFixed(1)} ${baseline.toFixed(1)}
+    L ${beatEnd.toFixed(1)} ${baseline.toFixed(1)}`;
 }
 
 export const ECGMonitorHUD: React.FC = () => {
@@ -79,21 +128,44 @@ export const ECGMonitorHUD: React.FC = () => {
   // Logical heartbeat active status: active when playback is running AND beating is enabled
   const isHeartActive = isPlaying && isBeating;
 
-  // Clinical findings from patient inputs
-  const rawPulseRate = Number(patientInputs['PR'] || heartRateBpm || 72);
+  // Clinical findings from patient inputs (with case-insensitive / multi-variant fallbacks)
+  const rawPulseRate = Number(
+    patientInputs['PR'] ?? patientInputs['pr'] ?? patientInputs['Pulse Rate'] ?? heartRateBpm ?? 72
+  );
   const currentBpm = Math.max(30, Math.min(180, rawPulseRate));
-  const hasSTElevation = Boolean(patientInputs['ST_Elevation']);
-  const hasSTDepression = Boolean(patientInputs['ST_Depression']);
-  const hasTInversion = Boolean(patientInputs['T_Inversion']);
+
+  const hasSTElevation = Boolean(
+    patientInputs['St Elevation'] ?? patientInputs['st_elevation'] ?? patientInputs['ST Elevation'] ?? patientInputs['ST_Elevation']
+  );
+  const hasSTDepression = Boolean(
+    patientInputs['St Depression'] ?? patientInputs['st_depression'] ?? patientInputs['ST Depression'] ?? patientInputs['ST_Depression']
+  );
+  const hasTInversion = Boolean(
+    patientInputs['Tinversion'] ?? patientInputs['tinversion'] ?? patientInputs['T_Inversion'] ?? patientInputs['T Inversion']
+  );
+  const hasQWave = Boolean(
+    patientInputs['Q Wave'] ?? patientInputs['q_wave'] ?? patientInputs['Q_Wave']
+  );
+  const hasLVH = Boolean(
+    patientInputs['LVH'] ?? patientInputs['lvh']
+  );
+  const hasPoorRProgression = Boolean(
+    patientInputs['Poor R Progression'] ?? patientInputs['poor_r_progression'] ?? patientInputs['Poor_R_Progression']
+  );
+  const bbbVal = String(patientInputs['BBB'] ?? patientInputs['bbb'] ?? 'N').trim().toUpperCase();
+  const hasBBB = bbbVal === 'LBBB' || bbbVal === 'RBBB';
   const ejectionFraction = Number(patientInputs['EF-TTE'] || 50);
 
   // Selected Lead (Lead II standard rhythm lead)
   const [selectedLead, setSelectedLead] = useState<'II' | 'V1' | 'V5' | 'aVR'>('II');
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
 
-  // Draggable window state
+  // Draggable window state (defaults to bottom-right)
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [position, setPosition] = useState<Position>({ x: 16, y: 16 });
+  const [position, setPosition] = useState<Position>({
+    x: typeof window !== 'undefined' ? Math.max(16, window.innerWidth - 496) : 700,
+    y: typeof window !== 'undefined' ? Math.max(16, window.innerHeight - 165) : 450,
+  });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
 
@@ -154,46 +226,51 @@ export const ECGMonitorHUD: React.FC = () => {
     };
   }, [showECG, isHeartActive, cardiacPhase, scrollSpeed, beatWidth]);
 
-  // Generate continuous seamless multi-beat moving path
+  // Generate continuous seamless multi-beat moving path with patient-individualized ECG features
   const movingWaveformPath = useMemo(() => {
     // Current cyclic offset within one beat period [0, beatWidth)
     const offset = scrollOffset % beatWidth;
-    // Generate 5 consecutive beats starting from -offset - beatWidth to cover [-200, 800]
+    const currentGlobalBeatIdx = Math.floor(scrollOffset / beatWidth);
+
+    // Generate consecutive beats starting from -offset - beatWidth to cover [-200, 800]
     let pathD = '';
     for (let i = -1; i <= 3; i++) {
       const beatStartX = i * beatWidth - offset;
+      const beatIdx = currentGlobalBeatIdx + i;
       const beat = generateSingleBeatPath(
         beatStartX,
         beatWidth,
         selectedLead,
         hasSTElevation,
         hasSTDepression,
-        hasTInversion
+        hasTInversion,
+        hasQWave,
+        hasLVH,
+        hasPoorRProgression,
+        hasBBB,
+        currentBpm,
+        beatIdx
       );
       pathD += ` ${beat}`;
     }
     return pathD;
-  }, [scrollOffset, beatWidth, selectedLead, hasSTElevation, hasSTDepression, hasTInversion]);
+  }, [
+    scrollOffset,
+    beatWidth,
+    selectedLead,
+    hasSTElevation,
+    hasSTDepression,
+    hasTInversion,
+    hasQWave,
+    hasLVH,
+    hasPoorRProgression,
+    hasBBB,
+    currentBpm,
+  ]);
 
   // Current cardiac phase derived from live scroll position
   const currentNormalizedPhase = (scrollOffset % beatWidth) / beatWidth;
   const isSystolePhase = currentNormalizedPhase >= 0.16 && currentNormalizedPhase <= 0.38;
-
-  // Initial placement at bottom-center of viewport
-  useEffect(() => {
-    const parent = containerRef.current?.parentElement;
-    if (parent) {
-      const parentWidth = parent.clientWidth;
-      const parentHeight = parent.clientHeight;
-      const targetWidth = isMinimized ? 240 : 500;
-      const targetHeight = isMinimized ? 40 : 160;
-
-      setPosition({
-        x: Math.max(16, Math.min(parentWidth - targetWidth - 16, (parentWidth - targetWidth) / 2)),
-        y: Math.max(16, parentHeight - targetHeight - 20),
-      });
-    }
-  }, []);
 
   // Boundary clamping
   const clamp = useCallback((pos: Position, menuWidth: number, menuHeight: number): Position => {
@@ -212,6 +289,46 @@ export const ECGMonitorHUD: React.FC = () => {
       y: Math.max(minY, Math.min(maxY, pos.y)),
     };
   }, []);
+
+  // Initial placement at bottom-right of viewport
+  useEffect(() => {
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const parentWidth = parent.clientWidth;
+      const parentHeight = parent.clientHeight;
+      const targetWidth = isMinimized ? 240 : 480;
+      const targetHeight = isMinimized ? 40 : 160;
+
+      setPosition(clamp({
+        x: Math.max(16, parentWidth - 496),
+        y: Math.max(16, parentHeight - 165),
+      }, targetWidth, targetHeight));
+    }
+  }, [clamp, isMinimized]);
+
+  // Fluid expand/minimize handlers with boundary clamping
+  const handleMinimize = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      setPosition((prev) => clamp(prev, 240, 40));
+    }
+    setIsMinimized(true);
+  };
+
+  const handleExpand = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const parentWidth = parent.clientWidth;
+      const parentHeight = parent.clientHeight;
+      setPosition((prev) => clamp({
+        x: Math.min(prev.x, parentWidth - 496),
+        y: Math.min(prev.y, parentHeight - 165),
+      }, 480, 160));
+    }
+    setIsMinimized(false);
+  };
 
   // Pointer drag listeners using robust window-level tracking
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -283,12 +400,12 @@ export const ECGMonitorHUD: React.FC = () => {
       {isMinimized ? (
         /* Minimalist Pill */
         <div
-          className="bg-[#070b12]/95 backdrop-blur-md border border-slate-700/80 hover:border-emerald-500/60 rounded-xl px-3 py-1.5 flex items-center gap-2.5 text-xs text-slate-200 shadow-2xl transition-all"
+          className="bg-card/95 backdrop-blur-md border border-border hover:border-emerald-500/60 rounded-xl px-3 py-1.5 flex items-center gap-2.5 text-xs text-card-foreground shadow-2xl transition-all duration-200 ease-in-out"
         >
           {/* Drag Handle */}
           <div
             onPointerDown={handlePointerDown}
-            className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-emerald-400 p-0.5"
+            className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-emerald-400 p-0.5"
             title="Drag to reposition ECG Pill"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -297,7 +414,7 @@ export const ECGMonitorHUD: React.FC = () => {
           </div>
 
           <div
-            onClick={() => setIsMinimized(false)}
+            onClick={handleExpand}
             className="flex items-center gap-2 cursor-pointer hover:opacity-90"
             title="Click to expand ECG Oscilloscope Monitor"
           >
@@ -306,7 +423,7 @@ export const ECGMonitorHUD: React.FC = () => {
                 isHeartActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
               }`}
             />
-            <span className="font-semibold text-white tracking-tight">ECG Lead {selectedLead}</span>
+            <span className="font-semibold text-foreground tracking-tight">ECG Lead {selectedLead}</span>
             <span className="font-mono text-emerald-400 font-bold">{currentBpm} BPM</span>
             {!isHeartActive && (
               <span className="text-[10px] text-amber-400 font-bold px-1 rounded bg-amber-950/80 border border-amber-700/60">
@@ -317,16 +434,18 @@ export const ECGMonitorHUD: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setIsMinimized(false)}
-            className="w-5 h-5 rounded-md bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-[10px] transition-colors"
+            onClick={handleExpand}
+            className="w-5 h-5 rounded-md bg-secondary/80 hover:bg-secondary text-secondary-foreground hover:text-foreground flex items-center justify-center text-[10px] transition-colors border border-border"
             title="Expand ECG Monitor"
+            aria-label="Expand ECG Monitor"
+            data-testid="expand-ecg-btn"
           >
-            ▲
+            ▼
           </button>
           <button
             type="button"
             onClick={() => toggleECG()}
-            className="w-5 h-5 rounded-md bg-slate-800/80 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center text-[10px] transition-colors"
+            className="w-5 h-5 rounded-md bg-secondary/80 hover:bg-rose-600 text-secondary-foreground hover:text-white flex items-center justify-center text-[10px] transition-colors border border-border"
             title="Close ECG"
           >
             &times;
@@ -335,18 +454,18 @@ export const ECGMonitorHUD: React.FC = () => {
       ) : (
         /* Minimalist & Professional Telemetry Monitor Window */
         <div
-          className="w-[92vw] sm:w-[480px] md:w-[500px] rounded-2xl border border-slate-800/90 bg-[#070b12]/95 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col text-xs"
+          className="w-[92vw] sm:w-[480px] md:w-[500px] rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col text-xs text-card-foreground transition-all duration-200 ease-in-out"
         >
           {/* Header Bar */}
           <div
-            className="bg-slate-900/80 border-b border-slate-800/80 px-3.5 py-2 flex items-center justify-between"
+            className="bg-muted/40 border-b border-border/80 px-3.5 py-2 flex items-center justify-between"
           >
             <div
               onPointerDown={handlePointerDown}
               className="flex items-center gap-2 cursor-grab active:cursor-grabbing flex-1 mr-2"
               title="Drag to reposition ECG Monitor"
             >
-              <svg className="w-3.5 h-3.5 text-slate-400 hover:text-white" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9 5a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm10-14a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
 
@@ -356,8 +475,8 @@ export const ECGMonitorHUD: React.FC = () => {
                     isHeartActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
                   }`}
                 />
-                <span className="font-bold text-white tracking-wide">ECG Telemetry</span>
-                <span className="text-[10px] font-mono text-emerald-400/90 font-semibold px-1.5 py-0.2 rounded bg-emerald-950/60 border border-emerald-800/60">
+                <span className="font-bold text-foreground tracking-wide">ECG Telemetry</span>
+                <span className="text-[10px] font-mono text-emerald-400 font-semibold px-1.5 py-0.2 rounded bg-emerald-950/60 border border-emerald-800/60">
                   Lead {selectedLead}
                 </span>
                 {!isHeartActive && (
@@ -370,7 +489,7 @@ export const ECGMonitorHUD: React.FC = () => {
 
             <div className="flex items-center gap-1.5">
               {/* Minimalist Lead Selector */}
-              <div className="flex items-center bg-slate-950/80 p-0.5 rounded-lg border border-slate-800">
+              <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border">
                 {(['II', 'V1', 'V5', 'aVR'] as const).map((lead) => (
                   <button
                     key={lead}
@@ -378,8 +497,8 @@ export const ECGMonitorHUD: React.FC = () => {
                     onClick={() => setSelectedLead(lead)}
                     className={`px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold transition-colors ${
                       selectedLead === lead
-                        ? 'bg-emerald-600 text-white'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {lead}
@@ -390,16 +509,18 @@ export const ECGMonitorHUD: React.FC = () => {
               {/* Minimize & Close */}
               <button
                 type="button"
-                onClick={() => setIsMinimized(true)}
-                className="w-6 h-6 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/50"
-                title="Minimize"
+                onClick={handleMinimize}
+                className="w-6 h-6 rounded-lg bg-secondary/80 hover:bg-secondary text-secondary-foreground hover:text-foreground flex items-center justify-center text-xs transition-colors border border-border"
+                title="Minimize ECG Monitor"
+                aria-label="Minimize ECG Monitor"
+                data-testid="collapse-ecg-btn"
               >
-                —
+                ▲
               </button>
               <button
                 type="button"
                 onClick={() => toggleECG()}
-                className="w-6 h-6 rounded-lg bg-slate-800/70 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/50"
+                className="w-6 h-6 rounded-lg bg-secondary/80 hover:bg-rose-600 text-secondary-foreground hover:text-white flex items-center justify-center text-xs transition-colors border border-border"
                 title="Close"
               >
                 &times;
@@ -408,37 +529,78 @@ export const ECGMonitorHUD: React.FC = () => {
           </div>
 
           {/* Vitals Telemetry Row */}
-          <div className="px-3.5 py-1.5 bg-slate-950/60 border-b border-slate-800/60 flex items-center justify-between text-[11px]">
+          <div className="px-3.5 py-1.5 bg-muted/40 border-b border-border/60 flex flex-wrap items-center justify-between text-[11px] gap-2">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 font-mono">
-                <span className="text-slate-400">HR:</span>
+                <span className="text-muted-foreground">HR:</span>
                 <span className="font-bold text-emerald-400 text-xs">{currentBpm} BPM</span>
+                <span className="text-[10px] text-muted-foreground font-sans">
+                  ({currentBpm >= 100 ? 'Tachy' : currentBpm < 60 ? 'Brady' : 'Sinus'})
+                </span>
               </div>
-              <div className="flex items-center gap-1 font-mono text-slate-400">
+              <div className="flex items-center gap-1 font-mono text-muted-foreground">
                 <span>PR:</span>
-                <span className="text-slate-200 font-semibold">160ms</span>
+                <span className="text-foreground font-semibold">
+                  {Math.round(160 * Math.pow(75 / currentBpm, 0.25))}ms
+                </span>
               </div>
-              <div className="flex items-center gap-1 font-mono text-slate-400">
+              <div className="flex items-center gap-1 font-mono text-muted-foreground">
                 <span>QRS:</span>
-                <span className="text-slate-200 font-semibold">88ms</span>
+                <span className="text-foreground font-semibold">
+                  {hasBBB ? '132ms' : hasLVH ? '104ms' : '88ms'}
+                </span>
               </div>
-              <div className="hidden sm:flex items-center gap-1 font-mono text-slate-400">
+              <div className="hidden sm:flex items-center gap-1 font-mono text-muted-foreground">
+                <span>QTc:</span>
+                <span className="text-foreground font-semibold">
+                  {Math.round(395 * Math.sqrt(75 / currentBpm))}ms
+                </span>
+              </div>
+              <div className="hidden md:flex items-center gap-1 font-mono text-muted-foreground">
                 <span>EF:</span>
-                <span className="text-cyan-300 font-semibold">{ejectionFraction}%</span>
+                <span className="text-primary font-semibold">{ejectionFraction}%</span>
               </div>
             </div>
 
-            {/* Ischemia badge */}
+            {/* Ischemia / Infarction badge */}
             <div>
-              {hasSTElevation || hasSTDepression || hasTInversion ? (
-                <span className="px-2 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-800 text-[10px] font-bold flex items-center gap-1">
+              {hasSTElevation ? (
+                <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/50 text-[10px] font-bold flex items-center gap-1 animate-pulse">
+                  <span>🚨</span>
+                  STEMI (ST-Elev)
+                </span>
+              ) : hasSTDepression && hasTInversion ? (
+                <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/50 text-[10px] font-bold flex items-center gap-1">
                   <span>⚠️</span>
-                  {hasSTElevation && 'ST-Elev'}
-                  {hasSTDepression && 'ST-Depr'}
-                  {hasTInversion && 'T-Inv'}
+                  ST-Depr + T-Inv
+                </span>
+              ) : hasSTDepression ? (
+                <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/50 text-[10px] font-bold flex items-center gap-1">
+                  <span>⚠️</span>
+                  ST-Depression
+                </span>
+              ) : hasTInversion ? (
+                <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/50 text-[10px] font-bold flex items-center gap-1">
+                  <span>⚠️</span>
+                  T-Inversion
+                </span>
+              ) : hasQWave ? (
+                <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/50 text-[10px] font-bold flex items-center gap-1">
+                  <span>⚠️</span>
+                  Pathological Q
+                </span>
+              ) : hasLVH ? (
+                <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/50 text-[10px] font-bold flex items-center gap-1">
+                  <span>⚡</span>
+                  LVH Criteria
+                </span>
+              ) : hasPoorRProgression ? (
+                <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/50 text-[10px] font-bold flex items-center gap-1">
+                  <span>⚠️</span>
+                  Poor R-Progression
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded bg-emerald-950/50 text-emerald-300 border border-emerald-800/50 text-[10px] font-medium">
+                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-medium">
                   Normal Sinus
                 </span>
               )}

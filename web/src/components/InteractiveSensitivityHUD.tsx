@@ -28,6 +28,7 @@ export const InteractiveSensitivityHUD: React.FC<InteractiveSensitivityHUDProps>
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 16, y: 16 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
 
   // Initial placement at top-right
@@ -251,60 +252,119 @@ export const InteractiveSensitivityHUD: React.FC<InteractiveSensitivityHUDProps>
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         touchAction: 'none',
       }}
-      className={`absolute top-0 left-0 z-30 w-full max-w-sm sm:max-w-md bg-slate-900/95 backdrop-blur-xl border border-purple-800/70 rounded-2xl shadow-2xl shadow-purple-950/60 overflow-hidden text-slate-100 flex flex-col max-h-[88vh] select-none pointer-events-auto ${
+      className={`absolute top-0 left-0 z-30 select-none pointer-events-auto ${
         isDragging ? 'cursor-grabbing scale-[1.01]' : ''
       }`}
+      data-testid="interactive-sensitivity-hud"
     >
-      {/* HUD Header */}
-      <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
+      {isCollapsed ? (
+        /* Collapsed Floating Chip / Pill */
         <div
           onPointerDown={handlePointerDown}
-          className="flex items-center gap-2.5 cursor-grab active:cursor-grabbing flex-1 mr-2"
-          title="Drag to reposition Sensitivity window"
+          className="bg-slate-900/95 backdrop-blur-md border border-purple-800/80 hover:border-purple-500 rounded-full px-3 py-1.5 flex items-center gap-2.5 cursor-grab text-xs text-slate-200 shadow-2xl transition-all pointer-events-auto"
+          title="Click to expand sensitivity controls or drag to reposition"
+          data-testid="sensitivity-collapsed-pill"
         >
-          <div className="text-slate-400 hover:text-purple-400 p-0.5">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M9 5a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm10-14a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
+          <span className="text-purple-400 font-bold">⠿</span>
+          <div className="w-5 h-5 rounded-md bg-purple-950 flex items-center justify-center border border-purple-700/60">
+            <span className="text-[11px]">⚡</span>
           </div>
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-md">
-            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <h3 className="text-sm font-bold text-white tracking-tight">Model Sensitivity</h3>
-              <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700/60">
-                Live 3D
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-400">Perturb vitals to observe dynamic 3D vessel shifts</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          {baseline && (
-            <button
-              onClick={handleResetToBaseline}
-              className="text-[11px] text-purple-300 hover:text-white bg-purple-950/60 hover:bg-purple-900/80 px-2 py-1 rounded border border-purple-700/60 transition-colors font-medium"
-              title="Reset all inputs back to original baseline persona values"
-            >
-              Reset
-            </button>
-          )}
-
+          <span className="font-semibold text-slate-100 flex items-center gap-1.5">
+            <span>Model Sensitivity</span>
+            <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-700/60 font-mono">
+              Live
+            </span>
+          </span>
           <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            title="Close Sensitivity Overlay"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCollapsed(false);
+            }}
+            className="w-5 h-5 rounded-full bg-slate-800 hover:bg-purple-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors text-[10px]"
+            title="Expand Sensitivity HUD"
+            aria-label="Expand Sensitivity HUD"
+            data-testid="expand-sensitivity-btn"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            ▼
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="w-5 h-5 rounded-full bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors text-[10px]"
+            title="Close Sensitivity Overlay"
+            aria-label="Close Sensitivity Overlay"
+          >
+            ✕
           </button>
         </div>
-      </div>
+      ) : (
+        /* Expanded HUD Window */
+        <div className="w-full max-w-sm sm:max-w-md bg-slate-900/95 backdrop-blur-xl border border-purple-800/70 rounded-2xl shadow-2xl shadow-purple-950/60 overflow-hidden text-slate-100 flex flex-col max-h-[88vh]">
+          {/* HUD Header */}
+          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
+            <div
+              onPointerDown={handlePointerDown}
+              className="flex items-center gap-2.5 cursor-grab active:cursor-grabbing flex-1 mr-2"
+              title="Drag to reposition Sensitivity window"
+            >
+              <div className="text-slate-400 hover:text-purple-400 p-0.5">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 5a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm10-14a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-md">
+                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-sm font-bold text-white tracking-tight">Model Sensitivity</h3>
+                  <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700/60">
+                    Live 3D
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400">Perturb vitals to observe dynamic 3D vessel shifts</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {baseline && (
+                <button
+                  onClick={handleResetToBaseline}
+                  className="text-[11px] text-purple-300 hover:text-white bg-purple-950/60 hover:bg-purple-900/80 px-2 py-1 rounded border border-purple-700/60 transition-colors font-medium"
+                  title="Reset all inputs back to original baseline persona values"
+                >
+                  Reset
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setIsCollapsed(true)}
+                className="w-6 h-6 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/50"
+                title="Collapse Sensitivity HUD"
+                aria-label="Collapse Sensitivity HUD"
+                data-testid="collapse-sensitivity-btn"
+              >
+                ▲
+              </button>
+
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                title="Close Sensitivity Overlay"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 text-xs">
         {/* Required Clinical Disclaimer Title */}
@@ -484,5 +544,7 @@ export const InteractiveSensitivityHUD: React.FC<InteractiveSensitivityHUDProps>
         </div>
       </div>
     </div>
+    )}
+  </div>
   );
 };

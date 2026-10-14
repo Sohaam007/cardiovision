@@ -1,0 +1,757 @@
+[
+  {
+    "name": "Age",
+    "type": "integer",
+    "group": "Demographic",
+    "min": 30,
+    "max": 86,
+    "default": 58,
+    "unit": "years",
+    "reference_range": "18-100",
+    "options": null,
+    "description": "Patient age in years"
+  },
+  {
+    "name": "Weight",
+    "type": "integer",
+    "group": "Demographic",
+    "min": 48,
+    "max": 120,
+    "default": 74,
+    "unit": "kg",
+    "reference_range": "40-150",
+    "options": null,
+    "description": "Patient body weight in kilograms"
+  },
+  {
+    "name": "Length",
+    "type": "integer",
+    "group": "Demographic",
+    "min": 140,
+    "max": 188,
+    "default": 165,
+    "unit": "cm",
+    "reference_range": "140-200",
+    "options": null,
+    "description": "Patient height in centimeters"
+  },
+  {
+    "name": "Sex",
+    "type": "categorical",
+    "group": "Demographic",
+    "min": null,
+    "max": null,
+    "default": "Male",
+    "unit": "",
+    "reference_range": "Male/Female",
+    "options": [
+      "Male",
+      "Fmale"
+    ],
+    "description": "Biological sex (Male or Female/Fmale)"
+  },
+  {
+    "name": "BMI",
+    "type": "number",
+    "group": "Demographic",
+    "min": 18.11,
+    "max": 40.91,
+    "default": 26.78,
+    "unit": "kg/m^2",
+    "reference_range": "18.5-24.9",
+    "options": null,
+    "description": "Body Mass Index"
+  },
+  {
+    "name": "DM",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "History of Diabetes Mellitus"
+  },
+  {
+    "name": "HTN",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 1,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "History of Hypertension"
+  },
+  {
+    "name": "Current Smoker",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Current tobacco cigarette smoker"
+  },
+  {
+    "name": "EX-Smoker",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Ex-smoker status"
+  },
+  {
+    "name": "FH",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Family history of premature CAD"
+  },
+  {
+    "name": "Obesity",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 1,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Clinical obesity assessment (BMI >= 30)"
+  },
+  {
+    "name": "CRF",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Chronic Renal Failure history"
+  },
+  {
+    "name": "CVA",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Cerebrovascular Accident / stroke history"
+  },
+  {
+    "name": "Airway disease",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Chronic obstructive pulmonary disease or asthma"
+  },
+  {
+    "name": "Thyroid Disease",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "History of thyroid dysfunction"
+  },
+  {
+    "name": "CHF",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Congestive Heart Failure history"
+  },
+  {
+    "name": "DLP",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Dyslipidemia history"
+  },
+  {
+    "name": "BP",
+    "type": "integer",
+    "group": "History/exam",
+    "min": 90,
+    "max": 190,
+    "default": 130,
+    "unit": "mmHg",
+    "reference_range": "90-120",
+    "options": null,
+    "description": "Resting systolic blood pressure"
+  },
+  {
+    "name": "PR",
+    "type": "integer",
+    "group": "History/exam",
+    "min": 50,
+    "max": 110,
+    "default": 70,
+    "unit": "bpm",
+    "reference_range": "60-100",
+    "options": null,
+    "description": "Resting pulse rate"
+  },
+  {
+    "name": "Edema",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Peripheral peripheral edema sign"
+  },
+  {
+    "name": "Weak Peripheral Pulse",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Diminished or absent peripheral pulse"
+  },
+  {
+    "name": "Lung rales",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Auscultatory crackles or rales in lungs"
+  },
+  {
+    "name": "Systolic Murmur",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Presence of systolic cardiac murmur"
+  },
+  {
+    "name": "Diastolic Murmur",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Presence of diastolic cardiac murmur"
+  },
+  {
+    "name": "Typical Chest Pain",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 1,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Classical substernal exertional angina"
+  },
+  {
+    "name": "Dyspnea",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Shortness of breath on exertion or rest"
+  },
+  {
+    "name": "Function Class",
+    "type": "ordinal",
+    "group": "History/exam",
+    "min": 0,
+    "max": 3,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0-3",
+    "options": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "description": "NYHA heart failure functional classification (0-3)"
+  },
+  {
+    "name": "Atypical",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Atypical chest pain presentation"
+  },
+  {
+    "name": "Nonanginal",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Non-anginal chest pain symptoms"
+  },
+  {
+    "name": "LowTH Ang",
+    "type": "binary",
+    "group": "History/exam",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Low threshold angina presentation"
+  },
+  {
+    "name": "Q Wave",
+    "type": "binary",
+    "group": "ECG",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Pathological Q waves on electrocardiogram"
+  },
+  {
+    "name": "St Elevation",
+    "type": "binary",
+    "group": "ECG",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "ST-segment elevation on electrocardiogram"
+  },
+  {
+    "name": "St Depression",
+    "type": "binary",
+    "group": "ECG",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "ST-segment depression on electrocardiogram"
+  },
+  {
+    "name": "Tinversion",
+    "type": "binary",
+    "group": "ECG",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "T-wave inversion on electrocardiogram"
+  },
+  {
+    "name": "LVH",
+    "type": "binary",
+    "group": "ECG",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Left Ventricular Hypertrophy voltage criteria on ECG"
+  },
+  {
+    "name": "Poor R Progression",
+    "type": "binary",
+    "group": "ECG",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0=No, 1=Yes",
+    "options": [
+      0,
+      1
+    ],
+    "description": "Poor R-wave progression across precordial leads V1-V3"
+  },
+  {
+    "name": "BBB",
+    "type": "categorical",
+    "group": "ECG",
+    "min": null,
+    "max": null,
+    "default": "N",
+    "unit": "",
+    "reference_range": "N/LBBB/RBBB",
+    "options": [
+      "N",
+      "LBBB",
+      "RBBB"
+    ],
+    "description": "Bundle Branch Block pattern on ECG"
+  },
+  {
+    "name": "FBS",
+    "type": "integer",
+    "group": "Lab",
+    "min": 62,
+    "max": 400,
+    "default": 98,
+    "unit": "mg/dL",
+    "reference_range": "70-100",
+    "options": null,
+    "description": "Fasting blood sugar level"
+  },
+  {
+    "name": "CR",
+    "type": "number",
+    "group": "Lab",
+    "min": 0.5,
+    "max": 2.2,
+    "default": 1.0,
+    "unit": "mg/dL",
+    "reference_range": "0.6-1.2",
+    "options": null,
+    "description": "Serum creatinine level"
+  },
+  {
+    "name": "TG",
+    "type": "integer",
+    "group": "Lab",
+    "min": 37,
+    "max": 1050,
+    "default": 122,
+    "unit": "mg/dL",
+    "reference_range": "<150",
+    "options": null,
+    "description": "Serum triglycerides level"
+  },
+  {
+    "name": "LDL",
+    "type": "integer",
+    "group": "Lab",
+    "min": 18,
+    "max": 232,
+    "default": 100,
+    "unit": "mg/dL",
+    "reference_range": "<100",
+    "options": null,
+    "description": "Low-density lipoprotein cholesterol level"
+  },
+  {
+    "name": "HDL",
+    "type": "number",
+    "group": "Lab",
+    "min": 15.9,
+    "max": 111.0,
+    "default": 39.0,
+    "unit": "mg/dL",
+    "reference_range": ">40",
+    "options": null,
+    "description": "High-density lipoprotein cholesterol level"
+  },
+  {
+    "name": "BUN",
+    "type": "integer",
+    "group": "Lab",
+    "min": 6,
+    "max": 52,
+    "default": 16,
+    "unit": "mg/dL",
+    "reference_range": "7-20",
+    "options": null,
+    "description": "Blood Urea Nitrogen level"
+  },
+  {
+    "name": "ESR",
+    "type": "integer",
+    "group": "Lab",
+    "min": 1,
+    "max": 90,
+    "default": 15,
+    "unit": "mm/hr",
+    "reference_range": "<20",
+    "options": null,
+    "description": "Erythrocyte sedimentation rate"
+  },
+  {
+    "name": "HB",
+    "type": "number",
+    "group": "Lab",
+    "min": 8.9,
+    "max": 17.6,
+    "default": 13.2,
+    "unit": "g/dL",
+    "reference_range": "12.0-17.5",
+    "options": null,
+    "description": "Hemoglobin level"
+  },
+  {
+    "name": "K",
+    "type": "number",
+    "group": "Lab",
+    "min": 3.0,
+    "max": 6.6,
+    "default": 4.2,
+    "unit": "mEq/L",
+    "reference_range": "3.5-5.0",
+    "options": null,
+    "description": "Serum potassium concentration"
+  },
+  {
+    "name": "Na",
+    "type": "integer",
+    "group": "Lab",
+    "min": 128,
+    "max": 156,
+    "default": 141,
+    "unit": "mEq/L",
+    "reference_range": "135-145",
+    "options": null,
+    "description": "Serum sodium concentration"
+  },
+  {
+    "name": "WBC",
+    "type": "integer",
+    "group": "Lab",
+    "min": 3700,
+    "max": 18000,
+    "default": 7100,
+    "unit": "/uL",
+    "reference_range": "4000-11000",
+    "options": null,
+    "description": "White blood cell count"
+  },
+  {
+    "name": "Lymph",
+    "type": "integer",
+    "group": "Lab",
+    "min": 7,
+    "max": 60,
+    "default": 32,
+    "unit": "%",
+    "reference_range": "20-40",
+    "options": null,
+    "description": "Lymphocyte percentage in differential"
+  },
+  {
+    "name": "Neut",
+    "type": "integer",
+    "group": "Lab",
+    "min": 32,
+    "max": 89,
+    "default": 60,
+    "unit": "%",
+    "reference_range": "40-70",
+    "options": null,
+    "description": "Neutrophil percentage in differential"
+  },
+  {
+    "name": "PLT",
+    "type": "integer",
+    "group": "Lab",
+    "min": 25,
+    "max": 742,
+    "default": 210,
+    "unit": "10^3/uL",
+    "reference_range": "150-450",
+    "options": null,
+    "description": "Platelet count"
+  },
+  {
+    "name": "EF-TTE",
+    "type": "integer",
+    "group": "Echo",
+    "min": 15,
+    "max": 60,
+    "default": 50,
+    "unit": "%",
+    "reference_range": "50-70",
+    "options": null,
+    "description": "Transthoracic echocardiographic ejection fraction"
+  },
+  {
+    "name": "Region RWMA",
+    "type": "categorical",
+    "group": "Echo",
+    "min": null,
+    "max": null,
+    "default": 0,
+    "unit": "",
+    "reference_range": "0-4",
+    "options": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "description": "Regional wall motion abnormality segment count (0=normal)"
+  },
+  {
+    "name": "VHD",
+    "type": "categorical",
+    "group": "Echo",
+    "min": null,
+    "max": null,
+    "default": "mild",
+    "unit": "",
+    "reference_range": "N/mild/Moderate/Severe",
+    "options": [
+      "N",
+      "mild",
+      "Moderate",
+      "Severe"
+    ],
+    "description": "Valvular Heart Disease severity"
+  }
+]

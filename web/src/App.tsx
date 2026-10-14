@@ -10,12 +10,11 @@ import { DoctorInspectionDrawer } from './components/DoctorInspectionDrawer';
 import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
 import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
-import { InteractiveBeatingHeart } from './components/InteractiveBeatingHeart';
 import { SceneCanvas } from './scene/SceneCanvas';
 import { DissectionControls } from './components/DissectionControls';
 import { DraggableToolsMenu } from './components/DraggableToolsMenu';
-import { PatientFindingsHUD } from './components/PatientFindingsHUD';
 import { ECGMonitorHUD } from './components/ECGMonitorHUD';
+import { RepresentationSwitcherPill } from './components/RepresentationSwitcherPill';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -31,12 +30,10 @@ export const App: React.FC = () => {
   const setApiStatus = useStore((state) => state.setApiStatus);
   const setDemoMode = useStore((state) => state.setDemoMode);
   const viewerMode = useStore((state) => state.viewerMode);
-  const setViewerMode = useStore((state) => state.setViewerMode);
   const force2DFallback = useStore((state) => state.force2DFallback);
   const webglError = useStore((state) => state.webglError);
   const isSensitivityOpen = useStore((state) => state.isSensitivityOpen);
   const closeSensitivity = useStore((state) => state.closeSensitivity);
-  const toggleSensitivity = useStore((state) => state.toggleSensitivity);
   const [isModelInfoOpen, setIsModelInfoOpen] = useState(false);
   const [isBlenderStudioOpen, setIsBlenderStudioOpen] = useState(false);
   const [isDisclaimerDismissed, setIsDisclaimerDismissed] = useState(false);
@@ -231,7 +228,10 @@ export const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* 4. Main Workspace Area: 2-Column Responsive View (3D Scene + Clinical Panel) */}
+      {/* 4. Dedicated Patient Access Bar (Relocated PersonaPicker completely outside 3D Canvas) */}
+      <PersonaPicker />
+
+      {/* 5. Main Workspace Area: 2-Column Responsive View (3D Scene + Clinical Panel) */}
       <main className="flex-1 relative flex flex-col lg:flex-row overflow-hidden">
         {/* Left Column: 3D Canvas Viewport */}
         <div className="flex-1 relative h-[50vh] lg:h-auto bg-slate-950">
@@ -240,97 +240,19 @@ export const App: React.FC = () => {
               <WebGLFallback />
             ) : viewerMode === 'blender' ? (
               <BlenderTurntableEmbed onOpenModal={() => setIsBlenderStudioOpen(true)} />
-            ) : viewerMode === 'procedural' ? (
-              <SceneCanvas />
             ) : (
-              <InteractiveBeatingHeart fullScreen />
+              <SceneCanvas />
             )}
           </WebGLErrorBoundary>
 
-          {/* Segmented Mode Selector & Sensitivity What-If Toggle in Viewport Top-Right */}
-          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2 max-w-full justify-end">
-            <div className="flex items-center bg-[#090d16]/90 backdrop-blur-md p-1 rounded-xl border border-slate-800 shadow-2xl">
-              <button
-                type="button"
-                onClick={() => setViewerMode('realistic')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                  viewerMode === 'realistic'
-                    ? 'bg-rose-600 text-white shadow-md shadow-rose-950/60 ring-1 ring-rose-400/50'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                }`}
-                title="3D Photorealistic Beating Heart Model"
-              >
-                <span>🫀 3D Beating</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setViewerMode('procedural')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                  viewerMode === 'procedural'
-                    ? 'bg-cyan-600 text-white shadow-md shadow-cyan-950/60 ring-1 ring-cyan-400/50'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                }`}
-                title="3D Anatomical Procedural Model with Surgical Dissection & Myocardial Cutaway"
-              >
-                <span>⚙️ 3D Procedural</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setViewerMode('2d')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                  viewerMode === '2d'
-                    ? 'bg-amber-600 text-white shadow-md shadow-amber-950/60 ring-1 ring-amber-400/50'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                }`}
-                title="2D Clinical Angiogram & Hemodynamic Suite with Live Flow, ECG, and Cavities"
-              >
-                <span>🔬 2D Angiogram</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setViewerMode('blender')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                  viewerMode === 'blender'
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-950/60 ring-1 ring-purple-400/50'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                }`}
-                title="Blender 5.2 360° Studio Turntable & Offline Renderings"
-              >
-                <span>🎬 Blender Studio</span>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={toggleSensitivity}
-              className={`backdrop-blur-md border text-xs px-2.5 py-2 rounded-xl shadow-xl flex items-center gap-1.5 transition-all font-semibold ${
-                isSensitivityOpen
-                  ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
-                  : 'bg-[#090d16]/90 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
-              }`}
-              title="Toggle interactive 3D model sensitivity sliders and what-if simulation"
-            >
-              <svg className="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-              <span>{isSensitivityOpen ? 'Close Sensitivity' : '⚡ 3D Sensitivity'}</span>
-            </button>
-          </div>
-
-          {/* 1. Draggable Access Patient Tool (8 Holdout Personas) */}
-          <PersonaPicker />
-
-          {/* 2. Draggable Patient Findings & Direct Structure Navigation HUD */}
-          <PatientFindingsHUD />
+          {/* 0. In-Viewport Floating Representation Switcher Pill */}
+          <RepresentationSwitcherPill />
 
           {/* 3. Consolidated Draggable Floating Tools HUD */}
           <DraggableToolsMenu />
 
-          {/* 3b. Procedural Dissection Controls (Active strictly when viewerMode === 'procedural') */}
-          {viewerMode === 'procedural' && <DissectionControls />}
+          {/* 3b. Surgical Dissection Controls (Active for both procedural and realistic 3D representations) */}
+          {(viewerMode === 'procedural' || viewerMode === 'realistic') && <DissectionControls />}
 
           {/* 4. Floating Risk Legend HUD (Movable & Collapsible) */}
           <FloatingRiskLegend />

@@ -40,8 +40,8 @@ export interface TorsoProps {
  */
 export const Torso: React.FC<TorsoProps> = ({
   renderingMode = 'holographic',
-  showRibs = false,
-  showLungs = true,
+  showRibs = true,
+  showLungs = false,
   showDiaphragm = true,
   showVasculature = true,
 }) => {
@@ -189,8 +189,6 @@ export const Torso: React.FC<TorsoProps> = ({
     };
   }, []);
 
-  // Structural Wireframe Edge Accents for high-tech holographic depth
-  const edgesGeo = useMemo(() => new THREE.EdgesGeometry(torsoGeo, 28), [torsoGeo]);
 
   // =========================================================================
   // 2. DOME-SHAPED DIAPHRAGM MUSCLE
@@ -481,24 +479,24 @@ export const Torso: React.FC<TorsoProps> = ({
     });
 
     return {
-      aortaArch: new THREE.TubeGeometry(aortaArch, 36, 0.155, 20, false),
-      descendingAorta: new THREE.TubeGeometry(descendingAorta, 36, 0.095, 14, false),
-      rightIliac: new THREE.TubeGeometry(rightIliac, 16, 0.055, 10, false),
-      leftIliac: new THREE.TubeGeometry(leftIliac, 16, 0.055, 10, false),
-      rightCarotid: new THREE.TubeGeometry(rightCarotid, 24, 0.046, 10, false),
-      rightInternalCarotid: new THREE.TubeGeometry(rightInternalCarotid, 12, 0.032, 8, false),
-      rightExternalCarotid: new THREE.TubeGeometry(rightExternalCarotid, 12, 0.034, 8, false),
-      rightThyroidArtery: new THREE.TubeGeometry(rightThyroidArtery, 14, 0.020, 8, false),
-      leftCarotid: new THREE.TubeGeometry(leftCarotid, 24, 0.044, 10, false),
-      leftInternalCarotid: new THREE.TubeGeometry(leftInternalCarotid, 12, 0.032, 8, false),
-      leftExternalCarotid: new THREE.TubeGeometry(leftExternalCarotid, 12, 0.034, 8, false),
-      leftThyroidArtery: new THREE.TubeGeometry(leftThyroidArtery, 14, 0.020, 8, false),
-      rightBrachial: new THREE.TubeGeometry(rightBrachial, 44, 0.048, 12, false),
-      rightProfundaBrachii: new THREE.TubeGeometry(rightProfundaBrachii, 20, 0.026, 8, false),
-      leftBrachial: new THREE.TubeGeometry(leftBrachial, 44, 0.046, 12, false),
-      leftProfundaBrachii: new THREE.TubeGeometry(leftProfundaBrachii, 20, 0.026, 8, false),
-      rightInternalThoracic: new THREE.TubeGeometry(rightInternalThoracic, 24, 0.025, 8, false),
-      leftInternalThoracic: new THREE.TubeGeometry(leftInternalThoracic, 24, 0.025, 8, false),
+      aortaArch: new THREE.TubeGeometry(aortaArch, 36, 0.082, 16, false),
+      descendingAorta: new THREE.TubeGeometry(descendingAorta, 36, 0.052, 14, false),
+      rightIliac: new THREE.TubeGeometry(rightIliac, 16, 0.038, 10, false),
+      leftIliac: new THREE.TubeGeometry(leftIliac, 16, 0.038, 10, false),
+      rightCarotid: new THREE.TubeGeometry(rightCarotid, 24, 0.028, 10, false),
+      rightInternalCarotid: new THREE.TubeGeometry(rightInternalCarotid, 12, 0.020, 8, false),
+      rightExternalCarotid: new THREE.TubeGeometry(rightExternalCarotid, 12, 0.020, 8, false),
+      rightThyroidArtery: new THREE.TubeGeometry(rightThyroidArtery, 14, 0.015, 8, false),
+      leftCarotid: new THREE.TubeGeometry(leftCarotid, 24, 0.028, 10, false),
+      leftInternalCarotid: new THREE.TubeGeometry(leftInternalCarotid, 12, 0.020, 8, false),
+      leftExternalCarotid: new THREE.TubeGeometry(leftExternalCarotid, 12, 0.020, 8, false),
+      leftThyroidArtery: new THREE.TubeGeometry(leftThyroidArtery, 14, 0.015, 8, false),
+      rightBrachial: new THREE.TubeGeometry(rightBrachial, 44, 0.030, 12, false),
+      rightProfundaBrachii: new THREE.TubeGeometry(rightProfundaBrachii, 20, 0.018, 8, false),
+      leftBrachial: new THREE.TubeGeometry(leftBrachial, 44, 0.030, 12, false),
+      leftProfundaBrachii: new THREE.TubeGeometry(leftProfundaBrachii, 20, 0.018, 8, false),
+      rightInternalThoracic: new THREE.TubeGeometry(rightInternalThoracic, 24, 0.018, 8, false),
+      leftInternalThoracic: new THREE.TubeGeometry(leftInternalThoracic, 24, 0.018, 8, false),
       pectoralBranches,
       intercostals: intercostalCurves,
     };
@@ -625,22 +623,22 @@ export const Torso: React.FC<TorsoProps> = ({
     ]);
 
     return {
-      svc: new THREE.TubeGeometry(svc, 24, 0.095, 14, false),
-      leftBrachiocephalicVein: new THREE.TubeGeometry(leftBrachiocephalicVein, 24, 0.068, 12, false),
-      rightBrachiocephalicVein: new THREE.TubeGeometry(rightBrachiocephalicVein, 16, 0.065, 10, false),
-      rightInternalJugular: new THREE.TubeGeometry(rightInternalJugular, 20, 0.056, 10, false),
-      leftInternalJugular: new THREE.TubeGeometry(leftInternalJugular, 20, 0.054, 10, false),
-      rightExternalJugular: new THREE.TubeGeometry(rightExternalJugular, 18, 0.035, 8, false),
-      leftExternalJugular: new THREE.TubeGeometry(leftExternalJugular, 18, 0.035, 8, false),
-      rightArmVein: new THREE.TubeGeometry(rightArmVein, 44, 0.052, 12, false),
-      rightCephalicVein: new THREE.TubeGeometry(rightCephalicVein, 36, 0.034, 10, false),
-      leftArmVein: new THREE.TubeGeometry(leftArmVein, 44, 0.050, 12, false),
-      leftCephalicVein: new THREE.TubeGeometry(leftCephalicVein, 36, 0.034, 10, false),
-      ivc: new THREE.TubeGeometry(ivc, 28, 0.088, 12, false),
-      rightCommonIliacVein: new THREE.TubeGeometry(rightCommonIliacVein, 14, 0.052, 8, false),
-      leftCommonIliacVein: new THREE.TubeGeometry(leftCommonIliacVein, 14, 0.052, 8, false),
-      rightInternalThoracicVein: new THREE.TubeGeometry(rightInternalThoracicVein, 20, 0.024, 8, false),
-      leftInternalThoracicVein: new THREE.TubeGeometry(leftInternalThoracicVein, 20, 0.024, 8, false),
+      svc: new THREE.TubeGeometry(svc, 24, 0.062, 14, false),
+      leftBrachiocephalicVein: new THREE.TubeGeometry(leftBrachiocephalicVein, 24, 0.042, 12, false),
+      rightBrachiocephalicVein: new THREE.TubeGeometry(rightBrachiocephalicVein, 16, 0.040, 10, false),
+      rightInternalJugular: new THREE.TubeGeometry(rightInternalJugular, 20, 0.032, 10, false),
+      leftInternalJugular: new THREE.TubeGeometry(leftInternalJugular, 20, 0.032, 10, false),
+      rightExternalJugular: new THREE.TubeGeometry(rightExternalJugular, 18, 0.022, 8, false),
+      leftExternalJugular: new THREE.TubeGeometry(leftExternalJugular, 18, 0.022, 8, false),
+      rightArmVein: new THREE.TubeGeometry(rightArmVein, 44, 0.030, 12, false),
+      rightCephalicVein: new THREE.TubeGeometry(rightCephalicVein, 36, 0.022, 10, false),
+      leftArmVein: new THREE.TubeGeometry(leftArmVein, 44, 0.030, 12, false),
+      leftCephalicVein: new THREE.TubeGeometry(leftCephalicVein, 36, 0.022, 10, false),
+      ivc: new THREE.TubeGeometry(ivc, 28, 0.055, 12, false),
+      rightCommonIliacVein: new THREE.TubeGeometry(rightCommonIliacVein, 14, 0.034, 8, false),
+      leftCommonIliacVein: new THREE.TubeGeometry(leftCommonIliacVein, 14, 0.034, 8, false),
+      rightInternalThoracicVein: new THREE.TubeGeometry(rightInternalThoracicVein, 20, 0.018, 8, false),
+      leftInternalThoracicVein: new THREE.TubeGeometry(leftInternalThoracicVein, 20, 0.018, 8, false),
     };
   }, []);
 
@@ -649,20 +647,20 @@ export const Torso: React.FC<TorsoProps> = ({
   // =========================================================================
 
   // Outer Thoracic Shell Material
-  // Holographic Translucent Sapphire/Obsidian-Blue with Cyan Fresnel Edge Glow
+  // Holographic Translucent Dark Obsidian-Sapphire with Soft Anatomical Rim Sheen
   const shellMaterial = useMemo(() => {
     const isSkin = renderingMode === 'medical_skin';
     const mat = new THREE.MeshPhysicalMaterial({
-      color: isSkin ? '#e4b69d' : '#0b1c36', // Warm medical skin or Obsidian sapphire blue (#0b1c36)
-      roughness: isSkin ? 0.42 : 0.22,
-      metalness: isSkin ? 0.02 : 0.10,
-      transmission: isSkin ? 0.0 : 0.82,
-      ior: 1.35,
-      thickness: 0.8,
-      clearcoat: isSkin ? 0.35 : 1.0,
-      clearcoatRoughness: isSkin ? 0.22 : 0.14,
+      color: isSkin ? '#e4b69d' : '#0a101f', // Warm medical skin or dark smokey obsidian-slate
+      roughness: isSkin ? 0.42 : 0.28,
+      metalness: isSkin ? 0.02 : 0.04,
+      transmission: isSkin ? 0.0 : 0.65,
+      ior: 1.30,
+      thickness: 0.5,
+      clearcoat: isSkin ? 0.35 : 0.60,
+      clearcoatRoughness: isSkin ? 0.22 : 0.18,
       transparent: true,
-      opacity: isSkin ? 0.18 : 0.78,
+      opacity: isSkin ? 0.18 : 0.18,
       depthWrite: false, // Critical contract: NEVER occlude internal heart/vessels!
       side: THREE.DoubleSide,
       flatShading: false,
@@ -680,9 +678,9 @@ export const Torso: React.FC<TorsoProps> = ({
           vec3 rimViewDir = normalize(vViewPosition);
           vec3 rimNormal = normalize(vNormal);
           float rimFactor = 1.0 - clamp(abs(dot(rimNormal, rimViewDir)), 0.0, 1.0);
-          rimFactor = pow(rimFactor, 2.4);
-          // High-impact cyan Fresnel edge glow (#00e5ff)
-          gl_FragColor.rgb += vec3(0.0, 0.85, 1.0) * (rimFactor * 0.92);
+          rimFactor = pow(rimFactor, 3.0);
+          // Subtle elegant cool rim sheen matching anatomical reference
+          gl_FragColor.rgb += vec3(0.18, 0.28, 0.45) * (rimFactor * 0.35);
           `
         );
       };
@@ -708,16 +706,16 @@ export const Torso: React.FC<TorsoProps> = ({
     });
   }, [clippingPlane]);
 
-  // High-Impact Systemic Arterial Material (Crimson Red #dc2626, clearcoat: 1.0, roughness: 0.18)
+  // Systemic Arterial Material (Deep Anatomical Crimson Red #991b1b matching reference)
   const systemicArteryMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
-      color: '#dc2626', // Vibrant systemic arterial crimson red
-      roughness: 0.18,
-      metalness: 0.10,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.12,
+      color: '#991b1b', // Anatomical systemic arterial crimson red
+      roughness: 0.24,
+      metalness: 0.08,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.15,
       transparent: true,
-      opacity: 0.95,
+      opacity: 0.90,
       depthWrite: false,
       clippingPlanes: clippingPlane ? [clippingPlane] : [],
       clipShadows: true,
@@ -725,16 +723,16 @@ export const Torso: React.FC<TorsoProps> = ({
     });
   }, [clippingPlane]);
 
-  // High-Impact Systemic Venous Material (Cobalt Blue #2563eb, clearcoat: 0.90, roughness: 0.20)
+  // Systemic Venous Material (Deep Anatomical Navy #1e3a8a matching reference)
   const systemicVenousMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
-      color: '#2563eb', // Vibrant systemic venous cobalt blue
-      roughness: 0.20,
-      metalness: 0.10,
-      clearcoat: 0.90,
-      clearcoatRoughness: 0.14,
+      color: '#1e3a8a', // Anatomical systemic venous navy blue
+      roughness: 0.24,
+      metalness: 0.08,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.15,
       transparent: true,
-      opacity: 0.95,
+      opacity: 0.90,
       depthWrite: false,
       clippingPlanes: clippingPlane ? [clippingPlane] : [],
       clipShadows: true,
@@ -742,16 +740,6 @@ export const Torso: React.FC<TorsoProps> = ({
     });
   }, [clippingPlane]);
 
-  // Edge line material with clipping support
-  const edgeLineMaterial = useMemo(() => {
-    return new THREE.LineBasicMaterial({
-      color: '#38bdf8',
-      transparent: true,
-      opacity: 0.16,
-      depthWrite: false,
-      clippingPlanes: clippingPlane ? [clippingPlane] : [],
-    });
-  }, [clippingPlane]);
 
   if (!showTorso) {
     return null;
@@ -789,13 +777,8 @@ export const Torso: React.FC<TorsoProps> = ({
       <mesh geometry={armGeos.left} material={shellMaterial} />
       <mesh geometry={armGeos.right} material={shellMaterial} />
 
-      {/* Subtle Holographic Edge Rings (when in holographic styling) */}
-      {renderingMode !== 'medical_skin' && (
-        <lineSegments geometry={edgesGeo} material={edgeLineMaterial} />
-      )}
-
       {/* ============================================================== */}
-      {/* 5. SYSTEMIC ARTERIAL TREE (Crimson Red #dc2626)               */}
+      {/* 5. SYSTEMIC ARTERIAL TREE (Crimson Red #991b1b)               */}
       {/* Thick Ascending Aorta & Arch, Carotids, Subclavians/Brachials */}
       {/* ============================================================== */}
       {showVasculature && (
@@ -815,8 +798,16 @@ export const Torso: React.FC<TorsoProps> = ({
           <mesh geometry={arterialGeos.rightBrachial} material={systemicArteryMaterial} />
           <mesh geometry={arterialGeos.leftBrachial} material={systemicArteryMaterial} />
 
+          {/* Intercostal & Pectoral Artery Branches Tracing Ribcage */}
+          {arterialGeos.intercostals.map((geo, idx) => (
+            <mesh key={`intercostal_${idx}`} geometry={geo} material={systemicArteryMaterial} />
+          ))}
+          {arterialGeos.pectoralBranches.map((geo, idx) => (
+            <mesh key={`pectoral_${idx}`} geometry={geo} material={systemicArteryMaterial} />
+          ))}
+
           {/* ============================================================== */}
-          {/* 6. SYSTEMIC VENOUS TREE (Cobalt Blue #2563eb)                 */}
+          {/* 6. SYSTEMIC VENOUS TREE (Deep Navy #1e3a8a)                   */}
           {/* Large SVC, Primary Jugulars, Brachiocephalics, Main Arm Veins */}
           {/* ============================================================== */}
           {/* Large Superior Vena Cava (SVC) Entering Heart */}

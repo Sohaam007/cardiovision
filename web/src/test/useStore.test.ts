@@ -43,7 +43,7 @@ export function runUseStoreTests(): { passed: number; failed: number; tests: str
   test('Tier 1: Initial visual and toggle defaults are correctly set', () => {
     const state = useStore.getState();
     strictEqual(state.colorblindMode, false, 'Default colorblindMode must be false');
-    strictEqual(state.showTorso, true, 'Default showTorso must be true');
+    strictEqual(state.showTorso, false, 'Default showTorso must be false (torso off by default)');
     strictEqual(state.heartOpacity, 0.92, 'Default heartOpacity must be 0.92');
     strictEqual(state.selectedVessel, null, 'Default selectedVessel must be null');
     strictEqual(state.hoveredVessel, null, 'Default hoveredVessel must be null');
@@ -181,7 +181,7 @@ export function runUseStoreTests(): { passed: number; failed: number; tests: str
     strictEqual(state.prediction.vessels.LCX.prob, 0.31);
     strictEqual(state.prediction.vessels.RCA.prob, 0.52);
     strictEqual(state.colorblindMode, false);
-    strictEqual(state.showTorso, true);
+    strictEqual(state.showTorso, false);
     strictEqual(state.heartOpacity, 0.92);
     strictEqual(state.selectedVessel, null);
   });
