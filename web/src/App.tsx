@@ -37,6 +37,7 @@ export const App: React.FC = () => {
   const toggleSensitivity = useStore((state) => state.toggleSensitivity);
   const [isModelInfoOpen, setIsModelInfoOpen] = useState(false);
   const [isBlenderStudioOpen, setIsBlenderStudioOpen] = useState(false);
+  const [isDisclaimerDismissed, setIsDisclaimerDismissed] = useState(false);
 
   // Initial asset loading & health check
   useEffect(() => {
@@ -118,10 +119,25 @@ export const App: React.FC = () => {
       <DoctorInspectionDrawer />
       <BlenderStudioModal isOpen={isBlenderStudioOpen} onClose={() => setIsBlenderStudioOpen(false)} />
 
-      {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner */}
-      <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 text-center font-medium tracking-wide shadow-md z-30">
-        For decision support and educational purposes only. Not a medical device. Not a substitute for formal diagnostic imaging or clinical judgment.
-      </header>
+      {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner (Dismissable with Cross button) */}
+      {!isDisclaimerDismissed && (
+        <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 flex items-center justify-between font-medium tracking-wide shadow-md z-30">
+          <div className="flex-1 text-center pr-2">
+            For decision support and educational purposes only. Not a medical device. Not a substitute for formal diagnostic imaging or clinical judgment.
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsDisclaimerDismissed(true)}
+            className="p-1 rounded-md text-amber-300 hover:text-white hover:bg-amber-900/60 transition-colors shrink-0"
+            title="Dismiss clinical safety banner to expand view"
+            aria-label="Dismiss disclaimer"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+      )}
 
       {/* 3. Application Navigation Bar */}
       <nav className="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-6 py-2.5 flex items-center justify-between z-20">
@@ -154,6 +170,18 @@ export const App: React.FC = () => {
 
         {/* Global Controls & Status */}
         <div className="flex items-center gap-2.5">
+          {isDisclaimerDismissed && (
+            <button
+              type="button"
+              onClick={() => setIsDisclaimerDismissed(false)}
+              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-amber-700 bg-amber-950/90 text-amber-300 hover:bg-amber-900 transition-all flex items-center gap-1.5 shadow-sm"
+              title="Show clinical safety disclaimer banner"
+            >
+              <span>⚠️</span>
+              <span className="hidden sm:inline">Disclaimer</span>
+            </button>
+          )}
+
           <button
             onClick={() => setIsBlenderStudioOpen(true)}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-purple-700 bg-purple-950/90 text-purple-300 hover:bg-purple-900 transition-all flex items-center gap-1.5 shadow-sm"
@@ -201,10 +229,7 @@ export const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* 4. Top Bar: Persona Picker (8 Holdout Patients) */}
-      <PersonaPicker />
-
-      {/* 5. Main Workspace Area: 2-Column Responsive View (3D Scene + Clinical Panel) */}
+      {/* 4. Main Workspace Area: 2-Column Responsive View (3D Scene + Clinical Panel) */}
       <main className="flex-1 relative flex flex-col lg:flex-row overflow-hidden">
         {/* Left Column: 3D Canvas Viewport */}
         <div className="flex-1 relative h-[50vh] lg:h-auto bg-slate-950">
@@ -217,21 +242,6 @@ export const App: React.FC = () => {
               <InteractiveBeatingHeart fullScreen />
             )}
           </WebGLErrorBoundary>
-
-          {/* Viewport Clinical HUD Overlay */}
-          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 pointer-events-none z-10 hidden sm:flex items-center gap-2">
-            <div className="bg-[#090d16]/90 backdrop-blur-md border border-slate-800 text-[11px] text-slate-300 px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span className="font-semibold text-white">
-                {viewerMode === 'realistic' && '3D Beating Heart (Cycles Photorealistic)'}
-                {viewerMode === '2d' && '2D Angiogram Suite'}
-                {viewerMode === 'blender' && 'Blender Studio Turntable'}
-              </span>
-              <span className="text-slate-500 text-[10px] pl-2 border-l border-slate-800 hidden md:inline">
-                Uniform vessel risk shading &bull; Zero localized lesions
-              </span>
-            </div>
-          </div>
 
           {/* Segmented Mode Selector & Sensitivity What-If Toggle in Viewport Top-Right */}
           <div className="absolute top-3 right-3 sm:top-4 sm:right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2 max-w-full justify-end">
@@ -293,21 +303,22 @@ export const App: React.FC = () => {
             </button>
           </div>
 
-          {/* Patient Findings & Direct Structure Navigation HUD Overlay */}
-          <div className="absolute top-12 left-3 right-3 sm:top-14 sm:left-4 sm:right-4 z-20 pointer-events-auto flex flex-col gap-1.5 max-w-full">
-            <PatientFindingsHUD />
-          </div>
+          {/* 1. Draggable Access Patient Tool (8 Holdout Personas) */}
+          <PersonaPicker />
 
-          {/* Consolidated Draggable Floating Tools HUD */}
+          {/* 2. Draggable Patient Findings & Direct Structure Navigation HUD */}
+          <PatientFindingsHUD />
+
+          {/* 3. Consolidated Draggable Floating Tools HUD */}
           <DraggableToolsMenu />
 
-          {/* Floating Risk Legend HUD (Movable & Collapsible) */}
+          {/* 4. Floating Risk Legend HUD (Movable & Collapsible) */}
           <FloatingRiskLegend />
 
-          {/* Systematic Real-Time ECG Oscilloscope Monitor HUD */}
+          {/* 5. Systematic Real-Time ECG Oscilloscope Monitor HUD (Minimalist & Draggable) */}
           <ECGMonitorHUD />
 
-          {/* Interactive Sensitivity & What-If Studio HUD Overlay */}
+          {/* 6. Interactive Sensitivity & What-If Studio HUD Overlay (Draggable) */}
           <InteractiveSensitivityHUD isOpen={isSensitivityOpen} onClose={closeSensitivity} />
         </div>
 
