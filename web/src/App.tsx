@@ -7,6 +7,7 @@ import { FloatingRiskLegend } from './components/FloatingRiskLegend';
 import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 import { WebGLFallback } from './components/WebGLFallback';
 import { ModelInfoDrawer } from './components/ModelInfoDrawer';
+import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -25,6 +26,7 @@ export const App: React.FC = () => {
   const setForce2DFallback = useStore((state) => state.setForce2DFallback);
   const webglError = useStore((state) => state.webglError);
   const [isModelInfoOpen, setIsModelInfoOpen] = useState(false);
+  const [isBlenderStudioOpen, setIsBlenderStudioOpen] = useState(false);
 
   // Initial asset loading & health check
   useEffect(() => {
@@ -103,6 +105,7 @@ export const App: React.FC = () => {
       {/* 1. First-Load Clinical Safety Modal & Model Information Drawer */}
       <SafetyModal />
       <ModelInfoDrawer isOpen={isModelInfoOpen} onClose={() => { setIsModelInfoOpen(false); useStore.getState().closeModelInfo(); }} />
+      <BlenderStudioModal isOpen={isBlenderStudioOpen} onClose={() => setIsBlenderStudioOpen(false)} />
 
       {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner */}
       <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 text-center font-medium tracking-wide shadow-md z-30">
@@ -140,6 +143,17 @@ export const App: React.FC = () => {
 
         {/* Global Controls & Status */}
         <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setIsBlenderStudioOpen(true)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-purple-700 bg-purple-950/90 text-purple-300 hover:bg-purple-900 transition-all flex items-center gap-1.5 shadow-sm"
+            title="Inspect Blender 5.2 medical studio renders, 360° turntable animation, and 3D assets"
+          >
+            <svg className="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span>Blender Studio Renders</span>
+          </button>
+
           <button
             onClick={() => {
               setIsModelInfoOpen(true);

@@ -397,6 +397,23 @@ def render_clinical_views(output_dir, width=1280, height=720):
         render_still_frame(frame, path, width=width, height=height)
 
 
+def render_turntable_frames(output_dir, total_frames=24, width=640, height=360):
+    """Render 360-degree turntable frames for web interactive viewer or animation."""
+    abs_dir = os.path.abspath(output_dir)
+    os.makedirs(abs_dir, exist_ok=True)
+    scene = bpy.context.scene
+    scene.render.resolution_x = width
+    scene.render.resolution_y = height
+    scene.render.image_settings.file_format = 'PNG'
+    print(f"[CardioVision] Rendering {total_frames} turntable frames ({width}x{height}) to {abs_dir}...")
+    for f in range(1, total_frames + 1):
+        scene.frame_set(f)
+        frame_path = os.path.join(abs_dir, f"frame_{f:02d}.png")
+        scene.render.filepath = frame_path
+        bpy.ops.render.render(write_still=True)
+    print(f"[CardioVision] Successfully saved {total_frames} turntable frames to {abs_dir}")
+
+
 def export_glb(output_filepath):
     """
     Export cardiac model to compact glTF 2.0 binary (.glb).
@@ -434,6 +451,7 @@ def parse_cli_args():
     parser.add_argument("--colorblind", action="store_true", help="Enable colorblind-safe palette")
     parser.add_argument("--render-still", type=str, default="", help="Render still image to path")
     parser.add_argument("--render-views", type=str, default="", help="Render clinical multi-view images to directory")
+    parser.add_argument("--render-turntable-frames", type=str, default="", help="Render all turntable frames to directory")
     parser.add_argument("--export-glb", type=str, default="", help="Export scene to GLB file path")
     parser.add_argument("--total-frames", type=int, default=120, help="Turntable animation total frames (default: 120)")
     return parser.parse_args(argv)
@@ -461,6 +479,9 @@ def main():
 
     if args.render_views:
         render_clinical_views(args.render_views)
+
+    if args.render_turntable_frames:
+        render_turntable_frames(args.render_turntable_frames, total_frames=args.total_frames)
 
     print("[CardioVision] Blender pipeline execution completed successfully.")
 
