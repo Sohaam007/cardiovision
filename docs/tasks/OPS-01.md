@@ -1,5 +1,5 @@
 # OPS-01 Repo bootstrap and hello-world deploys
-Owner: Debdas   Status: todo
+Owner: Debdas   Status: done
 Reads: docs/00_CONTEXT.md, docs/01_ARCHITECTURE.md, docs/07_DEPLOY.md
 Do:
 - Create GitHub repo with the folder layout from 01_ARCHITECTURE.md (add this docs pack at root).

@@ -14,6 +14,7 @@ export const App: React.FC = () => {
   const selectedVessel = useStore((state) => state.selectedVessel);
   const colorblindMode = useStore((state) => state.colorblindMode);
   const toggleColorblindMode = useStore((state) => state.toggleColorblindMode);
+  const openModelInfo = useStore((state) => state.openModelInfo);
   const prediction = useStore((state) => state.prediction);
   const setSchema = useStore((state) => state.setSchema);
   const setDemoPatients = useStore((state) => state.setDemoPatients);
@@ -101,7 +102,7 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden font-sans">
       {/* 1. First-Load Clinical Safety Modal & Model Information Drawer */}
       <SafetyModal />
-      <ModelInfoDrawer isOpen={isModelInfoOpen} onClose={() => setIsModelInfoOpen(false)} />
+      <ModelInfoDrawer isOpen={isModelInfoOpen} onClose={() => { setIsModelInfoOpen(false); useStore.getState().closeModelInfo(); }} />
 
       {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner */}
       <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 text-center font-medium tracking-wide shadow-md z-30">
@@ -140,14 +141,17 @@ export const App: React.FC = () => {
         {/* Global Controls & Status */}
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => setIsModelInfoOpen(true)}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-cyan-800/80 bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-200 transition-all flex items-center gap-1.5 shadow-sm"
-            title="View cross-validation metrics, calibration, and clinical limitations"
+            onClick={() => {
+              setIsModelInfoOpen(true);
+              openModelInfo();
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-cyan-700 bg-cyan-950/90 text-cyan-300 hover:bg-cyan-900 transition-all flex items-center gap-1.5 shadow-sm"
+            title="Inspect 15-fold cross-validation metrics, feature ablations, and clinical limitations"
           >
             <svg className="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Model Info</span>
+            <span>Model Info &amp; Caveats</span>
           </button>
 
           <button
