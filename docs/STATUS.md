@@ -14,3 +14,4 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 12:01 | UI-02-Explainability | Adin | done | RiskExplainer Recharts horizontal bar chart (top 10 + other), log-odds axis, tooltips, and measurement cards
 2026-10-14 12:03 | UI-02-Sensitivity | Adin | done | SensitivityPanel directional arrows and probability change badges vs baseline, 300ms debounce, and reset-to-baseline
 2026-10-14 12:11 | UI-02-Cards-Picker | Adin | done | Overall CAD card (prob, label, threshold, CI) and 3 vessel cards with 3D color matching and camera focus; 8-patient PersonaPicker
+2026-10-14 12:26 | UI-02-ModelInfo | Adin | done | ModelInfoDrawer slide-over with CV metrics table, Platt scaling note, clinical limitations, and asset licenses
