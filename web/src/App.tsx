@@ -7,6 +7,8 @@ import { FloatingRiskLegend } from './components/FloatingRiskLegend';
 import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 import { WebGLFallback } from './components/WebGLFallback';
 import { ModelInfoDrawer } from './components/ModelInfoDrawer';
+import { DissectionControls } from './components/DissectionControls';
+import { DoctorInspectionDrawer } from './components/DoctorInspectionDrawer';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -21,7 +23,6 @@ export const App: React.FC = () => {
   const setApiStatus = useStore((state) => state.setApiStatus);
   const setDemoMode = useStore((state) => state.setDemoMode);
   const force2DFallback = useStore((state) => state.force2DFallback);
-  const setForce2DFallback = useStore((state) => state.setForce2DFallback);
   const webglError = useStore((state) => state.webglError);
   const [isModelInfoOpen, setIsModelInfoOpen] = useState(false);
 
@@ -99,9 +100,10 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden font-sans">
-      {/* 1. First-Load Clinical Safety Modal & Model Information Drawer */}
+      {/* 1. First-Load Clinical Safety Modal, Model Info, & Doctor Inspection Drawer */}
       <SafetyModal />
       <ModelInfoDrawer isOpen={isModelInfoOpen} onClose={() => setIsModelInfoOpen(false)} />
+      <DoctorInspectionDrawer />
 
       {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner */}
       <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 text-center font-medium tracking-wide shadow-md z-30">
@@ -195,17 +197,8 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          {/* 2D / 3D Mode Toggle in Viewport Top-Right */}
-          <div className="absolute top-4 right-4 pointer-events-auto z-10 flex items-center gap-2">
-            <button
-              onClick={() => setForce2DFallback(!force2DFallback)}
-              className="bg-slate-900/85 backdrop-blur-md border border-slate-700/80 hover:border-slate-600 text-[11px] text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-1.5 transition-all"
-              title="Toggle between 3D WebGL anatomical view and 2D high-contrast schematic"
-            >
-              <span className={`w-2 h-2 rounded-full ${force2DFallback ? 'bg-amber-400' : 'bg-cyan-400'}`} />
-              <span>{force2DFallback ? 'Switch to 3D View' : '2D Schematic Mode'}</span>
-            </button>
-          </div>
+          {/* Surgical Dissection & 2D/3D Controls HUD */}
+          <DissectionControls />
 
           {/* Floating Risk Legend HUD (Anterior/Lateral/Posterior presets, percentages, opacity slider, torso toggle, selected vessel details) */}
           <div className="absolute bottom-4 left-4 z-10">

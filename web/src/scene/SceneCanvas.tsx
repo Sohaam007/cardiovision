@@ -185,24 +185,32 @@ const SceneControls: React.FC<{ controlsRef: React.RefObject<OrbitControlsImpl> 
 
 export const SceneCanvas: React.FC = () => {
   const controlsRef = useRef<OrbitControlsImpl>(null);
+  const isBeating = useStore((state) => state.isBeating);
 
   return (
-    <div className="w-full h-full relative select-none bg-radial from-slate-900 to-slate-950">
+    <div className="w-full h-full relative select-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
       <Canvas
-        frameloop={SCENE_FRAMELOOP_CONFIG}
+        frameloop={isBeating ? 'always' : SCENE_FRAMELOOP_CONFIG}
         dpr={SCENE_DPR_CONFIG}
         shadows={false}
         camera={{ position: [0, 0.35, 3.8], fov: 45 }}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', localClippingEnabled: true }}
       >
         <DemandInvalidator />
         <CameraTweenController controlsRef={controlsRef} />
 
-        {/* Lightweight balanced lighting */}
-        <ambientLight intensity={0.75} />
-        <directionalLight position={[6, 8, 6]} intensity={1.2} />
-        <directionalLight position={[-6, -4, -6]} intensity={0.4} />
-        <pointLight position={[0, -3, 2]} intensity={0.3} color="#fca5a5" />
+        {/* Photorealistic Cinema 4D Studio Lighting */}
+        <ambientLight intensity={0.7} />
+        {/* Key Light: High-angle specular shine across aortic arch & ventricular crest */}
+        <directionalLight position={[5, 7, 6]} intensity={1.5} color="#ffffff" />
+        {/* Fill Light: Soft warm blood-red fill on anterior surface */}
+        <directionalLight position={[-5, 3, 5]} intensity={0.85} color="#ffe4e6" />
+        {/* Rim Light: Cool blue/cyan rim accentuating anatomical silhouette */}
+        <directionalLight position={[-4, 5, -5]} intensity={1.1} color="#bae6fd" />
+        {/* Deep posterior fill */}
+        <directionalLight position={[4, -4, -6]} intensity={0.4} color="#fecdd3" />
+        {/* Inferior apex point bounce */}
+        <pointLight position={[0, -2, 3]} intensity={0.45} color="#fca5a5" />
 
         {/* Anatomical Model Components */}
         <group position={[0, 0, 0]}>
