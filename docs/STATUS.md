@@ -12,3 +12,4 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 11:25 | INT-01 | Soumyadeep | done | /predict wired to 3D and risk cards; 8s timeout with AbortController; 8 holdout patients with 3D color parity; offline fallback
 2026-10-14 11:58 | UI-02-Form | Adin | done | ClinicalForm enhanced with collapsible tabs, min/max validation messages, reference ranges, binary toggles, and Reset action
 2026-10-14 12:01 | UI-02-Explainability | Adin | done | RiskExplainer Recharts horizontal bar chart (top 10 + other), log-odds axis, tooltips, and measurement cards
+2026-10-14 12:03 | UI-02-Sensitivity | Adin | done | SensitivityPanel directional arrows and probability change badges vs baseline, 300ms debounce, and reset-to-baseline

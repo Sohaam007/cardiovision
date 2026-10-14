@@ -49,5 +49,6 @@
   - Measured 4x CPU Throttling: Measured 22.2 FPS active camera tweening (45.06 ms average delta) and 0 FPS idle on demand frameloop.
 - UI Task 1 (FORM): Enhanced ClinicalForm with three collapsible sections (Vitals & History, ECG, Echo & Labs), physiological range validation (min/max) with inline warning feedback, reference range display with clinical sources, interactive binary toggle buttons, and a Reset to Defaults action.
 - UI Task 2 (EXPLAINABILITY UI): Implemented RiskExplainer using Recharts horizontal BarChart with 'Calibrated log-odds contribution' axis label, top 10 features plus '(other)' aggregate bucket, color-coded bars (rose for risk-increasing, teal for protective), custom hover tooltip displaying patient values, measurement cards with evidence-based reference ranges and sources, and dynamic CAD hierarchical constraint notice.
+- UI Task 3 (SENSITIVITY PANEL): Added baseline probability delta tracking with directional change indicators (arrows and color-coded badges) for CAD, LAD, LCX, and RCA across BP, FBS, LDL, TG, and smoker controls, with 300 ms debounce, stale request cancellation, and a reset-to-baseline action.
 
 
