@@ -6,6 +6,7 @@ import { useStore } from '../store/useStore';
 import { InternalHeartStructures } from './InternalHeartStructures';
 import { getVesselColorThree } from './vesselConfig';
 import { computeCardiacMotion } from './cardiacMotion';
+import { cardiacAudio } from '../audio/cardiacAudio';
 
 /**
  * Generates photorealistic high-resolution procedural textures:
@@ -319,10 +320,43 @@ const ProceduralHeart: React.FC = () => {
     invalidate();
   }, [heartOpacity, isCutOpen, dissectionPlane, cutDepth, invalidate]);
 
+  const lastSoundRef = useRef<'s1' | 's2' | 'none'>('none');
+
   // Live cardiac biomechanical animation loop matching physiological Wiggers cycle
   useFrame((state) => {
-    const { isBeating, heartRateBpm, beatingSpeed, setCardiacCyclePhase } = useStore.getState();
-    const motion = computeCardiacMotion(state.clock.getElapsedTime(), heartRateBpm, beatingSpeed, isBeating);
+    const {
+      isBeating,
+      heartRateBpm,
+      beatingSpeed,
+      setCardiacCyclePhase,
+      cardiacPhase,
+      patientInputs,
+      isAudioMuted,
+      isPlaying,
+    } = useStore.getState();
+
+    const rawEf = Number(patientInputs['EF-TTE'] || 50);
+    const motion = computeCardiacMotion(
+      state.clock.getElapsedTime(),
+      heartRateBpm,
+      beatingSpeed,
+      isBeating,
+      rawEf,
+      cardiacPhase
+    );
+
+    // Audio sound triggers during active beating
+    if (isPlaying && isBeating && cardiacPhase === 'auto' && !isAudioMuted) {
+      if (motion.phase >= 0.04 && motion.phase <= 0.12 && lastSoundRef.current !== 's1') {
+        cardiacAudio.playS1();
+        lastSoundRef.current = 's1';
+      } else if (motion.phase >= 0.36 && motion.phase <= 0.44 && lastSoundRef.current !== 's2') {
+        cardiacAudio.playS2();
+        lastSoundRef.current = 's2';
+      } else if (motion.phase > 0.50 && motion.phase < 0.90 && lastSoundRef.current !== 'none') {
+        lastSoundRef.current = 'none';
+      }
+    }
 
     // 1. Ventricular systolic contraction & wringing torsion
     if (ventriclesRef.current) {
@@ -349,7 +383,7 @@ const ProceduralHeart: React.FC = () => {
     }
 
     // Sync HUD cardiac cycle phase
-    if (isBeating && lastPhaseRef.current !== motion.phaseName) {
+    if (lastPhaseRef.current !== motion.phaseName) {
       lastPhaseRef.current = motion.phaseName;
       setCardiacCyclePhase(motion.phaseName);
     }
@@ -856,15 +890,62 @@ const RealisticBeatingHeart: React.FC<RealisticBeatingHeartProps> = ({ heartOpac
   const { actions, names } = useAnimations(animations, group);
   const invalidate = useThree((state) => state.invalidate);
 
-  // Play skeletal heartbeat animation
+  const isPlaying = useStore((state) => state.isPlaying);
+  const isBeating = useStore((state) => state.isBeating);
+  const cardiacPhase = useStore((state) => state.cardiacPhase);
+  const heartRateBpm = useStore((state) => state.heartRateBpm);
+  const beatingSpeed = useStore((state) => state.beatingSpeed);
+  const isAudioMuted = useStore((state) => state.isAudioMuted);
+  const lastSoundRef = useRef<'s1' | 's2' | 'none'>('none');
+
+  // Control playback, phase freeze, and physiological rate
   useEffect(() => {
     if (names.length > 0 && names[0]) {
       const action = actions[names[0]];
       if (action) {
-        action.play();
+        const clipDuration = action.getClip().duration || 1.0;
+        const speed = (heartRateBpm / 72) * beatingSpeed;
+        action.setEffectiveTimeScale(speed);
+
+        if (cardiacPhase === 'systole') {
+          action.paused = true;
+          action.time = clipDuration * 0.25;
+        } else if (cardiacPhase === 'diastole') {
+          action.paused = true;
+          action.time = clipDuration * 0.70;
+        } else {
+          // Auto beating
+          if (isPlaying && isBeating) {
+            action.paused = false;
+            action.play();
+          } else {
+            action.paused = true;
+          }
+        }
+        invalidate();
       }
     }
-  }, [actions, names]);
+  }, [actions, names, isPlaying, isBeating, cardiacPhase, heartRateBpm, beatingSpeed, invalidate]);
+
+  // Audio triggers in useFrame
+  useFrame(() => {
+    if (names.length > 0 && names[0]) {
+      const action = actions[names[0]];
+      if (action && !action.paused && isPlaying && cardiacPhase === 'auto' && !isAudioMuted) {
+        const clipDuration = action.getClip().duration || 1.0;
+        const progress = (action.time % clipDuration) / clipDuration;
+        if (progress >= 0.04 && progress <= 0.12 && lastSoundRef.current !== 's1') {
+          cardiacAudio.playS1();
+          lastSoundRef.current = 's1';
+        } else if (progress >= 0.36 && progress <= 0.44 && lastSoundRef.current !== 's2') {
+          cardiacAudio.playS2();
+          lastSoundRef.current = 's2';
+        } else if (progress > 0.50 && progress < 0.90 && lastSoundRef.current !== 'none') {
+          lastSoundRef.current = 'none';
+        }
+      }
+    }
+  });
 
   // Adjust material opacity and transparency based on heartOpacity store state
   useEffect(() => {

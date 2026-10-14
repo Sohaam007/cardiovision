@@ -1,6 +1,7 @@
 import React from 'react';
 import { useStore, CardiacCyclePhase } from '../store/useStore';
 import { INTERNAL_HEART_STRUCTURES } from '../data/heartAnatomyData';
+import { getFindingsForStructure } from '../clinical/patientFindingsEngine';
 
 export const DoctorInspectionDrawer: React.FC = () => {
   const selectedStructureKey = useStore((state) => state.selectedInternalStructure);
@@ -8,11 +9,14 @@ export const DoctorInspectionDrawer: React.FC = () => {
   const cardiacCyclePhase = useStore((state) => state.cardiacCyclePhase);
   const setCardiacCyclePhase = useStore((state) => state.setCardiacCyclePhase);
   const prediction = useStore((state) => state.prediction);
+  const patientInputs = useStore((state) => state.patientInputs);
 
   if (!selectedStructureKey) return null;
 
   const detail = INTERNAL_HEART_STRUCTURES[selectedStructureKey];
   if (!detail) return null;
+
+  const structureFindings = getFindingsForStructure(detail.id, patientInputs);
 
   const relatedVesselKey =
     detail.coronaryPerfusion.primaryArtery === 'LAD'
@@ -92,6 +96,47 @@ export const DoctorInspectionDrawer: React.FC = () => {
             >
               {relatedVesselProb >= 70 ? 'High Risk' : relatedVesselProb >= 40 ? 'Moderate' : 'Low Risk'}
             </span>
+          </div>
+        )}
+
+        {/* Active Patient Finding Alerts for this Structure */}
+        {structureFindings.length > 0 && (
+          <div className="bg-slate-900/90 border border-rose-700/80 rounded-lg p-3 space-y-2.5 shadow-lg animate-fadeIn" data-testid="structure-patient-findings">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-rose-300 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
+                Active Patient Findings ({structureFindings.length})
+              </h3>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-950 text-rose-200 border border-rose-800">
+                Direct Correlation
+              </span>
+            </div>
+
+            {structureFindings.map((f) => (
+              <div
+                key={f.id}
+                className={`p-2.5 rounded-lg border flex flex-col gap-1.5 ${
+                  f.severity === 'critical'
+                    ? 'bg-rose-950/60 border-rose-600/80 text-rose-100'
+                    : f.severity === 'abnormal'
+                    ? 'bg-amber-950/60 border-amber-600/80 text-amber-100'
+                    : 'bg-orange-950/60 border-orange-600/80 text-orange-100'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs">{f.title}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/40 border border-white/20">
+                    {f.severity}
+                  </span>
+                </div>
+                <p className="text-[11px] leading-relaxed opacity-95">{f.clinicalNote}</p>
+                <div className="flex items-center gap-2 pt-1 border-t border-white/10 text-[10px] font-mono text-cyan-300">
+                  <span>Input: <strong>{f.sourceFeature}</strong> = {String(f.featureValue)}</span>
+                  <span>&bull;</span>
+                  <span>Supplying Vessel: <strong>{f.supplyingVessel}</strong></span>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

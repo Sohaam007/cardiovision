@@ -12,6 +12,9 @@ import { DoctorInspectionDrawer } from './components/DoctorInspectionDrawer';
 import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
 import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
+import { DraggableToolsMenu } from './components/DraggableToolsMenu';
+import { PatientFindingsHUD } from './components/PatientFindingsHUD';
+import { CardiacCycleControlsHUD } from './components/CardiacCycleControlsHUD';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -216,26 +219,25 @@ export const App: React.FC = () => {
             )}
           </WebGLErrorBoundary>
 
-          {/* Viewport HUD Overlays */}
-          <div className="absolute top-4 left-4 pointer-events-none z-10 hidden sm:flex flex-col gap-1.5">
-            <div className="bg-slate-950/80 backdrop-blur border border-slate-800 text-[11px] text-slate-300 px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2">
-              <span className="text-cyan-400 font-medium">Mode:</span>
-              <span>
-                {viewerMode === 'realistic' && '3D Beating Heart (Cinema 4D Skeletal Pulsation)'}
-                {viewerMode === 'procedural' && '3D Procedural Model (Anatomical Cavity & Dissection)'}
-                {viewerMode === '2d' && '2D Clinical Angiogram & Hemodynamic Suite'}
-                {viewerMode === 'blender' && 'Blender 5.2 Medical Cycles Turntable (PBR Studio)'}
+          {/* Viewport Clinical HUD Overlay */}
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 pointer-events-none z-10 hidden sm:flex items-center gap-2">
+            <div className="bg-[#090d16]/90 backdrop-blur-md border border-slate-800 text-[11px] text-slate-300 px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="font-semibold text-white">
+                {viewerMode === 'realistic' && '3D Beating Heart'}
+                {viewerMode === 'procedural' && '3D Procedural Anatomy'}
+                {viewerMode === '2d' && '2D Angiogram Suite'}
+                {viewerMode === 'blender' && 'Blender Studio Turntable'}
               </span>
-            </div>
-            <div className="bg-slate-950/80 backdrop-blur border border-slate-800 text-[11px] text-slate-400 px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2">
-              <span className="text-amber-400 font-medium">Clinical Invariant:</span>
-              <span>Uniform vessel risk shading &bull; Zero localized lesion markers</span>
+              <span className="text-slate-500 text-[10px] pl-2 border-l border-slate-800 hidden md:inline">
+                Uniform vessel risk shading &bull; Zero localized lesions
+              </span>
             </div>
           </div>
 
           {/* Segmented Mode Selector & Sensitivity What-If Toggle in Viewport Top-Right */}
-          <div className="absolute top-4 right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/80 shadow-2xl">
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2 max-w-full justify-end">
+            <div className="flex items-center bg-[#090d16]/90 backdrop-blur-md p-1 rounded-xl border border-slate-800 shadow-2xl">
               <button
                 type="button"
                 onClick={() => setViewerMode('realistic')}
@@ -257,7 +259,7 @@ export const App: React.FC = () => {
                     ? 'bg-cyan-600 text-white shadow-md shadow-cyan-950/60 ring-1 ring-cyan-400/50'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                 }`}
-                title="3D Procedural Myocardium & Chamber Dissection Model (Previous Model)"
+                title="3D Procedural Myocardium & Chamber Dissection Model"
               >
                 <span>⚙️ 3D Procedural</span>
               </button>
@@ -295,7 +297,7 @@ export const App: React.FC = () => {
               className={`backdrop-blur-md border text-xs px-2.5 py-2 rounded-xl shadow-xl flex items-center gap-1.5 transition-all font-semibold ${
                 isSensitivityOpen
                   ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
-                  : 'bg-slate-900/90 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
+                  : 'bg-[#090d16]/90 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
               }`}
               title="Toggle interactive 3D model sensitivity sliders and what-if simulation"
             >
@@ -305,6 +307,17 @@ export const App: React.FC = () => {
               <span>{isSensitivityOpen ? 'Close Sensitivity' : '⚡ 3D Sensitivity'}</span>
             </button>
           </div>
+
+          {/* Patient Findings & Direct Structure Navigation HUD Overlay */}
+          <div className="absolute top-12 left-3 right-3 sm:top-14 sm:left-4 sm:right-4 z-20 pointer-events-auto flex flex-col gap-1.5 max-w-full">
+            <PatientFindingsHUD />
+            <div className="self-start">
+              <CardiacCycleControlsHUD />
+            </div>
+          </div>
+
+          {/* Consolidated Draggable Floating Tools HUD */}
+          <DraggableToolsMenu />
 
           {/* Surgical Dissection Controls (Active in 3D procedural mode) */}
           {viewerMode === 'procedural' && <DissectionControls />}

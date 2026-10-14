@@ -16,8 +16,6 @@ export const FloatingRiskLegend: React.FC = () => {
   const selectedVessel = useStore((state) => state.selectedVessel);
   const setSelectedVessel = useStore((state) => state.setSelectedVessel);
   const predictions = useStore((state) => state.predictions);
-  const isSensitivityOpen = useStore((state) => state.isSensitivityOpen);
-  const toggleSensitivity = useStore((state) => state.toggleSensitivity);
   const viewerMode = useStore((state) => state.viewerMode);
   const force2DFallback = useStore((state) => state.force2DFallback);
   const webglError = useStore((state) => state.webglError);
@@ -29,7 +27,7 @@ export const FloatingRiskLegend: React.FC = () => {
     <div className="flex flex-col gap-2 pointer-events-auto">
       {/* Selected Vessel Details Card */}
       {selectedVessel && (
-        <div className="bg-slate-900/90 backdrop-blur-md border border-cyan-700/70 rounded-lg p-3 shadow-2xl text-xs max-w-sm">
+        <div className="bg-[#090d16]/95 backdrop-blur-md border border-cyan-500/50 rounded-xl p-3 shadow-2xl text-xs max-w-sm">
           <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
             <div className="flex items-center gap-2">
               <span
@@ -53,7 +51,7 @@ export const FloatingRiskLegend: React.FC = () => {
               &times; Close
             </button>
           </div>
-          <div className="flex items-center justify-between py-1 bg-slate-950/60 px-2 rounded border border-slate-800/60 mb-2">
+          <div className="flex items-center justify-between py-1 bg-slate-900/60 px-2 rounded-lg border border-slate-800/60 mb-2">
             <span className="text-[11px] text-slate-300">Predicted probability of significant stenosis:</span>
             <span className="font-mono font-bold text-cyan-300 text-sm ml-2">
               {(((predictions?.vessels[selectedVessel]?.prob ?? 0) * 100)).toFixed(0)}%
@@ -68,14 +66,14 @@ export const FloatingRiskLegend: React.FC = () => {
       )}
 
       {/* 1. Camera Angle Presets Toolbar */}
-      <div className="bg-slate-900/85 backdrop-blur-md border border-slate-800 rounded-lg p-2 shadow-xl flex items-center gap-1.5 text-xs">
+      <div className="bg-[#090d16]/90 backdrop-blur-md border border-slate-800 rounded-xl p-2 shadow-xl flex items-center gap-1.5 text-xs">
         <span className="text-[10px] uppercase font-semibold text-slate-400 px-1 hidden sm:inline">
           View:
         </span>
         <button
           onClick={() => setCameraPreset('anterior')}
           disabled={isTweening}
-          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 transition-all font-medium text-xs disabled:opacity-50"
+          className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 transition-all font-medium text-xs disabled:opacity-50"
           title="Frontal anterior view: LAD overview and ventricular outflow"
         >
           Anterior
@@ -83,7 +81,7 @@ export const FloatingRiskLegend: React.FC = () => {
         <button
           onClick={() => setCameraPreset('lateral')}
           disabled={isTweening}
-          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 transition-all font-medium text-xs disabled:opacity-50 flex items-center gap-1"
+          className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 transition-all font-medium text-xs disabled:opacity-50 flex items-center gap-1"
           title="Left lateral view: Crucial to display LCX clearly along the left AV groove"
         >
           <span>Left Lateral</span>
@@ -94,7 +92,7 @@ export const FloatingRiskLegend: React.FC = () => {
         <button
           onClick={() => setCameraPreset('posterior')}
           disabled={isTweening}
-          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 transition-all font-medium text-xs disabled:opacity-50"
+          className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 transition-all font-medium text-xs disabled:opacity-50"
           title="Posterior view: Distal LCX trajectory and posterior crux RCA"
         >
           Posterior
@@ -102,7 +100,7 @@ export const FloatingRiskLegend: React.FC = () => {
       </div>
 
       {/* 2. Floating Clinical Risk Legend with Mandatory Numeric Percentages */}
-      <div className="bg-slate-900/85 backdrop-blur-md border border-slate-800 rounded-lg p-3 shadow-xl text-xs flex flex-col gap-2 max-w-sm">
+      <div className="bg-[#090d16]/90 backdrop-blur-md border border-slate-800 rounded-xl p-3 shadow-xl text-xs flex flex-col gap-2 max-w-sm">
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-cyan-400" />
@@ -245,22 +243,6 @@ export const FloatingRiskLegend: React.FC = () => {
               />
             </button>
           </div>
-
-          {/* Interactive Sensitivity & What-If Studio Toggle Button */}
-          <button
-            onClick={toggleSensitivity}
-            className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-2 shadow-sm ${
-              isSensitivityOpen
-                ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
-                : 'bg-purple-950/80 hover:bg-purple-900 text-purple-200 border-purple-700/70 hover:border-purple-600'
-            }`}
-            title="Open interactive 3D risk sensitivity sliders (BP, LDL, FBS, TG, Smoking) and what-if analysis"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-            <span>{isSensitivityOpen ? 'Close Sensitivity Studio' : '⚡ 3D Sensitivity & What-If'}</span>
-          </button>
         </div>
       </div>
     </div>

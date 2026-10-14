@@ -45,6 +45,18 @@ export interface AppState {
   heartRateBpm: number;
   beatingSpeed: number; // 1.0 = real-time, 0.5 = slow motion
 
+  // Unified Viewport & Tools Menu State
+  showHemodynamics: boolean;
+  showCavities: boolean;
+  showPerfusion: boolean;
+  showCalibers: boolean;
+  showECG: boolean;
+  fluoroscopyMode: boolean;
+  isPlaying: boolean;
+  cardiacPhase: 'auto' | 'diastole' | 'systole';
+  isAudioMuted: boolean;
+  zoomLevel: number;
+
   // Clinical & Prediction State
   patientInputs: Record<string, any>;
   predictions: PredictResponse | null;
@@ -90,6 +102,29 @@ export interface AppState {
   toggleBeating: () => void;
   setHeartRateBpm: (bpm: number) => void;
   setBeatingSpeed: (speed: number) => void;
+
+  // Unified Tools & Viewport Layer Actions
+  setShowHemodynamics: (show: boolean) => void;
+  toggleHemodynamics: () => void;
+  setShowCavities: (show: boolean) => void;
+  toggleCavities: () => void;
+  setShowPerfusion: (show: boolean) => void;
+  togglePerfusion: () => void;
+  setShowCalibers: (show: boolean) => void;
+  toggleCalibers: () => void;
+  setShowECG: (show: boolean) => void;
+  toggleECG: () => void;
+  setFluoroscopyMode: (enabled: boolean) => void;
+  toggleFluoroscopyMode: () => void;
+  setIsPlaying: (playing: boolean) => void;
+  togglePlayback: () => void;
+  setCardiacPhase: (phase: 'auto' | 'diastole' | 'systole') => void;
+  setIsAudioMuted: (muted: boolean) => void;
+  toggleAudio: () => void;
+  setZoomLevel: (zoom: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoom: () => void;
 
   setPatientInput: (field: string, value: any) => void;
   setPatientInputs: (inputs: Record<string, any>) => void;
@@ -154,6 +189,18 @@ export const useStore = create<AppState>()((set) => ({
   isBeating: true,
   heartRateBpm: 72,
   beatingSpeed: 1.0,
+
+  // Unified Tools & Viewport Layer Initial State
+  showHemodynamics: true,
+  showCavities: false,
+  showPerfusion: true,
+  showCalibers: true,
+  showECG: true,
+  fluoroscopyMode: false,
+  isPlaying: true,
+  cardiacPhase: 'auto',
+  isAudioMuted: true,
+  zoomLevel: 1.0,
 
   patientInputs: {},
   predictions: null,
@@ -245,6 +292,33 @@ export const useStore = create<AppState>()((set) => ({
   setHeartRateBpm: (bpm: number) => set({ heartRateBpm: Math.max(30, Math.min(180, bpm)) }),
   setBeatingSpeed: (speed: number) => set({ beatingSpeed: Math.max(0.1, Math.min(3.0, speed)) }),
 
+  // Unified Tools & Viewport Actions Implementation
+  setShowHemodynamics: (show: boolean) => set({ showHemodynamics: show }),
+  toggleHemodynamics: () => set((state) => ({ showHemodynamics: !state.showHemodynamics })),
+  setShowCavities: (show: boolean) => set({ showCavities: show }),
+  toggleCavities: () => set((state) => ({ showCavities: !state.showCavities })),
+  setShowPerfusion: (show: boolean) => set({ showPerfusion: show }),
+  togglePerfusion: () => set((state) => ({ showPerfusion: !state.showPerfusion })),
+  setShowCalibers: (show: boolean) => set({ showCalibers: show }),
+  toggleCalibers: () => set((state) => ({ showCalibers: !state.showCalibers })),
+  setShowECG: (show: boolean) => set({ showECG: show }),
+  toggleECG: () => set((state) => ({ showECG: !state.showECG })),
+  setFluoroscopyMode: (enabled: boolean) => set({ fluoroscopyMode: enabled }),
+  toggleFluoroscopyMode: () => set((state) => ({ fluoroscopyMode: !state.fluoroscopyMode })),
+  setIsPlaying: (playing: boolean) => set({ isPlaying: playing, isBeating: playing }),
+  togglePlayback: () => set((state) => ({ isPlaying: !state.isPlaying, isBeating: !state.isPlaying })),
+  setCardiacPhase: (phase: 'auto' | 'diastole' | 'systole') =>
+    set((state) => ({
+      cardiacPhase: phase,
+      cardiacCyclePhase: phase === 'diastole' ? 'diastole' : phase === 'systole' ? 'systole' : state.cardiacCyclePhase,
+    })),
+  setIsAudioMuted: (muted: boolean) => set({ isAudioMuted: muted }),
+  toggleAudio: () => set((state) => ({ isAudioMuted: !state.isAudioMuted })),
+  setZoomLevel: (zoom: number) => set({ zoomLevel: Math.max(0.5, Math.min(2.5, Number(zoom.toFixed(2)))) }),
+  zoomIn: () => set((state) => ({ zoomLevel: Math.min(2.5, Number((state.zoomLevel + 0.15).toFixed(2))) })),
+  zoomOut: () => set((state) => ({ zoomLevel: Math.max(0.5, Number((state.zoomLevel - 0.15).toFixed(2))) })),
+  resetZoom: () => set({ zoomLevel: 1.0 }),
+
   resetDemoProbabilities: () =>
     set({
       prediction: {
@@ -266,19 +340,42 @@ export const useStore = create<AppState>()((set) => ({
       cutDepth: 0.5,
       selectedInternalStructure: null,
       cardiacCyclePhase: 'systole',
+      showHemodynamics: true,
+      showCavities: false,
+      showPerfusion: true,
+      showCalibers: true,
+      showECG: true,
+      fluoroscopyMode: false,
+      isPlaying: true,
+      cardiacPhase: 'auto',
+      isAudioMuted: true,
+      zoomLevel: 1.0,
     }),
 
   setPatientInput: (field: string, value: any) =>
-    set((state) => ({
-      patientInputs: {
+    set((state) => {
+      const updatedInputs = {
         ...state.patientInputs,
         [field]: value,
-      },
-      selectedPersonaId: null,
-    })),
+      };
+      const pr = Number(field === 'PR' ? value : updatedInputs.PR);
+      const newBpm = !isNaN(pr) && pr >= 30 && pr <= 180 ? pr : state.heartRateBpm;
+      return {
+        patientInputs: updatedInputs,
+        heartRateBpm: newBpm,
+        selectedPersonaId: null,
+      };
+    }),
 
   setPatientInputs: (inputs: Record<string, any>) =>
-    set({ patientInputs: { ...inputs } }),
+    set((state) => {
+      const pr = Number(inputs.PR);
+      const newBpm = !isNaN(pr) && pr >= 30 && pr <= 180 ? pr : state.heartRateBpm;
+      return {
+        patientInputs: { ...inputs },
+        heartRateBpm: newBpm,
+      };
+    }),
 
   setPredictions: (pred: PredictResponse) => {
     set((state) => {
@@ -315,9 +412,13 @@ export const useStore = create<AppState>()((set) => ({
 
   loadPersona: (persona: DemoPatient) => {
     const vessels = persona.prediction?.vessels || (persona as any).predictions;
+    const feats = (persona.features || (persona as any).inputs) || {};
+    const pr = Number(feats.PR);
+    const validBpm = !isNaN(pr) && pr >= 30 && pr <= 180 ? pr : 75;
     set({
       selectedPersonaId: persona.id,
-      patientInputs: { ...(persona.features || (persona as any).inputs) },
+      patientInputs: { ...feats },
+      heartRateBpm: validBpm,
       predictions: persona.prediction,
       prediction: {
         vessels: {
