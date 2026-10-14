@@ -62,5 +62,10 @@
   - Assets Generated: Exported web-ready glTF 2.0 binary asset `docs/figures/cardiac_model.glb` (0.30 MB, well under the 5.0 MB performance budget) and rendered 3 canonical clinical angles: anterior (`blender_render_anterior.png`), left lateral (`blender_render_lateral.png`), and posterior crux cordis (`blender_render_posterior.png`).
 - Blender Localhost Studio Viewer & Animated 360° Asset Integration:
   - Localhost Showcase Component: Implemented `BlenderStudioModal.tsx` accessible via a dedicated "Blender Studio Renders" button in the application navigation bar.
-  - Features: Features 360° animated WebP turntable playback (116 KB), interactive 24-frame slider scrubber across 360° rotation angles, 3 canonical clinical inspection views (Anterior LAD 94%, Left Lateral LCX 24%, Posterior Crux RCA 28%), and direct web-ready GLB asset download (318 KB).
-  - Performance & Non-Interference: Completely isolated from the main WebGL canvas and Zustand store; zero extra draw calls or render ticks during idle, preserving the `frameloop="demand"` contract and 43 passing web tests.
+- Reference Video Parity & Interactive Chamber Cutaway (Heart moving.mp4):
+  - Anatomical Enhancements: In response to clinical reference video `docs/reference/Heart moving.mp4`, engineered dual-mode anatomical rendering across both the web interactive canvas and Blender 5.2 studio pipeline:
+    1. Cutaway Internal Dissection: Anterior chamber window exposing the muscular interventricular septum, interior LV & RV cavities, mitral and tricuspid valve rings, and white fibrous chordae tendineae cords anchored to papillary muscles.
+    2. Epicardial Adipose Sulcal Cushion: Modeled warm golden-amber adipose fat cushions (`#ca8a04`) along the AV groove and coronary sulci as depicted in the reference video.
+    3. Great Vessel Branches: Added the 3 systemic aortic arch branches (brachiocephalic trunk, left common carotid, and left subclavian).
+  - Interactive WebGL Integration: Added `chamberCutaway` state and HUD toggle in `web/src/components/FloatingRiskLegend.tsx` and `web/src/scene/Heart.tsx`, allowing clinicians to inspect internal anatomy and external coronary risk overlays in real-time.
+  - Studio Assets Updated: Re-rendered 24-frame cutaway turntable animation (`blender_turntable.webp`), clinical stills, and exported updated web-ready GLB asset `cardiac_model.glb` (0.41 MB, well within the 5.0 MB performance budget).
