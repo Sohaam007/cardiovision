@@ -236,7 +236,10 @@ export const useStore = create<AppState>()((set) => ({
 
   setShowTorso: (show: boolean) => set({ showTorso: show }),
   toggleTorso: () => set((state) => ({ showTorso: !state.showTorso })),
-  toggleChamberCutaway: () => set((state) => ({ chamberCutaway: !state.chamberCutaway })),
+  toggleChamberCutaway: () => set((state) => {
+    const next = !state.chamberCutaway;
+    return { chamberCutaway: next, isCutOpen: next, showCavities: next };
+  }),
 
   setHeartOpacity: (opacity: number) =>
     set({ heartOpacity: Math.max(0.1, Math.min(1, opacity)) }),
@@ -280,8 +283,11 @@ export const useStore = create<AppState>()((set) => ({
   setWebglError: (error: boolean) => set({ webglError: error }),
   setIsTweening: (tweening: boolean) => set({ isTweening: tweening }),
 
-  toggleCutOpen: () => set((state) => ({ isCutOpen: !state.isCutOpen })),
-  setIsCutOpen: (open: boolean) => set({ isCutOpen: open }),
+  toggleCutOpen: () => set((state) => {
+    const next = !state.isCutOpen;
+    return { isCutOpen: next, chamberCutaway: next, showCavities: next };
+  }),
+  setIsCutOpen: (open: boolean) => set({ isCutOpen: open, chamberCutaway: open, showCavities: open }),
   setDissectionPlane: (plane: DissectionPlane) => set({ dissectionPlane: plane }),
   setCutDepth: (depth: number) => set({ cutDepth: Math.max(0, Math.min(1, depth)) }),
   setSelectedInternalStructure: (structureId: string | null) => set({ selectedInternalStructure: structureId }),
@@ -295,8 +301,11 @@ export const useStore = create<AppState>()((set) => ({
   // Unified Tools & Viewport Actions Implementation
   setShowHemodynamics: (show: boolean) => set({ showHemodynamics: show }),
   toggleHemodynamics: () => set((state) => ({ showHemodynamics: !state.showHemodynamics })),
-  setShowCavities: (show: boolean) => set({ showCavities: show }),
-  toggleCavities: () => set((state) => ({ showCavities: !state.showCavities })),
+  setShowCavities: (show: boolean) => set({ showCavities: show, chamberCutaway: show, isCutOpen: show }),
+  toggleCavities: () => set((state) => {
+    const next = !state.showCavities;
+    return { showCavities: next, chamberCutaway: next, isCutOpen: next };
+  }),
   setShowPerfusion: (show: boolean) => set({ showPerfusion: show }),
   togglePerfusion: () => set((state) => ({ showPerfusion: !state.showPerfusion })),
   setShowCalibers: (show: boolean) => set({ showCalibers: show }),
@@ -335,6 +344,7 @@ export const useStore = create<AppState>()((set) => ({
       force2DFallback: false,
       webglError: false,
       isTweening: false,
+      chamberCutaway: false,
       isCutOpen: false,
       dissectionPlane: 'coronal',
       cutDepth: 0.5,

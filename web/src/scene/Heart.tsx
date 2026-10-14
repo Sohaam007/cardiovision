@@ -280,6 +280,98 @@ function createHeartTextures(): {
   return { diffuse: diffuseTex, bump: bumpTex, roughness: roughTex };
 }
 
+/**
+ * AHA 17-Segment Myocardial Perfusion Territories
+ * Highlights ventricular supply areas: LAD (anterior/septal/apex), LCX (lateral wall), RCA (inferior wall & RV).
+ * Colored uniformly according to predicted vessel probability.
+ */
+interface PerfusionTerritoriesProps {
+  clippingPlane: THREE.Plane | null;
+}
+
+const PerfusionTerritories: React.FC<PerfusionTerritoriesProps> = ({ clippingPlane }) => {
+  const showPerfusion = useStore((state) => state.showPerfusion);
+  const colorblindMode = useStore((state) => state.colorblindMode);
+  const ladProb = useStore((state) => state.prediction.vessels.LAD?.prob ?? 0.5);
+  const lcxProb = useStore((state) => state.prediction.vessels.LCX?.prob ?? 0.5);
+  const rcaProb = useStore((state) => state.prediction.vessels.RCA?.prob ?? 0.5);
+
+  const ladColor = useMemo(() => getVesselColorThree(ladProb, colorblindMode), [ladProb, colorblindMode]);
+  const lcxColor = useMemo(() => getVesselColorThree(lcxProb, colorblindMode), [lcxProb, colorblindMode]);
+  const rcaColor = useMemo(() => getVesselColorThree(rcaProb, colorblindMode), [rcaProb, colorblindMode]);
+
+  const territories = useMemo(() => {
+    // LAD: Anterior wall & apex
+    const ladGeo = new THREE.SphereGeometry(1.025, 32, 24, 0, Math.PI * 0.9, 0.2, Math.PI * 0.7);
+    // LCX: Lateral wall
+    const lcxGeo = new THREE.SphereGeometry(1.025, 32, 24, Math.PI * 0.8, Math.PI * 0.7, 0.2, Math.PI * 0.7);
+    // RCA: Inferior diaphragmatic wall & RV
+    const rcaGeo = new THREE.SphereGeometry(1.025, 32, 24, Math.PI * 1.4, Math.PI * 0.8, 0.2, Math.PI * 0.7);
+
+    [ladGeo, lcxGeo, rcaGeo].forEach((geo) => {
+      const pos = geo.attributes.position;
+      const v = new THREE.Vector3();
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i);
+        const t = Math.max(0, Math.min(1, (v.y + 1.0) / 2.0));
+        const taper = 0.28 + 0.72 * Math.sqrt(t);
+        v.x *= taper;
+        v.z *= taper;
+        if (v.x > 0) v.x *= 1.16;
+        if (v.z < 0) v.z *= 0.85;
+        v.y *= 1.18;
+        pos.setXYZ(i, v.x, v.y, v.z);
+      }
+      geo.computeVertexNormals();
+    });
+
+    return { ladGeo, lcxGeo, rcaGeo };
+  }, []);
+
+  if (!showPerfusion) return null;
+
+  return (
+    <group name="AHA17PerfusionTerritories">
+      <mesh geometry={territories.ladGeo}>
+        <meshPhysicalMaterial
+          color={ladColor}
+          transparent
+          opacity={0.34}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          clippingPlanes={clippingPlane ? [clippingPlane] : []}
+          emissive={ladColor}
+          emissiveIntensity={0.24}
+        />
+      </mesh>
+      <mesh geometry={territories.lcxGeo}>
+        <meshPhysicalMaterial
+          color={lcxColor}
+          transparent
+          opacity={0.34}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          clippingPlanes={clippingPlane ? [clippingPlane] : []}
+          emissive={lcxColor}
+          emissiveIntensity={0.24}
+        />
+      </mesh>
+      <mesh geometry={territories.rcaGeo}>
+        <meshPhysicalMaterial
+          color={rcaColor}
+          transparent
+          opacity={0.34}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          clippingPlanes={clippingPlane ? [clippingPlane] : []}
+          emissive={rcaColor}
+          emissiveIntensity={0.24}
+        />
+      </mesh>
+    </group>
+  );
+};
+
 const ProceduralHeart: React.FC = () => {
   const heartOpacity = useStore((state) => state.heartOpacity);
   const colorblindMode = useStore((state) => state.colorblindMode);
@@ -725,6 +817,9 @@ const ProceduralHeart: React.FC = () => {
 
         {/* Internal Surgical Dissection Structures (When cut open) */}
         <InternalHeartStructures />
+
+        {/* AHA 17-Segment Perfusion Territories (Active when showPerfusion is true) */}
+        <PerfusionTerritories clippingPlane={clippingPlane} />
       </group>
 
       {/* ============================================================== */}
@@ -947,7 +1042,9 @@ const RealisticBeatingHeart: React.FC<RealisticBeatingHeartProps> = ({ heartOpac
     }
   });
 
-  // Adjust material opacity and transparency based on heartOpacity store state
+  const showCavities = useStore((state) => state.showCavities);
+
+  // Adjust material opacity and transparency based on heartOpacity and showCavities state
   useEffect(() => {
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
@@ -955,15 +1052,16 @@ const RealisticBeatingHeart: React.FC<RealisticBeatingHeartProps> = ({ heartOpac
         if (mesh.material) {
           const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
           mats.forEach((mat) => {
-            mat.transparent = heartOpacity < 0.98;
-            mat.opacity = heartOpacity;
-            mat.depthWrite = heartOpacity > 0.85;
+            const effectiveOpacity = showCavities ? Math.min(heartOpacity, 0.42) : heartOpacity;
+            mat.transparent = effectiveOpacity < 0.98 || showCavities;
+            mat.opacity = effectiveOpacity;
+            mat.depthWrite = !showCavities && effectiveOpacity > 0.85;
           });
         }
       }
     });
     invalidate();
-  }, [scene, heartOpacity, invalidate]);
+  }, [scene, heartOpacity, showCavities, invalidate]);
 
   return (
     <group ref={group} name="RealisticBeatingHeartGLB" dispose={null}>
@@ -972,6 +1070,8 @@ const RealisticBeatingHeart: React.FC<RealisticBeatingHeartProps> = ({ heartOpac
         position={[0, -0.83, 0]}
         scale={[10.0, 10.0, 10.0]}
       />
+      {/* AHA 17-Segment Perfusion Territories (Active when showPerfusion is true) */}
+      <PerfusionTerritories clippingPlane={null} />
     </group>
   );
 };

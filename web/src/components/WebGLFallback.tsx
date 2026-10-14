@@ -23,7 +23,6 @@ export const WebGLFallback: React.FC = () => {
   const showHemodynamics = useStore((state) => state.showHemodynamics);
   const showChambers = useStore((state) => state.showCavities);
   const showTerritories = useStore((state) => state.showPerfusion);
-  const showECG = useStore((state) => state.showECG);
   const showCalibers = useStore((state) => state.showCalibers);
   const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
   const isAudioMuted = useStore((state) => state.isAudioMuted);
@@ -38,10 +37,6 @@ export const WebGLFallback: React.FC = () => {
   const rawPulseRate = Number(patientInputs['PR'] || 75);
   const pulseRate = Math.max(45, Math.min(160, isNaN(rawPulseRate) ? 75 : rawPulseRate));
   const ejectionFraction = Number(patientInputs['EF-TTE'] || 50);
-  const systolicBP = Number(patientInputs['BP'] || 120);
-  const hasSTElevation = Boolean(patientInputs['ST_Elevation']);
-  const hasSTDepression = Boolean(patientInputs['ST_Depression']);
-  const hasTInversion = Boolean(patientInputs['T_Inversion']);
 
   // Dynamic Cardiac Period in seconds
   const beatPeriod = 60 / pulseRate; // e.g. 0.8s at 75 BPM
@@ -940,104 +935,6 @@ export const WebGLFallback: React.FC = () => {
           </svg>
         </div>
       </div>
-
-      {/* 3. Bottom Dock: Synchronized Oscilloscope ECG Rhythm Strip & Vitals Banner */}
-      {showECG && (
-        <div
-          className={`w-full border rounded-xl p-2.5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 z-10 transition-colors ${
-            fluoroscopyMode
-              ? 'bg-white border-slate-300 text-slate-800'
-              : 'bg-slate-900/90 border-slate-800 text-slate-200'
-          }`}
-        >
-          {/* Left: Patient Physiological Vitals HUD */}
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-semibold tracking-wide">ECG Lead II</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-slate-950/50 px-2 py-1 rounded border border-slate-800/80 font-mono text-[11px]">
-              <span className="text-slate-400">HR:</span>
-              <span className="font-bold text-cyan-400">{pulseRate} BPM</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-slate-950/50 px-2 py-1 rounded border border-slate-800/80 font-mono text-[11px]">
-              <span className="text-slate-400">EF:</span>
-              <span className="font-bold text-emerald-400">{ejectionFraction}%</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-slate-950/50 px-2 py-1 rounded border border-slate-800/80 font-mono text-[11px]">
-              <span className="text-slate-400">BP:</span>
-              <span className="font-bold text-amber-400">{systolicBP} mmHg</span>
-            </div>
-
-            <div className="hidden md:flex items-center gap-1 text-[11px] text-slate-400">
-              <span>Phase:</span>
-              <span className="font-mono text-amber-300 font-semibold">
-                {phaseTime <= 0.35 ? 'Ventricular Systole' : 'Diastolic Perfusion'}
-              </span>
-            </div>
-
-            {(hasSTElevation || hasSTDepression || hasTInversion) && (
-              <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 text-[10px] font-bold">
-                {hasSTElevation && 'ST-Elev'}
-                {hasSTDepression && 'ST-Depr'}
-                {hasTInversion && ' T-Inv'}
-              </span>
-            )}
-          </div>
-
-          {/* Center / Right: Oscilloscope ECG Real-Time Rhythm Waveform */}
-          <div className="w-full sm:w-72 h-10 bg-slate-950 rounded-lg border border-slate-800 relative overflow-hidden flex items-center px-2">
-            <svg viewBox="0 0 300 40" className="w-full h-full">
-              {/* Grid Background Lines */}
-              <line x1="0" y1="10" x2="300" y2="10" stroke="#1e293b" strokeWidth="0.5" />
-              <line x1="0" y1="20" x2="300" y2="20" stroke="#1e293b" strokeWidth="0.5" />
-              <line x1="0" y1="30" x2="300" y2="30" stroke="#1e293b" strokeWidth="0.5" />
-
-              {/* Dynamic P-Q-R-S-T Physiological Wave Path */}
-              <path
-                d={`M 0 20 
-                    L 30 20 
-                    Q 45 14 55 20 
-                    L 70 20 
-                    L 75 23 
-                    L 85 ${hasSTElevation ? 3 : 2} 
-                    L 95 36 
-                    L 100 20 
-                    L 115 ${hasSTElevation ? 14 : hasSTDepression ? 26 : 20} 
-                    Q 135 ${hasTInversion ? 27 : 12} 150 20 
-                    L 200 20 
-                    L 205 23 
-                    L 215 ${hasSTElevation ? 3 : 2} 
-                    L 225 36 
-                    L 230 20 
-                    L 245 ${hasSTElevation ? 14 : hasSTDepression ? 26 : 20} 
-                    Q 265 ${hasTInversion ? 27 : 12} 280 20 
-                    L 300 20`}
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                className="drop-shadow-[0_0_6px_rgba(16,185,129,0.7)]"
-              />
-
-              {/* Sweeping Oscilloscope Vertical Beam Synchronized with Phase */}
-              <line
-                x1={phaseTime * 300}
-                y1="0"
-                x2={phaseTime * 300}
-                y2="40"
-                stroke="#38bdf8"
-                strokeWidth="2"
-                opacity="0.8"
-                className="drop-shadow-[0_0_4px_#38bdf8]"
-              />
-            </svg>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

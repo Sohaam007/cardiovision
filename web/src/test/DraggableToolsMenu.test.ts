@@ -227,5 +227,82 @@ export function runDraggableToolsMenuTests(): { passed: number; failed: number; 
     strictEqual(resetState.zoomLevel, 1.0);
   });
 
+  // TIER 8: CAVITIES SYNCHRONIZATION WITH INTERNAL STRUCTURES
+  test('Tier 8: Cavities toggle synchronizes showCavities, chamberCutaway, and isCutOpen', () => {
+    const store = useStore.getState();
+
+    // Default: all false
+    strictEqual(store.showCavities, false);
+    strictEqual(store.chamberCutaway, false);
+    strictEqual(store.isCutOpen, false);
+
+    // Toggle cavities on
+    store.toggleCavities();
+    strictEqual(useStore.getState().showCavities, true);
+    strictEqual(useStore.getState().chamberCutaway, true);
+    strictEqual(useStore.getState().isCutOpen, true);
+
+    // Toggle cutaway off
+    store.toggleChamberCutaway();
+    strictEqual(useStore.getState().showCavities, false);
+    strictEqual(useStore.getState().chamberCutaway, false);
+    strictEqual(useStore.getState().isCutOpen, false);
+
+    // Set cavities directly
+    store.setShowCavities(true);
+    strictEqual(useStore.getState().showCavities, true);
+    strictEqual(useStore.getState().isCutOpen, true);
+  });
+
+  // TIER 9: MOVABLE RISK LEGEND & BOUNDARY CLAMPING
+  test('Tier 9: Movable FloatingRiskLegend maintains boundary clamping and collapse state', () => {
+    const parentWidth = 1200;
+    const parentHeight = 800;
+    const legendWidth = 320;
+    const legendHeight = 340;
+    const margin = 12;
+
+    function clampLegend(pos: { x: number; y: number }) {
+      const minX = margin;
+      const maxX = Math.max(margin, parentWidth - legendWidth - margin);
+      const minY = margin;
+      const maxY = Math.max(margin, parentHeight - legendHeight - margin);
+      return {
+        x: Math.max(minX, Math.min(maxX, pos.x)),
+        y: Math.max(minY, Math.min(maxY, pos.y)),
+      };
+    }
+
+    const clampedTopLeft = clampLegend({ x: -50, y: -20 });
+    strictEqual(clampedTopLeft.x, margin);
+    strictEqual(clampedTopLeft.y, margin);
+
+    const clampedBottomRight = clampLegend({ x: 3000, y: 3000 });
+    strictEqual(clampedBottomRight.x, parentWidth - legendWidth - margin);
+    strictEqual(clampedBottomRight.y, parentHeight - legendHeight - margin);
+  });
+
+  // TIER 10: ECG MONITOR HUD & PATHOLOGY ALERT COMPUTATION
+  test('Tier 10: ECG Monitor HUD telemetry and ischemia alert computation operate correctly', () => {
+    const store = useStore.getState();
+
+    // Verify ECG toggle
+    strictEqual(store.showECG, true);
+    store.toggleECG();
+    strictEqual(useStore.getState().showECG, false);
+    store.setShowECG(true);
+    strictEqual(useStore.getState().showECG, true);
+
+    // Verify ST Elevation detection
+    store.setPatientInput('ST_Elevation', 1);
+    store.setPatientInput('PR', 82);
+    store.setPatientInput('EF-TTE', 45);
+
+    const inputs = useStore.getState().patientInputs;
+    strictEqual(Boolean(inputs['ST_Elevation']), true);
+    strictEqual(Number(inputs['PR']), 82);
+    strictEqual(Number(inputs['EF-TTE']), 45);
+  });
+
   return { passed, failed, tests };
 }

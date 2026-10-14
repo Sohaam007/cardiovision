@@ -15,6 +15,7 @@ import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHU
 import { DraggableToolsMenu } from './components/DraggableToolsMenu';
 import { PatientFindingsHUD } from './components/PatientFindingsHUD';
 import { CardiacCycleControlsHUD } from './components/CardiacCycleControlsHUD';
+import { ECGMonitorHUD } from './components/ECGMonitorHUD';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -319,16 +320,17 @@ export const App: React.FC = () => {
           {/* Consolidated Draggable Floating Tools HUD */}
           <DraggableToolsMenu />
 
+          {/* Floating Risk Legend HUD (Movable & Collapsible) */}
+          <FloatingRiskLegend />
+
+          {/* Systematic Real-Time ECG Oscilloscope Monitor HUD */}
+          <ECGMonitorHUD />
+
           {/* Surgical Dissection Controls (Active in 3D procedural mode) */}
           {viewerMode === 'procedural' && <DissectionControls />}
 
           {/* Interactive Sensitivity & What-If Studio HUD Overlay */}
           <InteractiveSensitivityHUD isOpen={isSensitivityOpen} onClose={closeSensitivity} />
-
-          {/* Floating Risk Legend HUD (Anterior/Lateral/Posterior presets, percentages, opacity slider, torso toggle, selected vessel details) */}
-          <div className="absolute bottom-4 left-4 z-10">
-            <FloatingRiskLegend />
-          </div>
         </div>
 
 
