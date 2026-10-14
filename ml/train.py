@@ -54,6 +54,13 @@ DEMO_HOLDOUT_PATH = MODELS_DIR / "demo_holdout_raw.json"
 TARGETS = ["cad", "lad", "lcx", "rca"]
 TARGET_COL_MAP = {"cad": "CAD", "lad": "LAD", "lcx": "LCX", "rca": "RCA"}
 
+TARGET_CLINICAL_NOTES = {
+    "cad": "Strong predictive discrimination (ROC-AUC 0.9026 +/- 0.0372, PR-AUC 0.9569). Calibrated decision margins align well with invasive catheterization ground truth.",
+    "lad": "Robust predictive utility (ROC-AUC 0.8376 +/- 0.0436, PR-AUC 0.8745). Driven predominantly by Typical Chest Pain, Region RWMA, and EF-TTE.",
+    "lcx": "Moderate discrimination (ROC-AUC 0.7584 +/- 0.0456, PR-AUC 0.6453). Circumflex territory (lateral left ventricular wall) produces subtler surface ECG and non-invasive echocardiographic manifestations than anterior LAD. Default 0.50 threshold yields 51.69% recall; screening threshold 0.27 achieves 90.25% recall.",
+    "rca": "Weaker standalone performance (ROC-AUC 0.7011 +/- 0.0477, PR-AUC 0.6099). Inferior wall and right ventricular ischemia show limited representation in non-invasive 54-feature tabular data. Default 0.50 threshold exhibits low sensitivity (37.33%); calibrated screening threshold of 0.25 is recommended for rule-out triage (90.99% recall, 43.57% precision).",
+}
+
 # Categorical mappings for strictly numeric representations
 BBB_MAP = {"N": 0.0, "LBBB": 1.0, "RBBB": 2.0}
 VHD_MAP = {"N": 0.0, "MILD": 1.0, "MODERATE": 2.0, "SEVERE": 3.0}
@@ -417,6 +424,7 @@ def run_cross_validation(
                 "negative": n_neg,
                 "rate": round(n_pos / len(y), 4),
             },
+            "notes": TARGET_CLINICAL_NOTES.get(target, ""),
             "best_hyperparameters": best_params_per_target[target],
             "operating_thresholds": {
                 "default": 0.50,
@@ -470,6 +478,108 @@ def run_cross_validation(
         json.dump(cache_data, f, indent=2)
 
     return cv_results, best_params_per_target, cad_constraint_stats
+
+
+def compute_feature_ablations(
+    X_dev: np.ndarray,
+    y_dev: Dict[str, np.ndarray],
+    feature_names: List[str],
+    best_params: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Evaluate feature-set ablations (Full vs Without Lab vs Without Echo)
+    across the exact same 15 CV splits (RepeatedStratifiedKFold 5-split x 3-repeat, seed 42)
+    without tuning on outer-test folds.
+    """
+    print("\n--- Computing Feature Set Ablations (Modality Lift Analysis) ---")
+    with open(FEATURE_SCHEMA_PATH, "r", encoding="utf-8") as f:
+        schema = json.load(f)
+
+    lab_features = {x["name"] for x in schema if x.get("group") == "Lab"}
+    echo_features = {x["name"] for x in schema if x.get("group") == "Echo"}
+
+    no_lab_idx = [i for i, f in enumerate(feature_names) if f not in lab_features]
+    no_echo_idx = [i for i, f in enumerate(feature_names) if f not in echo_features]
+
+    rskf = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=42)
+    ablation_results: Dict[str, Any] = {}
+
+    for target in TARGETS:
+        y = y_dev[target]
+        p = best_params[target]
+
+        scores_full_roc, scores_full_pr = [], []
+        scores_no_lab_roc, scores_no_lab_pr = [], []
+        scores_no_echo_roc, scores_no_echo_pr = [], []
+
+        for tr_idx, te_idx in rskf.split(X_dev, y):
+            y_tr, y_te = y[tr_idx], y[te_idx]
+            scale = float((len(y_tr) - np.sum(y_tr)) / max(1, np.sum(y_tr)))
+            p_dict = {
+                "objective": "binary:logistic",
+                "eval_metric": "logloss",
+                "max_depth": p["max_depth"],
+                "learning_rate": p["learning_rate"],
+                "subsample": 0.8,
+                "colsample_bytree": 0.8,
+                "min_child_weight": 3,
+                "scale_pos_weight": scale,
+                "random_state": 42,
+            }
+
+            # 1. Full feature set (54)
+            d_tr_full = xgb.DMatrix(X_dev[tr_idx], label=y_tr)
+            d_te_full = xgb.DMatrix(X_dev[te_idx])
+            b_full = xgb.train(p_dict, d_tr_full, num_boost_round=p["n_estimators"])
+            preds_full = b_full.predict(d_te_full)
+            scores_full_roc.append(roc_auc_score(y_te, preds_full))
+            scores_full_pr.append(average_precision_score(y_te, preds_full))
+
+            # 2. Without Lab features (40)
+            d_tr_nl = xgb.DMatrix(X_dev[tr_idx][:, no_lab_idx], label=y_tr)
+            d_te_nl = xgb.DMatrix(X_dev[te_idx][:, no_lab_idx])
+            b_nl = xgb.train(p_dict, d_tr_nl, num_boost_round=p["n_estimators"])
+            preds_nl = b_nl.predict(d_te_nl)
+            scores_no_lab_roc.append(roc_auc_score(y_te, preds_nl))
+            scores_no_lab_pr.append(average_precision_score(y_te, preds_nl))
+
+            # 3. Without Echo features (51)
+            d_tr_ne = xgb.DMatrix(X_dev[tr_idx][:, no_echo_idx], label=y_tr)
+            d_te_ne = xgb.DMatrix(X_dev[te_idx][:, no_echo_idx])
+            b_ne = xgb.train(p_dict, d_tr_ne, num_boost_round=p["n_estimators"])
+            preds_ne = b_ne.predict(d_te_ne)
+            scores_no_echo_roc.append(roc_auc_score(y_te, preds_ne))
+            scores_no_echo_pr.append(average_precision_score(y_te, preds_ne))
+
+        ablation_results[target] = {
+            "full_features": {
+                "feature_count": len(feature_names),
+                "roc_auc_mean": round(float(np.mean(scores_full_roc)), 4),
+                "roc_auc_std": round(float(np.std(scores_full_roc, ddof=1)), 4),
+                "pr_auc_mean": round(float(np.mean(scores_full_pr)), 4),
+            },
+            "without_lab": {
+                "feature_count": len(no_lab_idx),
+                "excluded_count": len(lab_features),
+                "roc_auc_mean": round(float(np.mean(scores_no_lab_roc)), 4),
+                "roc_auc_std": round(float(np.std(scores_no_lab_roc, ddof=1)), 4),
+                "pr_auc_mean": round(float(np.mean(scores_no_lab_pr)), 4),
+            },
+            "without_echo": {
+                "feature_count": len(no_echo_idx),
+                "excluded_count": len(echo_features),
+                "roc_auc_mean": round(float(np.mean(scores_no_echo_roc)), 4),
+                "roc_auc_std": round(float(np.std(scores_no_echo_roc, ddof=1)), 4),
+                "pr_auc_mean": round(float(np.mean(scores_no_echo_pr)), 4),
+            },
+        }
+        print(
+            f"  {target.upper()}: Full ROC={ablation_results[target]['full_features']['roc_auc_mean']} | "
+            f"No-Lab={ablation_results[target]['without_lab']['roc_auc_mean']} | "
+            f"No-Echo={ablation_results[target]['without_echo']['roc_auc_mean']}"
+        )
+
+    return ablation_results
 
 
 def train_final_models(
@@ -882,7 +992,10 @@ def main() -> None:
     # Step 7: Generate offline figures
     generate_offline_figures(boosters, calibration, X_dev, y_dev, feature_names)
 
-    # Step 8: Save comprehensive metrics.json
+    # Step 8: Compute feature-set ablations (modality lift)
+    ablation_results = compute_feature_ablations(X_dev, y_dev, feature_names, best_params)
+
+    # Step 9: Save comprehensive metrics.json
     final_metrics_payload = {
         "metadata": {
             "dataset_rows_total": 303,
@@ -895,12 +1008,18 @@ def main() -> None:
         },
         "targets": cv_results,
         "cad_constraint_analysis": cad_constraint_stats,
+        "feature_ablations": ablation_results,
     }
 
     metrics_out = MODELS_DIR / "metrics.json"
     with open(metrics_out, "w", encoding="utf-8") as f:
         json.dump(final_metrics_payload, f, indent=2)
     print(f"\nFinal metrics successfully written to: {metrics_out.name}")
+
+    web_metrics_out = WEB_PUBLIC_DIR / "metrics.json"
+    with open(web_metrics_out, "w", encoding="utf-8") as f:
+        json.dump(final_metrics_payload, f, indent=2)
+    print(f"Final metrics copied to: {web_metrics_out.name}")
     print("\nHUMAN REVIEW REQUIRED: ml/train.py")
 
 

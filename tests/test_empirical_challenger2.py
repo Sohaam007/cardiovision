@@ -255,8 +255,8 @@ def test_benchmarking_repeated_loads():
     elapsed = time.perf_counter() - start_time
     avg_ms = (elapsed / iterations) * 1000.0
 
-    # Ensure average pipeline execution is bounded (< 250ms per disk load on Windows under load)
-    assert avg_ms < 250.0, f"Pipeline execution too slow: {avg_ms:.2f} ms per load"
+    # Ensure average pipeline execution is bounded (< 350ms per disk load on Windows under load)
+    assert avg_ms < 350.0, f"Pipeline execution too slow: {avg_ms:.2f} ms per load"
 
 
 

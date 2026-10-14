@@ -1,32 +1,100 @@
-# 07 Deploy (Production Configuration)
+# 07 Deploy (Production Configuration & Runbook)
 
 ## Architecture Overview
-- **Frontend:** Vercel (or Cloudflare Pages / Netlify). Root directory `web/`, build command `npm run build`, output directory `dist`.
-  - Environment variable: `VITE_API_URL` (points to the Render live backend URL).
-  - Graceful fallback: If API is unreachable or waking, frontend automatically falls back to precomputed offline demo mode (`/demo_patients.json`).
-- **Backend API:** Render Web Service (Free Tier), Python 3.11.
+- **Frontend:** Vercel (or Cloudflare Pages). Root directory `web/`, build command `npm run build`, output directory `dist`.
+  - Environment variable: `VITE_API_URL` (points to the Render live backend URL, e.g. `https://cardiovision-api.onrender.com`).
+  - Graceful fallback: If API is unreachable or waking, frontend automatically falls back to bundled precomputed offline demo mode (`/demo_patients.json`).
+- **Backend API:** Render Web Service (Free Tier), Python 3.11.9.
   - Start command: `uvicorn api.main:app --host 0.0.0.0 --port $PORT`
+  - Build command: `pip install -r requirements.txt`
   - Health check path: `/health`
-  - Zero heavy dependencies: no `shap` in production runtime; models loaded at startup into memory.
+  - Zero heavy runtime dependencies: TreeSHAP is executed natively via XGBoost C++ `pred_contribs=True` without importing `shap` in production.
 
-## Environment Variables
-- `PORT`: Set automatically by Render (default: 8000).
-- `CORS_ORIGINS`: Comma-separated list of allowed origins (e.g. `http://localhost:5173,https://cardiovision.vercel.app`). Also supports all `*.vercel.app` preview deployments automatically.
-- `MOCK_MODE`:
-  - `0` (default in production): Serves live calibrated XGBoost models with native TreeSHAP in < 15ms.
-  - `1`: Runs deterministic mock inference engine for testing or fallback.
-- `VITE_API_URL`: Configured in frontend `.env` or Vercel dashboard to route calls to the live Render URL.
+---
 
-## Cold-Start Mitigation
+## Click-by-Click Deployment Guide
+
+### A. Deploy Backend API on Render
+
+1. Log in to [Render Dashboard](https://dashboard.render.com).
+2. Click **New +** &rarr; **Web Service**.
+3. Select your GitHub repository (`Sohaam007/cardiovision`).
+4. Configure service settings:
+   - **Name:** `cardiovision-api`
+   - **Region:** Ohio (US East) or Frankfurt (EU Central)
+   - **Branch:** `main`
+   - **Root Directory:** *(leave blank / repo root)*
+   - **Runtime:** `Python 3`
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `uvicorn api.main:app --host 0.0.0.0 --port $PORT`
+   - **Plan:** `Free`
+5. Expand **Advanced** and configure Environment Variables:
+   - `PYTHON_VERSION` = `3.11.9`
+   - `MOCK_MODE` = `0`
+   - `CORS_ORIGINS` = `http://localhost:5173,https://cardiovision.vercel.app`
+6. Set **Health Check Path** to `/health`.
+7. Click **Create Web Service**. Wait 2-3 minutes for the build to finish.
+8. Verify deployment:
+   ```bash
+   curl -s https://cardiovision-api.onrender.com/health
+   # Expected response: {"status":"ok","model_version":"v1"}
+   ```
+
+### B. Deploy Frontend on Vercel
+
+1. Log in to [Vercel Dashboard](https://vercel.com/dashboard).
+2. Click **Add New...** &rarr; **Project**.
+3. Import the `Sohaam007/cardiovision` GitHub repository.
+4. In Project Configuration:
+   - **Framework Preset:** `Vite`
+   - **Root Directory:** Click `Edit` and select `web`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+   - **Install Command:** `npm install`
+5. Expand **Environment Variables**:
+   - `VITE_API_URL` = `https://cardiovision-api.onrender.com`
+6. Click **Deploy**. Vercel will install dependencies, typecheck (`tsc`), and bundle via Vite.
+7. Verify live URL:
+   - Navigate to `https://cardiovision.vercel.app`
+   - Confirm safety disclaimer banner is visible.
+   - Confirm Model Info drawer opens and displays cross-validation metrics.
+   - Confirm 3D heart renders without errors.
+
+---
+
+## Testing CORS and End-to-End Connectivity
+
+Run the following test to confirm CORS headers from your Vercel domain:
+```bash
+curl -I -X OPTIONS "https://cardiovision-api.onrender.com/predict" \
+  -H "Origin: https://cardiovision.vercel.app" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: content-type"
+```
+Verify the response includes:
+```http
+access-control-allow-origin: https://cardiovision.vercel.app
+access-control-allow-methods: *
+access-control-allow-headers: *
+```
+
+---
+
+## Cold-Start Mitigation & Warm-Up Cron
+
 Render free tier instances sleep after 15 minutes of inactivity:
-1. Frontend makes an immediate non-blocking call to `/health` on mount.
-2. If the backend is sleeping, the top bar displays a subtle 'Demo Offline Engine' pill while waking up.
-3. Once live, the status badge seamlessly switches to 'Live Model Serving' without interrupting user interactions.
-4. During live evaluation or judging windows: ping `/health` every 10 minutes via a health monitor to maintain warm memory residency.
+1. **Frontend Resilience:** If the backend is waking up, the top bar displays 'Demo Mode (Offline)'. Patients can still be explored via precomputed holdout personas with zero interruption.
+2. **Scheduled Keep-Warm (for Judging Windows):**
+   - Use [cron-job.org](https://cron-job.org) or GitHub Actions (`.github/workflows/warmup.yml`) to ping `https://cardiovision-api.onrender.com/health` every 10 minutes.
+   - **Enable:** 2 hours before judging starts.
+   - **Disable:** Immediately following judging completion to conserve free tier quotas.
+
+---
 
 ## Deployment Verification Checklist
-- [x] Fast sub-15ms live inference confirmed via automated tests (`tests/test_api_parity.py`).
+- [x] Fast sub-25ms live inference confirmed via automated tests (`tests/test_api_parity.py`).
 - [x] Precomputed holdout personas verified in `api/demo_patients.json` and `web/public/demo_patients.json`.
-- [x] CORS middleware supports localhost:5173, custom domains, and Vercel preview URLs.
-- [x] Zero leakage guaranteed by automated CI test suite (`tests/test_no_leakage.py`).
-- [x] Frontend passes strict TypeScript checking and builds cleanly without warnings.
+- [x] CORS middleware supports `localhost:5173`, custom domains, and Vercel preview URLs regex (`https://.*\.vercel\.app`).
+- [x] Zero leakage guaranteed by automated test suite (`tests/test_no_leakage.py`).
+- [x] Frontend passes strict TypeScript checking (`tsc --noEmit`) and Vite production build.
+- [x] `render.yaml` and `web/vercel.json` configured for infrastructure-as-code and client-side routing.
