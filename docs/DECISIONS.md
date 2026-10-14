@@ -47,5 +47,6 @@
   - Sensitivity Debounce & Offline Resilience: Debounce set to 300ms. In offline mode or when backend is down during user slider adjustments, displays "Model server unavailable" rather than presenting stale cached numbers as live predictions.
   - Verified Parity: Added Tier 4 Scenario E test confirming vessel colors strictly equal numeric card percentages for 3 holdout personas.
   - Measured 4x CPU Throttling: Measured 22.2 FPS active camera tweening (45.06 ms average delta) and 0 FPS idle on demand frameloop.
+- UI Task 1 (FORM): Enhanced ClinicalForm with three collapsible sections (Vitals & History, ECG, Echo & Labs), physiological range validation (min/max) with inline warning feedback, reference range display with clinical sources, interactive binary toggle buttons, and a Reset to Defaults action.
 
 
