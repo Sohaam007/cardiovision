@@ -2,7 +2,7 @@ name: CI (Fast Automated Verification)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, ops/* ]
   pull_request:
     branches: [ main ]
 
