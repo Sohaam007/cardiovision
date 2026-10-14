@@ -1,6 +1,7 @@
 import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import { useStore, VesselKey } from '../store/useStore';
 import {
   VESSEL_CURVES,
@@ -21,6 +22,8 @@ const VesselItem: React.FC<VesselItemProps> = ({ vesselKey, clippingPlane }) => 
   const hoveredVessel = useStore((state) => state.hoveredVessel);
   const setSelectedVessel = useStore((state) => state.setSelectedVessel);
   const setHoveredVessel = useStore((state) => state.setHoveredVessel);
+  const showCalibers = useStore((state) => state.showCalibers);
+  const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
 
   const curve = VESSEL_CURVES[vesselKey];
   const params = VESSEL_PARAMS[vesselKey];
@@ -51,6 +54,7 @@ const VesselItem: React.FC<VesselItemProps> = ({ vesselKey, clippingPlane }) => 
 
   const isSelected = selectedVessel === vesselKey;
   const isHovered = hoveredVessel === vesselKey;
+  const labelPos = useMemo(() => curve.getPoint(0.45), [curve]);
 
   return (
     <group name={`Vessel_${vesselKey}`}>
@@ -60,15 +64,49 @@ const VesselItem: React.FC<VesselItemProps> = ({ vesselKey, clippingPlane }) => 
         receiveShadow={false}
       >
         <meshStandardMaterial
-          color={vesselColor}
-          roughness={0.32}
-          metalness={0.12}
-          emissive={isSelected ? vesselColor : '#000000'}
-          emissiveIntensity={isSelected ? 0.35 : isHovered ? 0.15 : 0.0}
+          color={fluoroscopyMode ? '#0f172a' : vesselColor}
+          roughness={fluoroscopyMode ? 0.08 : 0.32}
+          metalness={fluoroscopyMode ? 0.85 : 0.12}
+          emissive={fluoroscopyMode ? '#38bdf8' : isSelected ? vesselColor : '#000000'}
+          emissiveIntensity={fluoroscopyMode ? 0.85 : isSelected ? 0.35 : isHovered ? 0.15 : 0.0}
           clippingPlanes={clippingPlane ? [clippingPlane] : []}
           clipShadows={true}
         />
       </mesh>
+
+      {/* Floating 3D Anatomical Label Badge when Labels is active */}
+      {showCalibers && (
+        <Html
+          position={labelPos}
+          center
+          distanceFactor={5.5}
+          zIndexRange={[50, 0]}
+          style={{ pointerEvents: 'auto', userSelect: 'none' }}
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedVessel(isSelected ? null : vesselKey, true);
+            }}
+            className={`px-2 py-0.5 rounded-full text-[11px] font-bold font-mono shadow-xl transition-all flex items-center gap-1.5 border transform hover:scale-105 ${
+              isSelected
+                ? 'bg-rose-600 text-white border-rose-300 shadow-rose-950/60 ring-2 ring-rose-400'
+                : 'bg-card/95 text-card-foreground border-border hover:bg-muted/90'
+            }`}
+            title={`Select ${vesselKey} coronary artery (${(prob * 100).toFixed(0)}% risk)`}
+          >
+            <span
+              className="w-2 h-2 rounded-full inline-block shrink-0 shadow-sm"
+              style={{ backgroundColor: vesselColor.getStyle() }}
+            />
+            <span>{vesselKey}</span>
+            <span className="text-[10px] opacity-80 font-normal">
+              {(prob * 100).toFixed(0)}%
+            </span>
+          </button>
+        </Html>
+      )}
 
       <mesh
         name={`Proxy_${vesselKey}`}

@@ -175,7 +175,7 @@ export const useStore = create<AppState>()((set) => ({
     vessels: { ...DEFAULT_VESSELS },
   },
   colorblindMode: false,
-  showTorso: true,
+  showTorso: false,
   heartOpacity: 0.92,
   selectedVessel: null,
   hoveredVessel: null,
@@ -349,7 +349,7 @@ export const useStore = create<AppState>()((set) => ({
         vessels: { ...DEFAULT_VESSELS },
       },
       colorblindMode: false,
-      showTorso: true,
+      showTorso: false,
       heartOpacity: 0.92,
       selectedVessel: null,
       hoveredVessel: null,
@@ -543,6 +543,7 @@ export const useStore = create<AppState>()((set) => ({
       if (err.name !== 'AbortError') {
         console.error('Prediction failed:', err);
         state.setModelServerUnavailable(true);
+        useStore.setState({ isDirty: false });
       }
     } finally {
       useStore.getState().setIsLoadingPrediction(false);

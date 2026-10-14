@@ -72,13 +72,13 @@ export const PersonaPicker: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className="bg-[#080d19] border-b border-slate-800/80 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-3 text-xs z-20 shadow-md relative"
+      className="bg-card/95 backdrop-blur-md border-b border-border border-slate-800/80 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-3 text-xs z-20 shadow-md relative"
       data-testid="persona-picker-hud"
     >
       {/* Left Sub-Section: Access Patient Label & Dropdown Trigger */}
       <div className="flex items-center gap-2.5">
-        <div className="flex items-center gap-1.5 font-bold text-white tracking-wide">
-          <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="flex items-center gap-1.5 font-bold text-foreground tracking-wide">
+          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
           <span className="hidden sm:inline">Access Patient:</span>
@@ -88,12 +88,12 @@ export const PersonaPicker: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-[#090d16] hover:bg-slate-800/80 border border-slate-700/80 hover:border-cyan-500/60 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs text-slate-200 shadow-md transition-all cursor-pointer group"
+          className="bg-secondary/80 hover:bg-secondary border border-border hover:border-primary/60 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs text-foreground shadow-md transition-all cursor-pointer group"
           title="Click to select another benchmark patient persona"
           aria-expanded={isOpen}
           aria-haspopup="listbox"
         >
-          <span className="text-cyan-300 font-semibold group-hover:text-cyan-200 transition-colors">
+          <span className="text-primary font-semibold group-hover:text-primary/80 transition-colors">
             {activePatient.name}
           </span>
 
@@ -123,39 +123,39 @@ export const PersonaPicker: React.FC = () => {
           </span>
 
           {/* Dropdown Arrow */}
-          <span className="text-slate-400 group-hover:text-white text-[10px] font-bold transition-transform">
+          <span className="text-muted-foreground group-hover:text-foreground text-[10px] font-bold transition-transform">
             {isOpen ? '▲' : '▼'}
           </span>
         </button>
       </div>
 
       {/* Center Sub-Section: Compact Active Vitals Strip */}
-      <div className="hidden md:flex items-center gap-2.5 text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl px-3 py-1 font-mono">
+      <div className="hidden md:flex items-center gap-2.5 text-[11px] text-muted-foreground bg-muted/40 border border-border/80 rounded-xl px-3 py-1 font-mono">
         <span>
-          <strong className="text-slate-300">Age:</strong> {activePatient.features?.Age ?? 60}y
+          <strong className="text-foreground">Age:</strong> {activePatient.features?.Age ?? 60}y
         </span>
-        <span className="text-slate-700">•</span>
+        <span className="text-muted-foreground/50">•</span>
         <span>
-          <strong className="text-slate-300">Sex:</strong> {activePatient.features?.Sex ?? 'Male'}
+          <strong className="text-foreground">Sex:</strong> {activePatient.features?.Sex ?? 'Male'}
         </span>
-        <span className="text-slate-700">•</span>
+        <span className="text-muted-foreground/50">•</span>
         <span>
-          <strong className="text-slate-300">EF:</strong> {activePatient.features?.['EF-TTE'] ?? 50}%
+          <strong className="text-foreground">EF:</strong> {activePatient.features?.['EF-TTE'] ?? 50}%
         </span>
-        <span className="text-slate-700">•</span>
+        <span className="text-muted-foreground/50">•</span>
         <span>
-          <strong className="text-slate-300">BP:</strong> {activePatient.features?.BP ?? 120} mmHg
+          <strong className="text-foreground">BP:</strong> {activePatient.features?.BP ?? 120} mmHg
         </span>
-        <span className="text-slate-700">•</span>
+        <span className="text-muted-foreground/50">•</span>
         <span>
-          <strong className="text-slate-300">PR:</strong> {activePatient.features?.PR ?? 75} bpm
+          <strong className="text-foreground">PR:</strong> {activePatient.features?.PR ?? 75} bpm
         </span>
       </div>
 
       {/* Right Sub-Section: Benchmark Badge & Pagination Controls */}
       <div className="flex items-center gap-2">
-        <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/60 text-cyan-400 border border-cyan-800/60 font-mono text-[10px]">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+        <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/30 font-mono text-[10px]">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
           UCI 411 Benchmark (N=8)
         </span>
 
@@ -163,7 +163,7 @@ export const PersonaPicker: React.FC = () => {
           <button
             type="button"
             onClick={handlePrevPersona}
-            className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 transition-colors flex items-center gap-1 font-semibold text-[11px]"
+            className="px-2.5 py-1 rounded-lg bg-secondary/80 hover:bg-secondary text-secondary-foreground hover:text-foreground border border-border transition-colors flex items-center gap-1 font-semibold text-[11px]"
             title="Previous Holdout Persona (Wrap-around)"
             aria-label="Previous Persona"
           >
@@ -173,7 +173,7 @@ export const PersonaPicker: React.FC = () => {
           <button
             type="button"
             onClick={handleNextPersona}
-            className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 transition-colors flex items-center gap-1 font-semibold text-[11px]"
+            className="px-2.5 py-1 rounded-lg bg-secondary/80 hover:bg-secondary text-secondary-foreground hover:text-foreground border border-border transition-colors flex items-center gap-1 font-semibold text-[11px]"
             title="Next Holdout Persona (Wrap-around)"
             aria-label="Next Persona"
           >
@@ -187,19 +187,19 @@ export const PersonaPicker: React.FC = () => {
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-4 sm:left-6 mt-1.5 z-50 w-[92vw] sm:w-[480px] bg-[#090d16]/98 backdrop-blur-2xl border border-slate-700/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-xs max-h-[75vh] animate-in fade-in duration-150"
+          className="absolute top-full left-4 sm:left-6 mt-1.5 z-50 w-[92vw] sm:w-[480px] bg-slate-950/98 backdrop-blur-3xl border border-border/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-xs max-h-[75vh] animate-in fade-in duration-150"
           role="listbox"
           aria-label="Benchmark Holdout Personas"
         >
           {/* Popover Header */}
-          <div className="bg-slate-900/95 border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between">
+          <div className="bg-muted/60 border-b border-border/80 px-4 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <div className="flex items-center gap-1.5 font-bold text-white tracking-wide">
+              <div className="flex items-center gap-1.5 font-bold text-foreground tracking-wide">
                 <span>Access Patient</span>
-                <span className="text-[10px] font-normal text-slate-400">
+                <span className="text-[10px] font-normal text-muted-foreground">
                   (8 Holdout Personas)
                 </span>
               </div>
@@ -208,7 +208,7 @@ export const PersonaPicker: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="w-6 h-6 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/60"
+              className="w-6 h-6 rounded-lg bg-secondary/80 hover:bg-secondary text-secondary-foreground hover:text-foreground flex items-center justify-center text-xs transition-colors border border-border"
               title="Close patient selector"
               aria-label="Close"
             >
@@ -217,9 +217,9 @@ export const PersonaPicker: React.FC = () => {
           </div>
 
           {/* Subtext info */}
-          <div className="px-4 py-1.5 bg-slate-950/60 border-b border-slate-800/60 text-[11px] text-slate-400 flex items-center justify-between">
+          <div className="px-4 py-1.5 bg-muted/30 border-b border-border/60 text-[11px] text-muted-foreground flex items-center justify-between">
             <span>Select a benchmark patient to load multimodal clinical inputs:</span>
-            <span className="font-mono text-cyan-400 text-[10px]">UCI 411 Test Set</span>
+            <span className="font-mono text-primary text-[10px] font-semibold">UCI 411 Test Set</span>
           </div>
 
           {/* Patients List */}
@@ -251,8 +251,8 @@ export const PersonaPicker: React.FC = () => {
                   }}
                   className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all border text-left ${
                     isSelected
-                      ? 'bg-cyan-950/80 border-cyan-500 text-cyan-200 shadow-md shadow-cyan-950/50 scale-[1.01]'
-                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-800/50'
+                      ? 'bg-primary/20 border-primary text-foreground shadow-md shadow-primary/20 scale-[1.01]'
+                      : 'bg-card/90 border-border/80 text-card-foreground hover:border-primary/50 hover:bg-muted/70'
                   }`}
                   role="option"
                   aria-selected={isSelected}

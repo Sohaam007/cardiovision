@@ -248,7 +248,11 @@ export async function predictRisk(
 
   currentPredictController = new AbortController();
   const signal = currentPredictController.signal;
-  const timeoutId = setTimeout(() => currentPredictController?.abort(), TIMEOUT_MS);
+  let didTimeout = false;
+  const timeoutId = setTimeout(() => {
+    didTimeout = true;
+    currentPredictController?.abort();
+  }, TIMEOUT_MS);
 
   try {
     const res = await fetch(`${API_BASE}/predict`, {
@@ -267,7 +271,7 @@ export async function predictRisk(
     return { data, isFallback: false };
   } catch (err: any) {
     clearTimeout(timeoutId);
-    if (err.name === 'AbortError') {
+    if (err.name === 'AbortError' && !didTimeout) {
       throw err; // Stale request cancelled
     }
     // Return deterministic fallback prediction for offline or standalone demo mode

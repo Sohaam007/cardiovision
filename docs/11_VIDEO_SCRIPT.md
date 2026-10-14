@@ -72,49 +72,47 @@
 
 ---
 
-### 2:05 - 3:20 | Act 3: Multi-View Representation Switcher, Holographic Torso & Blender 3D Studio
-- **Visual:** Focus on the top-right canvas segmented pill control: `[🫀 3D Beating]`, `[⚙️ 3D Procedural]`, `[📊 2D Schematic]`, and `[🎬 Blender Studio]`.
+### 2:05 - 3:20 | Act 3: Dual Photorealistic Heart, Multi-View Switcher & Anatomical Ribcage
+- **Visual:** Focus on the top-center glassmorphic segmented pill: `[🫀 Blender Photorealistic]`, `[⚙️ Procedural Anatomy]`, `[🔬 2D Angiogram]`, `[🎬 Blender Studio]`, and `[⚡ 3D Sensitivity]`.
 - **Narrator (Soumyadeep Pal):**
-  > "As the 3D graphics lead, I designed CardioVision to meet clinicians where they work, across varying clinical workstations and diagnostic perspectives. In the top-right canvas HUD, clinicians can switch between four specialized representation modes."
-- **Action:** Click `[🫀 3D Beating]`. Orbit the camera smoothly around the beating heart.
-- **Visual:** The photorealistic heart pulsates with natural anatomical rhythm, displaying realistic myocardial deformation.
+  > "As the 3D graphics lead, I designed CardioVision to meet clinicians where they work, across varying clinical workstations and diagnostic perspectives. In the top-center canvas HUD, clinicians can seamlessly switch between representations with zero-latency 250ms cross-fading."
+- **Action:** Click `[🫀 Blender Photorealistic]`. Orbit the camera smoothly around the complete anatomical heart.
+- **Visual:** The whole heart model (`realistic_human_heart.glb`) pulsates with rich ruby-crimson myocardial tones, sulcal adipose cushions, and dark systemic venous anatomy, surrounded by the three major coronary branches glowing with calibrated risk colors.
 - **Narrator (Soumyadeep Pal):**
-  > "First is our photorealistic 3D Beating Heart, providing dynamic visceral intuition of cardiac contraction while maintaining live color-coded arterial risk overlays."
-- **Action:** Click `[⚙️ 3D Procedural]`.
-- **Visual:** The view shifts to the procedural myocardium with Catmull-Rom spline coronary tubes, atrioventricular sulcal fat cushions, and aortic branches.
-- **Action:** Toggle `Torso Shell` on and adjust opacity slider to 0.40.
-- **Visual:** A translucent holographic torso cage appears (ribs, sternum, spine, clavicles, and diaphragm), positioning the heart in accurate anatomical mediastinal orientation.
+  > "First is our photorealistic complete heart, presenting intact epicardial anatomy, physiological wringing motion, and selective coronary risk shading.
+  >
+  > When a clinician needs to inspect internal chambers, clicking 'Cut Open Heart' smoothly reveals the interior cutaway section (`beating_heart.glb`) with an identical ruby-crimson myocardial color palette, exposing the ventricular cavities, interventricular septum, and atrioventricular valves."
+- **Action:** Toggle `Torso Shell` in the dock.
+- **Visual:** The dark smokey obsidian thoracic silhouette appears with an anatomical rib cage encasing the mediastinum and heart, tracing realistic intercostal vascular branches without intrusive slicing discs.
 - **Narrator (Soumyadeep Pal):**
-  > "Second is our procedural 3D model, featuring Catmull-Rom spline coronary geometries and an optional holographic torso shell that places the heart in realistic mediastinal orientation."
-- **Action:** Click `[📊 2D Schematic]`.
+  > "Our anatomical torso mode encases the mediastinal heart within an accurate human rib cage, giving clinicians true spatial orientation within the thoracic cavity."
+- **Action:** Click `[🔬 2D Angiogram]`.
 - **Visual:** The canvas instantly switches to a high-contrast 2D coronary arterial diagram with clear vector labels, percentages, and color chips.
 - **Narrator (Soumyadeep Pal):**
-  > "Third is our 2D Schematic Fallback. If a clinician is operating on a low-power tablet, a mobile device, or a hospital workstation with WebGL disabled, CardioVision automatically serves this high-contrast 2D schematic, requiring zero GPU acceleration while preserving 100% data parity."
+  > "For low-power hospital terminals or mobile tablets where WebGL is restricted, our 2D Angiogram mode provides an instantaneous SVG schematic with complete clinical data parity."
 - **Action:** Click `[🎬 Blender Studio]`.
-- **Visual:** The Blender Studio embed loads. Soumyadeep drags the 24-frame interactive angle scrubber to rotate the heart 360°, showcasing medical studio-grade lighting and render stills.
+- **Visual:** The Blender Studio embed loads with 360-degree interactive turntable scrubbing and medical studio-grade lighting renders.
 - **Narrator (Soumyadeep Pal):**
-  > "Fourth is our integrated Blender 3D Studio. Built via our headless Python automation pipeline in Blender 5.2, this mode offers 360-degree interactive turntable scrubbing and medical studio-grade lighting renders, including anterior, left lateral, and posterior perspectives."
+  > "Finally, our integrated Blender 3D Studio, generated via headless Python automation in Blender 5.2, offers 360-degree studio turntable inspection."
 
 ---
 
-### 3:20 - 4:25 | Act 4: Draggable Tools Dock, Wiggers Cardiac Cycle, Lub-Dub Auscultation & 4-Chamber Cutaway Dissection
-- **Visual:** Focus on the newly added floating glassmorphic `DraggableToolsMenu` dock on the canvas.
-- **Action:** Click and drag the glassmorphic dock to demonstrate free floating placement; snap it neatly to the viewport corner.
+### 3:20 - 4:25 | Act 4: Surgical Dissection HUD, Dynamic Real-Life ECG Telemetry & Auscultation
+- **Visual:** Focus on the `Surgical Dissection HUD` in the top right and the real-time `ECG Telemetry` oscilloscope in the bottom right.
+- **Action:** Click `Cut Open Heart`. Select `Coronal`, then `Short-Axis`, then `Sagittal` dissection planes. Toggle the `⇄ Invert` normal button.
+- **Visual:**
+  - The multi-planar cutting tool exposes the internal 4-chamber anatomy in coronal view, transverse ventricular cross-sections in short-axis, and outflow tracts in sagittal view.
+  - Toggling Invert flips the surgical clipping normal cleanly without tearing geometry.
 - **Narrator (Soumyadeep Pal):**
-  > "To ensure zero UI collisions between anatomical visualization and clinical controls, we consolidated all scene instrumentation into this draggable, glassmorphic tools menu. It can be positioned anywhere across the canvas.
+  > "Our Surgical Dissection HUD gives surgeons interactive multi-planar control. Clinicians can cut through Coronal 4-chamber, Short-Axis ventricular, or Sagittal outflow views, modulate cut depth continuously from anterior to posterior, and invert the clipping normal with a single click.
   >
-  > Let's explore our synchronized cardiac mechanics."
-- **Action:** Expand the Cardiac Cycle controls inside the dock. Toggle cardiac playback and drag the Heart Rate slider from 60 up to 100 BPM. Unmute the acoustic sound button.
-- **Audio / Visual:**
-  - The Wiggers phase indicator dynamically tracks: Isovolumetric Contraction &rarr; Rapid Ejection &rarr; Isovolumetric Relaxation &rarr; Rapid Filling.
-  - The ventricles execute a subtle torsional wringing twist during systolic ejection.
-  - Rhythmic stethoscope sound plays: distinct Lub (S1 valve closure) followed by Dub (S2 valve closure), synthesized in real time via Web Audio API biquad bandpass filters.
+  > Crucially, our system features dynamic, patient-specific ECG telemetry."
+- **Action:** Focus on the real-time ECG oscilloscope. Click between `Patient #002` (ischemic ST changes) and `Patient #289` (normal sinus rhythm). Switch leads between `Lead II`, `V1`, `V5`, and `aVR`.
+- **Visual:**
+  - The continuous oscilloscope sweep updates dynamically: heart rate scales to the patient's exact resting pulse (100 BPM vs 70 BPM), the PR interval adjusts, and ischemic ST-segment depression / T-wave inversions morph in real time according to the patient's individual clinical inputs.
+  - The S1/S2 Lub-Dub stethoscope sound synchronizes perfectly with each sweep cycle.
 - **Narrator (Soumyadeep Pal):**
-  > "CardioVision synchronizes myocardial motion with the classic Wiggers diagram, simulating systolic ejection, ventricular torsional wringing, and diastolic filling. With Web Audio API synthesis, we generate realistic acoustic stethoscope auscultation—reproducing the S1 Lub and S2 Dub valve closures at any clinician-selected heart rate."
-- **Action:** Expand the Dissection Cutaway controls. Toggle `Chamber Dissection` and select the `Coronal Cut Plane`.
-- **Visual:** The anterior myocardial wall slices open cleanly, revealing internal cardiac morphology: the muscular Left Ventricle cavity, Right Ventricle, Left and Right Atria, Mitral and Tricuspid valve leaflets, papillary muscles, and the interventricular septum.
-- **Narrator (Soumyadeep Pal):**
-  > "For deep anatomical exploration, our multi-planar chamber dissection tool cuts through axial, coronal, or sagittal planes, exposing the internal four-chamber morphology, papillary muscles, and valve structures, allowing cardiologists to inspect spatial relationships between coronary perfusion territories and myocardial wall structures."
+  > "Rather than a static looping graphic, our ECG oscilloscope computes real-time physiological P-QRS-T waveforms parameterized by each patient's exact pulse rate, PR interval, QRS duration, and ischemic ST-T abnormalities. Stethoscope auscultation reproduces acoustic S1 and S2 valve snaps synthesized via the Web Audio API."
 
 ---
 
@@ -194,8 +192,8 @@
 - **Visual:** Split screen or quick window switch to the terminal.
 - **Action:** In terminal, execute `python -m pytest tests` and `npm --prefix web test -- --run`.
 - **Terminal Output Displayed:**
-  - `pytest`: 59 passed in 5.72s (including 31 zero-leakage mutation tests in `test_no_leakage.py`).
-  - `web test`: 69 passed in 53ms.
+  - `pytest`: 59 passed in 6.29s (including 31 zero-leakage mutation tests in `test_no_leakage.py`).
+  - `web test`: 117 passed in 238ms across 11 comprehensive suites.
 - **Narrator (Soumyadeep Pal):**
   > "Finally, let's examine the software engineering, cloud infrastructure, and DevOps architecture led by Debdas.
   >
@@ -205,8 +203,8 @@
   >
   > Behind the application stands an uncompromising automated quality assurance suite:
   > 1. **Zero-Leakage Invariant Suite:** 31 automated mutation tests in `tests/test_no_leakage.py` strictly prove that `LAD`, `LCX`, `RCA`, and `Cath` are never exposed as model inputs.
-  > 2. **Full Test Coverage:** 59 Python tests and 69 web unit and E2E tests pass 100% green in under 6 seconds.
-  > 3. **Production Build:** Clean TypeScript compilation with zero errors and an exact 6-page publication-ready technical report PDF.
+  > 2. **Full Test Coverage:** 59 Python tests and 117 web unit, layout, and clinical scenario tests pass 100% green in under 7 seconds.
+  > 3. **Production Build:** Clean TypeScript strict compilation with zero errors and an exact 6-page publication-ready technical report PDF.
   >
   > CardioVision successfully bridges zero-leakage machine learning, real-time TreeSHAP explainability, and multi-view 3D anatomical visualization to empower clinicians with transparent, trustworthy cardiovascular decision support.
   >

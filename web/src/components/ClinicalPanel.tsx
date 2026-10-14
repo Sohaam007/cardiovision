@@ -25,14 +25,14 @@ export const ClinicalPanel: React.FC = () => {
   const isMidRisk = cadProb >= 0.4 && cadProb < 0.7;
 
   return (
-    <aside className="w-full lg:w-[460px] bg-slate-900/95 border-l border-slate-800 flex flex-col h-full shadow-2xl z-20">
+    <aside className="w-full lg:w-[460px] bg-card/95 border-l border-border flex flex-col h-full shadow-2xl z-20 text-card-foreground">
       {/* 1. Overall CAD Card & Multi-Vessel Stratification Header */}
-      <div className="p-4 border-b border-slate-800 bg-slate-950/80 flex flex-col gap-3">
+      <div className="p-4 border-b border-border bg-card/60 flex flex-col gap-3">
         {/* Overall CAD Card */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex flex-col gap-2">
+        <div className="bg-muted/40 border border-border rounded-xl p-3 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase font-bold tracking-wider text-slate-300">
+              <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground">
                 Overall CAD Risk
               </span>
               <span
@@ -81,12 +81,12 @@ export const ClinicalPanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-slate-800/60 text-slate-400">
-            <span className="font-medium text-slate-300">{cadLabel}</span>
+          <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-border/60 text-muted-foreground">
+            <span className="font-medium text-foreground">{cadLabel}</span>
             <div className="flex items-center gap-2 font-mono text-[10px]">
               <span>Threshold: &ge; {(cadThreshold * 100).toFixed(0)}%</span>
               {cadCi && (
-                <span className="text-slate-500">
+                <span className="text-muted-foreground/60">
                   95% CI: [{(cadCi[0] * 100).toFixed(0)}%-{(cadCi[1] * 100).toFixed(0)}%]
                 </span>
               )}
@@ -104,7 +104,7 @@ export const ClinicalPanel: React.FC = () => {
         {/* Three Vessel Interactive Cards (LAD, LCX, RCA) */}
         {predictions && (
           <div className="flex flex-col gap-1.5">
-            <div className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider text-center">
+            <div className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider text-center">
               predicted probability of significant stenosis
             </div>
 
@@ -122,8 +122,8 @@ export const ClinicalPanel: React.FC = () => {
                     onClick={() => setSelectedVessel(vKey, true)}
                     className={`p-2 rounded-lg border transition-all text-left flex flex-col gap-1 ${
                       isSelected
-                        ? 'ring-2 ring-cyan-400 border-cyan-500 bg-cyan-950/40 shadow-md'
-                        : 'border-slate-800 bg-slate-900/80 hover:border-slate-700 hover:bg-slate-850'
+                        ? 'ring-2 ring-primary border-primary bg-primary/10 shadow-md'
+                        : 'border-border bg-muted/30 hover:border-border/80 hover:bg-muted/50'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full">
@@ -132,14 +132,14 @@ export const ClinicalPanel: React.FC = () => {
                           className="w-2.5 h-2.5 rounded-full shrink-0 border border-black/40"
                           style={{ backgroundColor: hexColor }}
                         />
-                        <span className="text-slate-200 font-bold text-xs">{vKey}</span>
+                        <span className="text-foreground font-bold text-xs">{vKey}</span>
                       </div>
-                      <span className="font-mono font-bold text-xs text-slate-100">
+                      <span className="font-mono font-bold text-xs text-foreground">
                         {modelServerUnavailable ? '--%' : `${(prob * 100).toFixed(0)}%`}
                       </span>
                     </div>
 
-                    <div className="text-[9px] text-slate-400 font-medium">
+                    <div className="text-[9px] text-muted-foreground font-medium">
                       {modelServerUnavailable
                         ? 'Offline'
                         : isProbable
@@ -155,13 +155,13 @@ export const ClinicalPanel: React.FC = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-slate-800 bg-slate-950 text-xs font-semibold">
+      <div className="flex border-b border-border bg-card text-xs font-semibold">
         <button
           onClick={() => setActiveTab('explainability')}
           className={`flex-1 py-2.5 text-center border-b-2 transition-all ${
             activeTab === 'explainability'
-              ? 'border-cyan-500 text-cyan-300 bg-slate-900/60'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-primary text-primary bg-muted/40'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           Explainability
@@ -170,8 +170,8 @@ export const ClinicalPanel: React.FC = () => {
           onClick={() => setActiveTab('sensitivity')}
           className={`flex-1 py-2.5 text-center border-b-2 transition-all ${
             activeTab === 'sensitivity'
-              ? 'border-cyan-500 text-cyan-300 bg-slate-900/60'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-primary text-primary bg-muted/40'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           Sensitivity
@@ -180,8 +180,8 @@ export const ClinicalPanel: React.FC = () => {
           onClick={() => setActiveTab('form')}
           className={`flex-1 py-2.5 text-center border-b-2 transition-all ${
             activeTab === 'form'
-              ? 'border-cyan-500 text-cyan-300 bg-slate-900/60'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-primary text-primary bg-muted/40'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           Clinical Form
@@ -190,8 +190,8 @@ export const ClinicalPanel: React.FC = () => {
           onClick={() => setActiveTab('3d_debug')}
           className={`flex-1 py-2.5 text-center border-b-2 transition-all ${
             activeTab === '3d_debug'
-              ? 'border-cyan-500 text-cyan-300 bg-slate-900/60'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-primary text-primary bg-muted/40'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           3D View

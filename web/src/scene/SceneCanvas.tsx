@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useStore } from '../store/useStore.ts';
 import { Heart } from './Heart.tsx';
-import { Pericardium } from './Pericardium.tsx';
 import { Torso } from './Torso.tsx';
 import { Vessels } from './Vessels.tsx';
 import {
@@ -165,6 +164,21 @@ const SceneControls: React.FC<{ controlsRef: React.RefObject<OrbitControlsImpl> 
   controlsRef,
 }) => {
   const invalidate = useThree((state) => state.invalidate);
+  const camera = useThree((state) => state.camera);
+  const zoomLevel = useStore((state) => state.zoomLevel);
+
+  // Smooth cinematic exponential damping for zoom controls (+, -, reset)
+  useFrame((_, delta) => {
+    if (camera) {
+      const diff = Math.abs(camera.zoom - zoomLevel);
+      if (diff > 0.001) {
+        camera.zoom = THREE.MathUtils.damp(camera.zoom, zoomLevel, 10, delta);
+        camera.updateProjectionMatrix();
+        invalidate();
+      }
+    }
+  });
+
   return (
     <OrbitControls
       ref={controlsRef}
@@ -187,9 +201,16 @@ const SceneControls: React.FC<{ controlsRef: React.RefObject<OrbitControlsImpl> 
 export const SceneCanvas: React.FC = () => {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const isBeating = useStore((state) => state.isBeating);
+  const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
 
   return (
-    <div className="w-full h-full relative select-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
+    <div
+      className={`w-full h-full relative select-none transition-colors duration-500 ${
+        fluoroscopyMode
+          ? 'bg-[#020617] contrast-125'
+          : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black'
+      }`}
+    >
       <Canvas
         frameloop={isBeating ? 'always' : SCENE_FRAMELOOP_CONFIG}
         dpr={SCENE_DPR_CONFIG}
@@ -200,25 +221,47 @@ export const SceneCanvas: React.FC = () => {
         <DemandInvalidator />
         <CameraTweenController controlsRef={controlsRef} />
 
-        {/* Photorealistic Cinema 4D Studio Lighting */}
-        <ambientLight intensity={0.6} />
-        {/* Key Light: High-angle specular shine across aortic arch, ventricular crest & wet cut-wall edges */}
-        <directionalLight position={[5, 8, 6]} intensity={1.8} color="#ffffff" />
-        {/* Fill Light: Soft warm pinkish-white fill illuminating anterior myocardium */}
-        <directionalLight position={[-5, 3, 4]} intensity={0.9} color="#ffe4e6" />
-        {/* Rim Light: Electric cyan/sky-blue rim catching holographic torso contour & heart edges */}
-        <directionalLight position={[-4, 6, -5]} intensity={1.3} color="#38bdf8" />
-        {/* Posterior Depth Fill: Deep ruby-plum contour */}
-        <directionalLight position={[3, -4, -5]} intensity={0.45} color="#fda4af" />
-        {/* Inferior apex point bounce */}
-        <pointLight position={[0, -2, 3]} intensity={0.4} color="#fca5a5" />
+        {/* Photorealistic Cinema 4D Studio vs Cath-Lab Cine Fluoroscopy Lighting */}
+        <ambientLight
+          intensity={fluoroscopyMode ? 1.6 : 0.6}
+          color={fluoroscopyMode ? '#93c5fd' : '#ffffff'}
+        />
+        {/* Key Light */}
+        <directionalLight
+          position={fluoroscopyMode ? [0, 0, 5] : [5, 8, 6]}
+          intensity={fluoroscopyMode ? 2.5 : 1.8}
+          color={fluoroscopyMode ? '#e0f2fe' : '#ffffff'}
+        />
+        {/* Fill Light */}
+        <directionalLight
+          position={[-5, 3, 4]}
+          intensity={fluoroscopyMode ? 0.3 : 0.9}
+          color={fluoroscopyMode ? '#64748b' : '#ffe4e6'}
+        />
+        {/* Rim Light */}
+        <directionalLight
+          position={[-4, 6, -5]}
+          intensity={fluoroscopyMode ? 0.2 : 1.3}
+          color={fluoroscopyMode ? '#334155' : '#38bdf8'}
+        />
+        {/* Posterior Depth Fill */}
+        <directionalLight
+          position={[3, -4, -5]}
+          intensity={fluoroscopyMode ? 0.1 : 0.45}
+          color={fluoroscopyMode ? '#1e293b' : '#fda4af'}
+        />
+        {/* Inferior apex bounce */}
+        <pointLight
+          position={[0, -2, 3]}
+          intensity={fluoroscopyMode ? 0.2 : 0.4}
+          color={fluoroscopyMode ? '#38bdf8' : '#fca5a5'}
+        />
 
         {/* Anatomical Model Components */}
         <group position={[0, 0, 0]}>
           <Torso showRibs={false} />
           {/* Cardiac apparatus shifted slightly to the left side of the torso and scaled to 0.89 (safely enclosed) */}
           <group position={[-0.16, 0.02, 0]} scale={[0.89, 0.89, 0.89]} name="CardiacApparatus">
-            <Pericardium />
             <Heart />
             <Vessels />
           </group>
