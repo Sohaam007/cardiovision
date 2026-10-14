@@ -25,7 +25,26 @@ const BeatingHeartModel: React.FC<BeatingHeartModelProps> = ({
   // Load Draco-compressed asset with offline local decoder fallback
   const { scene, animations } = useGLTF('/beating_heart.glb', '/draco/gltf/');
   const { actions, names } = useAnimations(animations, group);
-  const lastSoundRef = useRef<'s1' | 's2' | 'none'>('none');
+  const heartOpacity = useStore((state) => state.heartOpacity);
+  const showCavities = useStore((state) => state.showCavities);
+
+  // Modulate material opacity when heartOpacity or showCavities changes
+  useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.material) {
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          mats.forEach((mat) => {
+            const effectiveOpacity = showCavities ? Math.min(heartOpacity, 0.42) : heartOpacity;
+            mat.transparent = effectiveOpacity < 0.98 || showCavities;
+            mat.opacity = effectiveOpacity;
+            mat.depthWrite = !showCavities && effectiveOpacity > 0.85;
+          });
+        }
+      }
+    });
+  }, [scene, heartOpacity, showCavities]);
 
   useEffect(() => {
     if (names.length > 0 && names[0]) {
@@ -107,6 +126,20 @@ const CameraPresetController: React.FC<{ controlsRef: React.RefObject<OrbitContr
       controlsRef.current.update();
     }
   }, [cameraPreset, camera, controlsRef]);
+
+  return null;
+};
+
+const CameraZoomController: React.FC = () => {
+  const zoomLevel = useStore((state) => state.zoomLevel);
+  const { camera } = useThree();
+
+  useEffect(() => {
+    if (camera instanceof THREE.PerspectiveCamera || camera instanceof THREE.OrthographicCamera) {
+      camera.zoom = zoomLevel;
+      camera.updateProjectionMatrix();
+    }
+  }, [zoomLevel, camera]);
 
   return null;
 };
