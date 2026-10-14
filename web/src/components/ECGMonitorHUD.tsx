@@ -13,7 +13,6 @@ export const ECGMonitorHUD: React.FC = () => {
   const heartRateBpm = useStore((state) => state.heartRateBpm);
   const cardiacPhase = useStore((state) => state.cardiacPhase);
   const patientInputs = useStore((state) => state.patientInputs);
-  const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
 
   // Clinical findings from patient inputs
   const rawPulseRate = Number(patientInputs['PR'] || heartRateBpm || 72);
@@ -70,21 +69,21 @@ export const ECGMonitorHUD: React.FC = () => {
     };
   }, [showECG, isPlaying, cardiacPhase, beatPeriod]);
 
-  // Position at bottom center on initial render
+  // Initial placement at bottom-center of viewport
   useEffect(() => {
     const parent = containerRef.current?.parentElement;
     if (parent) {
       const parentWidth = parent.clientWidth;
       const parentHeight = parent.clientHeight;
-      const initialWidth = isMinimized ? 220 : 520;
-      const initialHeight = isMinimized ? 44 : 140;
+      const targetWidth = isMinimized ? 240 : 500;
+      const targetHeight = isMinimized ? 40 : 160;
 
       setPosition({
-        x: Math.max(16, Math.min(parentWidth - initialWidth - 16, (parentWidth - initialWidth) / 2)),
-        y: Math.max(16, parentHeight - initialHeight - 16),
+        x: Math.max(16, Math.min(parentWidth - targetWidth - 16, (parentWidth - targetWidth) / 2)),
+        y: Math.max(16, parentHeight - targetHeight - 20),
       });
     }
-  }, [isMinimized]);
+  }, []);
 
   // Boundary clamping
   const clamp = useCallback((pos: Position, menuWidth: number, menuHeight: number): Position => {
@@ -104,9 +103,8 @@ export const ECGMonitorHUD: React.FC = () => {
     };
   }, []);
 
-  // Pointer drag listeners
+  // Pointer drag listeners using robust window-level tracking
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.stopPropagation();
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
 
@@ -115,48 +113,46 @@ export const ECGMonitorHUD: React.FC = () => {
       offsetY: e.clientY - rect.top,
     };
     setIsDragging(true);
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  useEffect(() => {
     if (!isDragging) return;
-    e.stopPropagation();
 
-    const parent = containerRef.current?.parentElement;
-    const parentRect = parent?.getBoundingClientRect() || { left: 0, top: 0 };
-    const width = containerRef.current?.offsetWidth || 520;
-    const height = containerRef.current?.offsetHeight || 140;
+    const onPointerMove = (e: PointerEvent) => {
+      const parent = containerRef.current?.parentElement;
+      const parentRect = parent?.getBoundingClientRect() || { left: 0, top: 0 };
+      const width = containerRef.current?.offsetWidth || (isMinimized ? 240 : 500);
+      const height = containerRef.current?.offsetHeight || (isMinimized ? 40 : 160);
 
-    const rawX = e.clientX - parentRect.left - dragOffsetRef.current.offsetX;
-    const rawY = e.clientY - parentRect.top - dragOffsetRef.current.offsetY;
+      const rawX = e.clientX - parentRect.left - dragOffsetRef.current.offsetX;
+      const rawY = e.clientY - parentRect.top - dragOffsetRef.current.offsetY;
 
-    setPosition(clamp({ x: rawX, y: rawY }, width, height));
-  };
+      setPosition(clamp({ x: rawX, y: rawY }, width, height));
+    };
 
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (isDragging) {
-      e.stopPropagation();
+    const onPointerUp = () => {
       setIsDragging(false);
-      try {
-        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch {
-        // Safe fallback
-      }
-    }
-  };
+    };
 
-  // Prevent wheel and pointer bleed into OrbitControls
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    };
+  }, [isDragging, isMinimized, clamp]);
+
+  // Prevent wheel scroll bleed into 3D OrbitControls
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     const stopPropagation = (e: Event) => e.stopPropagation();
     el.addEventListener('wheel', stopPropagation, { passive: false });
-    el.addEventListener('pointerdown', stopPropagation);
 
     return () => {
       el.removeEventListener('wheel', stopPropagation);
-      el.removeEventListener('pointerdown', stopPropagation);
     };
   }, []);
 
@@ -169,84 +165,89 @@ export const ECGMonitorHUD: React.FC = () => {
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         touchAction: 'none',
       }}
-      className={`absolute top-0 left-0 z-30 select-none transition-shadow pointer-events-auto ${
-        isDragging ? 'cursor-grabbing shadow-2xl scale-[1.01]' : 'shadow-2xl'
+      className={`absolute top-0 left-0 z-30 select-none pointer-events-auto ${
+        isDragging ? 'cursor-grabbing shadow-2xl scale-[1.01]' : 'shadow-xl'
       }`}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
       data-testid="ecg-monitor-hud"
     >
       {isMinimized ? (
-        /* Minimized Floating Pill */
+        /* Minimalist Pill */
         <div
-          onPointerDown={handlePointerDown}
-          className="bg-[#090d16]/95 backdrop-blur-md border border-slate-700/80 hover:border-emerald-500/50 rounded-full px-3 py-1.5 flex items-center gap-2.5 cursor-grab text-xs text-slate-200 shadow-2xl transition-all hover:bg-slate-900"
-          title="Click to expand ECG Oscilloscope Monitor or drag to reposition"
+          className="bg-[#070b12]/95 backdrop-blur-md border border-slate-700/80 hover:border-emerald-500/60 rounded-xl px-3 py-1.5 flex items-center gap-2.5 text-xs text-slate-200 shadow-2xl transition-all"
         >
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-semibold text-white flex items-center gap-1.5">
-            <span>📈 Lead {selectedLead}</span>
+          {/* Drag Handle */}
+          <div
+            onPointerDown={handlePointerDown}
+            className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-emerald-400 p-0.5"
+            title="Drag to reposition ECG Pill"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 5a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm10-14a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+
+          <div
+            onClick={() => setIsMinimized(false)}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-90"
+            title="Click to expand ECG Oscilloscope Monitor"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-semibold text-white tracking-tight">ECG Lead {selectedLead}</span>
             <span className="font-mono text-emerald-400 font-bold">{currentBpm} BPM</span>
-          </span>
+          </div>
+
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMinimized(false);
-            }}
-            className="w-5 h-5 rounded-full bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors text-[10px]"
+            onClick={() => setIsMinimized(false)}
+            className="w-5 h-5 rounded-md bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-[10px] transition-colors"
             title="Expand ECG Monitor"
           >
             ▲
           </button>
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleECG();
-            }}
-            className="w-5 h-5 rounded-full bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors text-[10px]"
-            title="Close ECG Strip"
+            onClick={() => toggleECG()}
+            className="w-5 h-5 rounded-md bg-slate-800/80 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center text-[10px] transition-colors"
+            title="Close ECG"
           >
             &times;
           </button>
         </div>
       ) : (
-        /* Expanded Full Oscilloscope Monitor */
+        /* Minimalist & Professional Telemetry Monitor Window */
         <div
-          className={`w-[92vw] sm:w-[500px] md:w-[540px] rounded-2xl border backdrop-blur-md overflow-hidden flex flex-col text-xs shadow-2xl transition-colors ${
-            fluoroscopyMode
-              ? 'bg-slate-900/95 border-amber-500/60 text-slate-200'
-              : 'bg-[#090d16]/95 border-slate-800/90 text-slate-200'
-          }`}
+          className="w-[92vw] sm:w-[480px] md:w-[500px] rounded-2xl border border-slate-800/90 bg-[#070b12]/95 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col text-xs"
         >
           {/* Header Bar */}
           <div
-            onPointerDown={handlePointerDown}
-            className="bg-slate-900/90 border-b border-slate-800/80 px-3 py-2 flex items-center justify-between cursor-grab active:cursor-grabbing hover:bg-slate-800/60 transition-colors"
-            title="Drag to reposition ECG Monitor"
+            className="bg-slate-900/80 border-b border-slate-800/80 px-3.5 py-2 flex items-center justify-between"
           >
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-white tracking-wide">Physiological ECG Lead {selectedLead}</span>
-                <span className="text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 px-1.5 py-0.2 rounded font-semibold">
-                  25 mm/s &bull; 10 mm/mV
+            <div
+              onPointerDown={handlePointerDown}
+              className="flex items-center gap-2 cursor-grab active:cursor-grabbing flex-1 mr-2"
+              title="Drag to reposition ECG Monitor"
+            >
+              <svg className="w-3.5 h-3.5 text-slate-400 hover:text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 5a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm10-14a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-bold text-white tracking-wide">ECG Telemetry</span>
+                <span className="text-[10px] font-mono text-emerald-400/90 font-semibold px-1.5 py-0.2 rounded bg-emerald-950/60 border border-emerald-800/60">
+                  Lead {selectedLead}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-1.5">
-              {/* Lead Selector Chips */}
-              <div className="flex items-center bg-slate-950/70 p-0.5 rounded-md border border-slate-800">
+              {/* Minimalist Lead Selector */}
+              <div className="flex items-center bg-slate-950/80 p-0.5 rounded-lg border border-slate-800">
                 {(['II', 'V1', 'V5', 'aVR'] as const).map((lead) => (
                   <button
                     key={lead}
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedLead(lead);
-                    }}
+                    onClick={() => setSelectedLead(lead)}
                     className={`px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold transition-colors ${
                       selectedLead === lead
                         ? 'bg-emerald-600 text-white'
@@ -258,26 +259,20 @@ export const ECGMonitorHUD: React.FC = () => {
                 ))}
               </div>
 
-              {/* Minimize & Close Buttons */}
+              {/* Minimize & Close */}
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsMinimized(true);
-                }}
-                className="w-6 h-6 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/60"
-                title="Minimize ECG Monitor"
+                onClick={() => setIsMinimized(true)}
+                className="w-6 h-6 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/50"
+                title="Minimize"
               >
-                ▼
+                —
               </button>
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleECG();
-                }}
-                className="w-6 h-6 rounded-lg bg-slate-800/80 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/60"
-                title="Close ECG Strip"
+                onClick={() => toggleECG()}
+                className="w-6 h-6 rounded-lg bg-slate-800/70 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/50"
+                title="Close"
               >
                 &times;
               </button>
@@ -285,7 +280,7 @@ export const ECGMonitorHUD: React.FC = () => {
           </div>
 
           {/* Vitals Telemetry Row */}
-          <div className="px-3 py-1.5 bg-slate-950/60 border-b border-slate-800/60 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+          <div className="px-3.5 py-1.5 bg-slate-950/60 border-b border-slate-800/60 flex items-center justify-between text-[11px]">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 font-mono">
                 <span className="text-slate-400">HR:</span>
@@ -293,15 +288,11 @@ export const ECGMonitorHUD: React.FC = () => {
               </div>
               <div className="flex items-center gap-1 font-mono text-slate-400">
                 <span>PR:</span>
-                <span className="text-slate-200 font-semibold">160 ms</span>
+                <span className="text-slate-200 font-semibold">160ms</span>
               </div>
               <div className="flex items-center gap-1 font-mono text-slate-400">
                 <span>QRS:</span>
-                <span className="text-slate-200 font-semibold">88 ms</span>
-              </div>
-              <div className="flex items-center gap-1 font-mono text-slate-400">
-                <span>QTc:</span>
-                <span className="text-slate-200 font-semibold">412 ms</span>
+                <span className="text-slate-200 font-semibold">88ms</span>
               </div>
               <div className="hidden sm:flex items-center gap-1 font-mono text-slate-400">
                 <span>EF:</span>
@@ -309,107 +300,105 @@ export const ECGMonitorHUD: React.FC = () => {
               </div>
             </div>
 
-            {/* Ischemia & Pathology Alert */}
-            <div className="flex items-center gap-1.5">
+            {/* Ischemia badge */}
+            <div>
               {hasSTElevation || hasSTDepression || hasTInversion ? (
-                <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 text-[10px] font-bold flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-800 text-[10px] font-bold flex items-center gap-1">
                   <span>⚠️</span>
-                  {hasSTElevation && 'ST-Elevation '}
-                  {hasSTDepression && 'ST-Depression '}
-                  {hasTInversion && 'T-Inversion'}
+                  {hasSTElevation && 'ST-Elev'}
+                  {hasSTDepression && 'ST-Depr'}
+                  {hasTInversion && 'T-Inv'}
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800/60 text-[10px] font-semibold">
-                  Normal Sinus Rhythm
+                <span className="px-2 py-0.5 rounded bg-emerald-950/50 text-emerald-300 border border-emerald-800/50 text-[10px] font-medium">
+                  Normal Sinus
                 </span>
               )}
             </div>
           </div>
 
-          {/* Oscilloscope Canvas Waveform */}
+          {/* Waveform Canvas */}
           <div className="p-2.5 bg-black/90 relative">
-            <div className="w-full h-16 bg-[#040d08] rounded-xl border border-emerald-950/80 relative overflow-hidden flex items-center">
-              {/* Medical ECG Millimeter Grid Background */}
+            <div className="w-full h-14 bg-[#030906] rounded-xl border border-emerald-950/70 relative overflow-hidden flex items-center">
+              {/* Medical Grid Pattern */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  {/* Minor 1mm Grid Pattern */}
-                  <pattern id="ecgMinorGrid" width="6" height="6" patternUnits="userSpaceOnUse">
-                    <path d="M 6 0 L 0 0 0 6" fill="none" stroke="#064e3b" strokeWidth="0.35" opacity="0.35" />
+                  <pattern id="ecgMinorGrid" width="8" height="8" patternUnits="userSpaceOnUse">
+                    <path d="M 8 0 L 0 0 0 8" fill="none" stroke="#064e3b" strokeWidth="0.3" opacity="0.25" />
                   </pattern>
-                  {/* Major 5mm Grid Pattern */}
-                  <pattern id="ecgMajorGrid" width="30" height="30" patternUnits="userSpaceOnUse">
-                    <rect width="30" height="30" fill="url(#ecgMinorGrid)" />
-                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#047857" strokeWidth="0.75" opacity="0.6" />
+                  <pattern id="ecgMajorGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <rect width="40" height="40" fill="url(#ecgMinorGrid)" />
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#047857" strokeWidth="0.6" opacity="0.45" />
                   </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#ecgMajorGrid)" />
               </svg>
 
-              {/* Dynamic Oscilloscope P-Q-R-S-T Physiological Wave Path */}
-              <svg viewBox="0 0 600 64" preserveAspectRatio="none" className="w-full h-full relative z-10">
+              {/* Dynamic Oscilloscope P-Q-R-S-T Waveform */}
+              <svg viewBox="0 0 600 56" preserveAspectRatio="none" className="w-full h-full relative z-10">
                 <path
-                  d={`M 0 32
-                      L 40 32
-                      Q 60 22 75 32
-                      L 95 32
-                      L 102 36
+                  d={`M 0 28
+                      L 40 28
+                      Q 60 19 75 28
+                      L 95 28
+                      L 102 32
                       L 115 ${hasSTElevation ? 4 : 6}
-                      L 128 58
-                      L 135 32
-                      L 155 ${hasSTElevation ? 22 : hasSTDepression ? 42 : 32}
-                      Q 185 ${hasTInversion ? 44 : 18} 210 32
-                      L 280 32
-                      L 300 32
-                      Q 320 22 335 32
-                      L 355 32
-                      L 362 36
+                      L 128 50
+                      L 135 28
+                      L 155 ${hasSTElevation ? 19 : hasSTDepression ? 37 : 28}
+                      Q 185 ${hasTInversion ? 38 : 16} 210 28
+                      L 280 28
+                      L 300 28
+                      Q 320 19 335 28
+                      L 355 28
+                      L 362 32
                       L 375 ${hasSTElevation ? 4 : 6}
-                      L 388 58
-                      L 395 32
-                      L 415 ${hasSTElevation ? 22 : hasSTDepression ? 42 : 32}
-                      Q 445 ${hasTInversion ? 44 : 18} 470 32
-                      L 540 32
-                      L 600 32`}
+                      L 388 50
+                      L 395 28
+                      L 415 ${hasSTElevation ? 19 : hasSTDepression ? 37 : 28}
+                      Q 445 ${hasTInversion ? 38 : 16} 470 28
+                      L 540 28
+                      L 600 28`}
                   fill="none"
                   stroke="#10b981"
-                  strokeWidth="2.2"
+                  strokeWidth="2.0"
                   strokeLinecap="round"
-                  className="drop-shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                  className="drop-shadow-[0_0_6px_rgba(16,185,129,0.85)]"
                 />
 
-                {/* Sweeping Oscilloscope Beam Bar */}
+                {/* Sweeping Beam Bar */}
                 <line
                   x1={phaseTime * 600}
                   y1="0"
                   x2={phaseTime * 600}
-                  y2="64"
+                  y2="56"
                   stroke="#38bdf8"
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                   className="drop-shadow-[0_0_6px_#38bdf8]"
-                  opacity="0.9"
+                  opacity="0.85"
                 />
 
-                {/* Oscilloscope Sweep Phosphor Glow Circle */}
+                {/* Phosphor Glow Point */}
                 <circle
                   cx={phaseTime * 600}
-                  cy="32"
-                  r="4"
+                  cy="28"
+                  r="3.5"
                   fill="#38bdf8"
-                  className="drop-shadow-[0_0_8px_#38bdf8]"
+                  className="drop-shadow-[0_0_6px_#38bdf8]"
                 />
               </svg>
             </div>
 
-            {/* Sub-text footer with cycle phase */}
-            <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 px-1 font-mono">
+            {/* Subtext Footer */}
+            <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 px-1 font-mono">
               <span className="flex items-center gap-1">
-                <span>Cycle Phase:</span>
+                <span className="text-slate-500">Phase:</span>
                 <span className="text-amber-300 font-semibold">
-                  {phaseTime <= 0.35 ? 'Ventricular Systole (Ejection)' : 'Diastolic Filling & Coronary Perfusion'}
+                  {phaseTime <= 0.35 ? 'Ventricular Systole' : 'Diastolic Filling'}
                 </span>
               </span>
-              <span className="text-slate-500">
-                P-R: 0.16s &bull; QRS: 0.08s &bull; ST: Isoelectric
+              <span className="text-slate-500 hidden sm:inline">
+                25mm/s &bull; 10mm/mV &bull; Calibrated
               </span>
             </div>
           </div>
