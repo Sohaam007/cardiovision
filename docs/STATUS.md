@@ -13,3 +13,8 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 11:58 | UI-02-Form | Adin | done | ClinicalForm enhanced with collapsible tabs, min/max validation messages, reference ranges, binary toggles, and Reset action
 2026-10-14 12:01 | UI-02-Explainability | Adin | done | RiskExplainer Recharts horizontal bar chart (top 10 + other), log-odds axis, tooltips, and measurement cards
 2026-10-14 12:03 | UI-02-Sensitivity | Adin | done | SensitivityPanel directional arrows and probability change badges vs baseline, 300ms debounce, and reset-to-baseline
+2026-10-14 12:25 | ML-VERIFY | Soham | done | Verified ml/train.py: out-of-fold calibration margins, 8 holdout patients isolated, outer-fold metrics, fixed seeds, zero leakage
+2026-10-14 12:38 | ML-QUAL | Soham | done | Added honest target notes, feature-set ablations (modality lift), and ModelInfo drawer in UI, PR #6 merged
+2026-10-14 12:43 | API-BENCH | Soham | done | /predict real latency measured locally across 100 runs (mean 20.50ms, median 19.99ms, p95 23.96ms, p99 37.09ms, min 17.17ms)
+2026-10-14 12:44 | DOC-NUM | Soham | done | Generated docs/report_numbers.md populated strictly from metrics.json; offline figures updated with SHAP beeswarm and 4-target comparison
+
