@@ -78,6 +78,10 @@ export interface AppState {
   openModelInfo: () => void;
   closeModelInfo: () => void;
   toggleModelInfo: () => void;
+  isSensitivityOpen: boolean;
+  openSensitivity: () => void;
+  closeSensitivity: () => void;
+  toggleSensitivity: () => void;
 }
 
 const DEFAULT_VESSELS: Record<VesselKey, VesselData> = {
@@ -280,6 +284,10 @@ export const useStore = create<AppState>()((set) => ({
   openModelInfo: () => set({ isModelInfoOpen: true }),
   closeModelInfo: () => set({ isModelInfoOpen: false }),
   toggleModelInfo: () => set((state) => ({ isModelInfoOpen: !state.isModelInfoOpen })),
+  isSensitivityOpen: false,
+  openSensitivity: () => set({ isSensitivityOpen: true }),
+  closeSensitivity: () => set({ isSensitivityOpen: false }),
+  toggleSensitivity: () => set((state) => ({ isSensitivityOpen: !state.isSensitivityOpen })),
 }));
 
 if (typeof window !== 'undefined') {
