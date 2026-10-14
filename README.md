@@ -534,7 +534,7 @@ cd web && npm test
 ### Verification Test Summary
 - **Zero Target Leakage (`tests/test_no_leakage.py`):** 31 synthetic mutation tests verifying that `Cath`, `CAD`, `LAD`, `LCX`, and `RCA` can never appear in feature matrices for any target.
 - **Python Backend Suite (`tests/`):** 59 comprehensive pytests covering zero-leakage invariants, API schema contracts, offline-online parity, and 3D Blender asset validation (all green in ~5.7s).
-- **Frontend E2E & Unit Suite (`web/src/test/`):** 69 test specs across 7 suites validating demand rendering, color space interpolation, persona loading, draggable tools menu, synchronized ECG telemetry, and clinical findings logic (all green in ~70ms).
+- **Frontend E2E & Unit Suite (`web/src/test/`):** 70 test specs across 7 suites validating demand rendering, color space interpolation, persona loading, draggable tools menu, synchronized ECG telemetry, viewport mode switching, and clinical findings logic (all green in ~75ms).
 - **TypeScript & Build Pipeline:** Strict TypeScript compilation (`tsc --noEmit`) and Vite production bundle (`npm run build`) passing 100% cleanly.
 
 ---

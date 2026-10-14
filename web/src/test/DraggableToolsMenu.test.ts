@@ -304,5 +304,19 @@ export function runDraggableToolsMenuTests(): { passed: number; failed: number; 
     strictEqual(Number(inputs['EF-TTE']), 45);
   });
 
+  // TIER 11: VIEWPORT REPRESENTATION MODE CONTROLS
+  test('Tier 11: Viewport representation mode buttons update viewerMode correctly', () => {
+    const store = useStore.getState();
+    store.setViewerMode('procedural');
+    strictEqual(useStore.getState().viewerMode, 'procedural');
+    store.setViewerMode('realistic');
+    strictEqual(useStore.getState().viewerMode, 'realistic');
+    store.setViewerMode('2d');
+    strictEqual(useStore.getState().viewerMode, '2d');
+    store.setViewerMode('blender');
+    strictEqual(useStore.getState().viewerMode, 'blender');
+    store.setViewerMode('realistic');
+  });
+
   return { passed, failed, tests };
 }

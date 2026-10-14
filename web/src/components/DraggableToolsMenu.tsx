@@ -22,6 +22,8 @@ export const DraggableToolsMenu: React.FC = () => {
   const toggleFluoroscopyMode = useStore((state) => state.toggleFluoroscopyMode);
   const showTorso = useStore((state) => state.showTorso);
   const toggleTorso = useStore((state) => state.toggleTorso);
+  const viewerMode = useStore((state) => state.viewerMode);
+  const setViewerMode = useStore((state) => state.setViewerMode);
 
   const isPlaying = useStore((state) => state.isPlaying);
   const togglePlayback = useStore((state) => state.togglePlayback);
@@ -204,6 +206,71 @@ export const DraggableToolsMenu: React.FC = () => {
           </div>
 
           <div className="p-3 flex flex-col gap-3 max-h-[75vh] overflow-y-auto">
+            {/* 0. Viewport Representation Mode */}
+            <div>
+              <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
+                <span>Viewport Mode</span>
+                <span className="text-cyan-400 font-mono text-[9px] uppercase">{viewerMode}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setViewerMode('realistic')}
+                  className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold border transition-all flex items-center justify-center gap-1.5 ${
+                    viewerMode === 'realistic'
+                      ? 'bg-rose-600 text-white border-rose-400 shadow-sm shadow-rose-950/60 ring-1 ring-rose-400/50'
+                      : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                  data-testid="mode-realistic-btn"
+                  title="Photorealistic 3D Beating Heart Model"
+                >
+                  <span>🫀 3D Beating</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewerMode('procedural')}
+                  className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold border transition-all flex items-center justify-center gap-1.5 ${
+                    viewerMode === 'procedural'
+                      ? 'bg-cyan-600 text-white border-cyan-400 shadow-sm shadow-cyan-950/60 ring-1 ring-cyan-400/50'
+                      : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                  data-testid="mode-procedural-btn"
+                  title="Procedural 3D Heart with Spline Coronaries & Dissection"
+                >
+                  <span>⚙️ 3D Procedural</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewerMode('2d')}
+                  className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold border transition-all flex items-center justify-center gap-1.5 ${
+                    viewerMode === '2d'
+                      ? 'bg-amber-600 text-white border-amber-400 shadow-sm shadow-amber-950/60 ring-1 ring-amber-400/50'
+                      : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                  data-testid="mode-2d-btn"
+                  title="2D Clinical Angiogram & Hemodynamic Suite"
+                >
+                  <span>🔬 2D Angiogram</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewerMode('blender')}
+                  className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold border transition-all flex items-center justify-center gap-1.5 ${
+                    viewerMode === 'blender'
+                      ? 'bg-purple-600 text-white border-purple-400 shadow-sm shadow-purple-950/60 ring-1 ring-purple-400/50'
+                      : 'bg-slate-900/60 text-slate-300 border-slate-800 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                  data-testid="mode-blender-btn"
+                  title="Blender 5.2 Medical Turntable Studio"
+                >
+                  <span>🎬 Blender Studio</span>
+                </button>
+              </div>
+            </div>
+
             {/* 1. Viewport Layer Toggles */}
             <div>
               <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
