@@ -21,6 +21,7 @@ export interface AppState {
   heartOpacity: number;
   selectedVessel: VesselKey | null;
   hoveredVessel: VesselKey | null;
+  chamberCutaway: boolean;
   cameraPreset: 'anterior' | 'lateral' | 'posterior' | null;
   flyToVesselTarget: VesselKey | null;
   force2DFallback: boolean;
@@ -48,6 +49,7 @@ export interface AppState {
   toggleColorblindMode: () => void;
   setShowTorso: (show: boolean) => void;
   toggleTorso: () => void;
+  toggleChamberCutaway: () => void;
   setHeartOpacity: (opacity: number) => void;
   setSelectedVessel: (vessel: VesselKey | null, flyTo?: boolean) => void;
   setHoveredVessel: (vessel: VesselKey | null) => void;
@@ -99,6 +101,7 @@ export const useStore = create<AppState>()((set) => ({
   heartOpacity: 0.92,
   selectedVessel: null,
   hoveredVessel: null,
+  chamberCutaway: false,
   cameraPreset: null,
   flyToVesselTarget: null,
   force2DFallback: false,
@@ -139,6 +142,7 @@ export const useStore = create<AppState>()((set) => ({
 
   setShowTorso: (show: boolean) => set({ showTorso: show }),
   toggleTorso: () => set((state) => ({ showTorso: !state.showTorso })),
+  toggleChamberCutaway: () => set((state) => ({ chamberCutaway: !state.chamberCutaway })),
 
   setHeartOpacity: (opacity: number) =>
     set({ heartOpacity: Math.max(0.1, Math.min(1, opacity)) }),

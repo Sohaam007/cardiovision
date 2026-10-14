@@ -7,6 +7,8 @@ export const FloatingRiskLegend: React.FC = () => {
   const toggleColorblindMode = useStore((state) => state.toggleColorblindMode);
   const showTorso = useStore((state) => state.showTorso);
   const toggleTorso = useStore((state) => state.toggleTorso);
+  const chamberCutaway = useStore((state) => state.chamberCutaway);
+  const toggleChamberCutaway = useStore((state) => state.toggleChamberCutaway);
   const heartOpacity = useStore((state) => state.heartOpacity);
   const setHeartOpacity = useStore((state) => state.setHeartOpacity);
   const setCameraPreset = useStore((state) => state.setCameraPreset);
@@ -178,7 +180,25 @@ export const FloatingRiskLegend: React.FC = () => {
           </div>
 
           {/* Toggles Row */}
-          <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="flex items-center justify-between gap-1.5 pt-1">
+            {/* Cutaway Toggle */}
+            <button
+              onClick={toggleChamberCutaway}
+              className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                chamberCutaway
+                  ? 'bg-purple-950/80 text-purple-300 border-purple-700/60'
+                  : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
+              }`}
+              title="Toggle anatomical cutaway revealing interior ventricular cavities, septum, and chordae tendineae"
+            >
+              <span>Cutaway</span>
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  chamberCutaway ? 'bg-purple-400' : 'bg-slate-600'
+                }`}
+              />
+            </button>
+
             {/* Torso Toggle */}
             <button
               onClick={toggleTorso}
@@ -188,7 +208,7 @@ export const FloatingRiskLegend: React.FC = () => {
                   : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
               }`}
             >
-              <span>Torso Shell</span>
+              <span>Torso</span>
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
                   showTorso ? 'bg-cyan-400' : 'bg-slate-600'
