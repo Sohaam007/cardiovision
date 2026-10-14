@@ -16,3 +16,4 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 12:11 | UI-02-Cards-Picker | Adin | done | Overall CAD card (prob, label, threshold, CI) and 3 vessel cards with 3D color matching and camera focus; 8-patient PersonaPicker
 2026-10-14 12:26 | UI-02-ModelInfo | Adin | done | ModelInfoDrawer slide-over with CV metrics table, Platt scaling note, clinical limitations, and asset licenses
 2026-10-14 12:32 | UI-02-Polish | Adin | done | Dark clinical theme, 1366x768 layout, focus rings, dual-channel signals, and waking server notice
+2026-10-14 13:18 | UI-02 | Adin | done | 3 dashboard figures saved to docs/figures/ (overview, sensitivity with deltas, model info drawer); task UI-02 completed
