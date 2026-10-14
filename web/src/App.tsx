@@ -8,6 +8,7 @@ import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 import { WebGLFallback } from './components/WebGLFallback';
 import { ModelInfoDrawer } from './components/ModelInfoDrawer';
 import { BlenderStudioModal } from './components/BlenderStudioModal';
+import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -25,6 +26,9 @@ export const App: React.FC = () => {
   const force2DFallback = useStore((state) => state.force2DFallback);
   const setForce2DFallback = useStore((state) => state.setForce2DFallback);
   const webglError = useStore((state) => state.webglError);
+  const isSensitivityOpen = useStore((state) => state.isSensitivityOpen);
+  const closeSensitivity = useStore((state) => state.closeSensitivity);
+  const toggleSensitivity = useStore((state) => state.toggleSensitivity);
   const [isModelInfoOpen, setIsModelInfoOpen] = useState(false);
   const [isBlenderStudioOpen, setIsBlenderStudioOpen] = useState(false);
 
@@ -213,8 +217,23 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          {/* 2D / 3D Mode Toggle in Viewport Top-Right */}
+          {/* 2D / 3D Mode & Sensitivity What-If Toggle in Viewport Top-Right */}
           <div className="absolute top-4 right-4 pointer-events-auto z-10 flex items-center gap-2">
+            <button
+              onClick={toggleSensitivity}
+              className={`backdrop-blur-md border text-[11px] px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-1.5 transition-all font-medium ${
+                isSensitivityOpen
+                  ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
+                  : 'bg-slate-900/85 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
+              }`}
+              title="Toggle interactive 3D model sensitivity sliders and what-if simulation"
+            >
+              <svg className="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              <span>{isSensitivityOpen ? 'Close Sensitivity' : '⚡ 3D Sensitivity'}</span>
+            </button>
+
             <button
               onClick={() => setForce2DFallback(!force2DFallback)}
               className="bg-slate-900/85 backdrop-blur-md border border-slate-700/80 hover:border-slate-600 text-[11px] text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-1.5 transition-all"
@@ -224,6 +243,9 @@ export const App: React.FC = () => {
               <span>{force2DFallback ? 'Switch to 3D View' : '2D Schematic Mode'}</span>
             </button>
           </div>
+
+          {/* Interactive Sensitivity & What-If Studio HUD Overlay */}
+          <InteractiveSensitivityHUD isOpen={isSensitivityOpen} onClose={closeSensitivity} />
 
           {/* Floating Risk Legend HUD (Anterior/Lateral/Posterior presets, percentages, opacity slider, torso toggle, selected vessel details) */}
           <div className="absolute bottom-4 left-4 z-10">

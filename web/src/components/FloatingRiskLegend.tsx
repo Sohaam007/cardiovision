@@ -16,6 +16,8 @@ export const FloatingRiskLegend: React.FC = () => {
   const selectedVessel = useStore((state) => state.selectedVessel);
   const setSelectedVessel = useStore((state) => state.setSelectedVessel);
   const predictions = useStore((state) => state.predictions);
+  const isSensitivityOpen = useStore((state) => state.isSensitivityOpen);
+  const toggleSensitivity = useStore((state) => state.toggleSensitivity);
 
   const activePalette = colorblindMode ? PALETTES.colorblind : PALETTES.standard;
 
@@ -233,6 +235,22 @@ export const FloatingRiskLegend: React.FC = () => {
               />
             </button>
           </div>
+
+          {/* Interactive Sensitivity & What-If Studio Toggle Button */}
+          <button
+            onClick={toggleSensitivity}
+            className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-2 shadow-sm ${
+              isSensitivityOpen
+                ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
+                : 'bg-purple-950/80 hover:bg-purple-900 text-purple-200 border-purple-700/70 hover:border-purple-600'
+            }`}
+            title="Open interactive 3D risk sensitivity sliders (BP, LDL, FBS, TG, Smoking) and what-if analysis"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            <span>{isSensitivityOpen ? 'Close Sensitivity Studio' : '⚡ 3D Sensitivity & What-If'}</span>
+          </button>
         </div>
       </div>
     </div>
