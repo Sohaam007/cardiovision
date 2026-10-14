@@ -11,6 +11,8 @@ export interface VesselData {
   label?: number;
 }
 
+export type ViewerMode = 'realistic' | 'procedural' | '2d' | 'blender';
+
 export interface AppState {
   // 3D Scene state
   prediction: {
@@ -24,6 +26,7 @@ export interface AppState {
   chamberCutaway: boolean;
   cameraPreset: 'anterior' | 'lateral' | 'posterior' | null;
   flyToVesselTarget: VesselKey | null;
+  viewerMode: ViewerMode;
   force2DFallback: boolean;
   webglError: boolean;
   isTweening: boolean;
@@ -55,6 +58,7 @@ export interface AppState {
   setHoveredVessel: (vessel: VesselKey | null) => void;
   setCameraPreset: (preset: 'anterior' | 'lateral' | 'posterior' | null) => void;
   flyToVessel: (vessel: VesselKey | null) => void;
+  setViewerMode: (mode: ViewerMode) => void;
   setForce2DFallback: (force: boolean) => void;
   setWebglError: (error: boolean) => void;
   setIsTweening: (tweening: boolean) => void;
@@ -108,6 +112,7 @@ export const useStore = create<AppState>()((set) => ({
   chamberCutaway: false,
   cameraPreset: null,
   flyToVesselTarget: null,
+  viewerMode: 'realistic',
   force2DFallback: false,
   webglError: false,
   isTweening: false,
@@ -178,7 +183,16 @@ export const useStore = create<AppState>()((set) => ({
       cameraPreset: null,
     })),
 
-  setForce2DFallback: (force: boolean) => set({ force2DFallback: force }),
+  setViewerMode: (mode: ViewerMode) =>
+    set({
+      viewerMode: mode,
+      force2DFallback: mode === '2d',
+    }),
+  setForce2DFallback: (force: boolean) =>
+    set({
+      force2DFallback: force,
+      viewerMode: force ? '2d' : 'realistic',
+    }),
   setWebglError: (error: boolean) => set({ webglError: error }),
   setIsTweening: (tweening: boolean) => set({ isTweening: tweening }),
 
@@ -194,6 +208,7 @@ export const useStore = create<AppState>()((set) => ({
       hoveredVessel: null,
       cameraPreset: null,
       flyToVesselTarget: null,
+      viewerMode: 'realistic',
       force2DFallback: false,
       webglError: false,
       isTweening: false,

@@ -349,6 +349,7 @@ useGLTF.preload('/beating_heart.glb', '/draco/gltf/');
 export const Heart: React.FC = () => {
   const heartOpacity = useStore((state) => state.heartOpacity);
   const chamberCutaway = useStore((state) => state.chamberCutaway);
+  const viewerMode = useStore((state) => state.viewerMode);
 
   const fallback = (
     <ProceduralHeart
@@ -357,6 +358,12 @@ export const Heart: React.FC = () => {
     />
   );
 
+  // If user explicitly selected the procedural representation, render it directly
+  if (viewerMode === 'procedural') {
+    return fallback;
+  }
+
+  // Default to photorealistic beating heart with procedural fallback on error/loading
   return (
     <GLTFErrorBoundary fallback={fallback}>
       <Suspense fallback={fallback}>

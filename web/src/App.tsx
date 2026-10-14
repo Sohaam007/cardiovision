@@ -8,6 +8,7 @@ import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 import { WebGLFallback } from './components/WebGLFallback';
 import { ModelInfoDrawer } from './components/ModelInfoDrawer';
 import { BlenderStudioModal } from './components/BlenderStudioModal';
+import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
 import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
@@ -23,8 +24,9 @@ export const App: React.FC = () => {
   const loadPersona = useStore((state) => state.loadPersona);
   const setApiStatus = useStore((state) => state.setApiStatus);
   const setDemoMode = useStore((state) => state.setDemoMode);
+  const viewerMode = useStore((state) => state.viewerMode);
+  const setViewerMode = useStore((state) => state.setViewerMode);
   const force2DFallback = useStore((state) => state.force2DFallback);
-  const setForce2DFallback = useStore((state) => state.setForce2DFallback);
   const webglError = useStore((state) => state.webglError);
   const isSensitivityOpen = useStore((state) => state.isSensitivityOpen);
   const closeSensitivity = useStore((state) => state.closeSensitivity);
@@ -202,14 +204,25 @@ export const App: React.FC = () => {
         {/* Left Column: 3D Canvas Viewport */}
         <div className="flex-1 relative h-[50vh] lg:h-auto bg-slate-950">
           <WebGLErrorBoundary fallback={<WebGLFallback />}>
-            {force2DFallback || webglError ? <WebGLFallback /> : <SceneCanvas />}
+            {viewerMode === '2d' || force2DFallback || webglError ? (
+              <WebGLFallback />
+            ) : viewerMode === 'blender' ? (
+              <BlenderTurntableEmbed onOpenModal={() => setIsBlenderStudioOpen(true)} />
+            ) : (
+              <SceneCanvas />
+            )}
           </WebGLErrorBoundary>
 
           {/* Viewport HUD Overlays */}
           <div className="absolute top-4 left-4 pointer-events-none z-10 hidden sm:flex flex-col gap-1.5">
             <div className="bg-slate-950/80 backdrop-blur border border-slate-800 text-[11px] text-slate-300 px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2">
-              <span className="text-cyan-400 font-medium">3D Controls:</span>
-              <span>Left-drag = Rotate &bull; Right-drag = Pan &bull; Scroll = Zoom</span>
+              <span className="text-cyan-400 font-medium">Mode:</span>
+              <span>
+                {viewerMode === 'realistic' && '3D Beating Heart (Cinema 4D Skeletal Pulsation)'}
+                {viewerMode === 'procedural' && '3D Procedural Model (Anatomical Cavity & Dissection)'}
+                {viewerMode === '2d' && '2D Clinical Angiogram & Hemodynamic Suite'}
+                {viewerMode === 'blender' && 'Blender 5.2 Medical Cycles Turntable (PBR Studio)'}
+              </span>
             </div>
             <div className="bg-slate-950/80 backdrop-blur border border-slate-800 text-[11px] text-slate-400 px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2">
               <span className="text-amber-400 font-medium">Clinical Invariant:</span>
@@ -217,14 +230,69 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          {/* 2D / 3D Mode & Sensitivity What-If Toggle in Viewport Top-Right */}
-          <div className="absolute top-4 right-4 pointer-events-auto z-10 flex items-center gap-2">
+          {/* Segmented Mode Selector & Sensitivity What-If Toggle in Viewport Top-Right */}
+          <div className="absolute top-4 right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2">
+            <div className="flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/80 shadow-2xl">
+              <button
+                type="button"
+                onClick={() => setViewerMode('realistic')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === 'realistic'
+                    ? 'bg-rose-600 text-white shadow-md shadow-rose-950/60 ring-1 ring-rose-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="3D Photorealistic Beating Heart Model"
+              >
+                <span>🫀 3D Beating</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewerMode('procedural')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === 'procedural'
+                    ? 'bg-cyan-600 text-white shadow-md shadow-cyan-950/60 ring-1 ring-cyan-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="3D Procedural Myocardium & Chamber Dissection Model (Previous Model)"
+              >
+                <span>⚙️ 3D Procedural</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewerMode('2d')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === '2d'
+                    ? 'bg-amber-600 text-white shadow-md shadow-amber-950/60 ring-1 ring-amber-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="2D High-Contrast Schematic Fallback View"
+              >
+                <span>📊 2D Schematic</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewerMode('blender')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  viewerMode === 'blender'
+                    ? 'bg-purple-600 text-white shadow-md shadow-purple-950/60 ring-1 ring-purple-400/50'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+                title="Blender 5.2 360° Studio Turntable & Offline Renderings"
+              >
+                <span>🎬 Blender Studio</span>
+              </button>
+            </div>
+
             <button
+              type="button"
               onClick={toggleSensitivity}
-              className={`backdrop-blur-md border text-[11px] px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-1.5 transition-all font-medium ${
+              className={`backdrop-blur-md border text-xs px-2.5 py-2 rounded-xl shadow-xl flex items-center gap-1.5 transition-all font-semibold ${
                 isSensitivityOpen
                   ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
-                  : 'bg-slate-900/85 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
+                  : 'bg-slate-900/90 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
               }`}
               title="Toggle interactive 3D model sensitivity sliders and what-if simulation"
             >
@@ -232,15 +300,6 @@ export const App: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
               <span>{isSensitivityOpen ? 'Close Sensitivity' : '⚡ 3D Sensitivity'}</span>
-            </button>
-
-            <button
-              onClick={() => setForce2DFallback(!force2DFallback)}
-              className="bg-slate-900/85 backdrop-blur-md border border-slate-700/80 hover:border-slate-600 text-[11px] text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-1.5 transition-all"
-              title="Toggle between 3D WebGL anatomical view and 2D high-contrast schematic"
-            >
-              <span className={`w-2 h-2 rounded-full ${force2DFallback ? 'bg-amber-400' : 'bg-cyan-400'}`} />
-              <span>{force2DFallback ? 'Switch to 3D View' : '2D Schematic Mode'}</span>
             </button>
           </div>
 
