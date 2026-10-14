@@ -48,5 +48,6 @@
   - Verified Parity: Added Tier 4 Scenario E test confirming vessel colors strictly equal numeric card percentages for 3 holdout personas.
   - Measured 4x CPU Throttling: Measured 22.2 FPS active camera tweening (45.06 ms average delta) and 0 FPS idle on demand frameloop.
 - UI Task 1 (FORM): Enhanced ClinicalForm with three collapsible sections (Vitals & History, ECG, Echo & Labs), physiological range validation (min/max) with inline warning feedback, reference range display with clinical sources, interactive binary toggle buttons, and a Reset to Defaults action.
+- UI Task 2 (EXPLAINABILITY UI): Implemented RiskExplainer using Recharts horizontal BarChart with 'Calibrated log-odds contribution' axis label, top 10 features plus '(other)' aggregate bucket, color-coded bars (rose for risk-increasing, teal for protective), custom hover tooltip displaying patient values, measurement cards with evidence-based reference ranges and sources, and dynamic CAD hierarchical constraint notice.
 
 
