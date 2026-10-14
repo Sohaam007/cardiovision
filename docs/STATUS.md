@@ -28,4 +28,5 @@ Format: `YYYY-MM-DD HH:MM | ID | person | done/partial/blocked | note`
 2026-10-14 12:56 | VIDEO-SCRIPT | Debdas | done | Aligned docs/11_VIDEO_SCRIPT.md with live UI elements, ModelInfo drawer, TreeSHAP values, and YouTube placeholder
 2026-10-14 12:59 | FINAL-QA | Debdas | done | Verified full test suite: 53 pytests pass, 43 web tests pass, tsc --noEmit clean, npm run build green in 55s
 2026-10-14 13:18 | UI-02 | Adin | done | 3 dashboard figures saved to docs/figures/ (overview, sensitivity with deltas, model info drawer); task UI-02 completed
+2026-10-14 18:48 | OPS-01 | Debdas | done | PR #13 reviewed, client.ts API_BASE fallback corrected, merged to main, branch deleted
 
