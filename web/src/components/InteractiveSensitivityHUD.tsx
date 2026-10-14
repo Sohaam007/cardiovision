@@ -24,6 +24,99 @@ export const InteractiveSensitivityHUD: React.FC<InteractiveSensitivityHUDProps>
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Draggable window state
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 16, y: 16 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
+
+  // Initial placement at top-right
+  useEffect(() => {
+    if (isOpen) {
+      const parent = containerRef.current?.parentElement;
+      if (parent) {
+        const parentWidth = parent.clientWidth;
+        const width = 420;
+        setPosition({
+          x: Math.max(16, parentWidth - width - 20),
+          y: 16,
+        });
+      }
+    }
+  }, [isOpen]);
+
+  // Clamping within parent bounds
+  const clamp = useCallback((pos: { x: number; y: number }, width: number, height: number) => {
+    const parent = containerRef.current?.parentElement;
+    const parentWidth = parent?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 800);
+    const parentHeight = parent?.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 600);
+
+    const margin = 12;
+    const minX = margin;
+    const maxX = Math.max(margin, parentWidth - width - margin);
+    const minY = margin;
+    const maxY = Math.max(margin, parentHeight - height - margin);
+
+    return {
+      x: Math.max(minX, Math.min(maxX, pos.x)),
+      y: Math.max(minY, Math.min(maxY, pos.y)),
+    };
+  }, []);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    dragOffsetRef.current = {
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+    };
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const onPointerMove = (e: PointerEvent) => {
+      const parent = containerRef.current?.parentElement;
+      const parentRect = parent?.getBoundingClientRect() || { left: 0, top: 0 };
+      const width = containerRef.current?.offsetWidth || 420;
+      const height = containerRef.current?.offsetHeight || 400;
+
+      const rawX = e.clientX - parentRect.left - dragOffsetRef.current.offsetX;
+      const rawY = e.clientY - parentRect.top - dragOffsetRef.current.offsetY;
+
+      setPosition(clamp({ x: rawX, y: rawY }, width, height));
+    };
+
+    const onPointerUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    };
+  }, [isDragging, clamp]);
+
+  // Prevent wheel and touch bleed into 3D OrbitControls
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const stopPropagation = (e: Event) => e.stopPropagation();
+    el.addEventListener('wheel', stopPropagation, { passive: false });
+    el.addEventListener('pointerdown', stopPropagation);
+
+    return () => {
+      el.removeEventListener('wheel', stopPropagation);
+      el.removeEventListener('pointerdown', stopPropagation);
+    };
+  }, [isOpen]);
+
   // Store baseline values for computing probability deltas
   const [baseline, setBaseline] = useState<{
     inputs: Record<string, any>;
@@ -152,10 +245,28 @@ export const InteractiveSensitivityHUD: React.FC<InteractiveSensitivityHUDProps>
   };
 
   return (
-    <div className="absolute top-4 right-4 z-30 w-full max-w-sm sm:max-w-md bg-slate-900/95 backdrop-blur-xl border border-purple-800/70 rounded-2xl shadow-2xl shadow-purple-950/60 overflow-hidden text-slate-100 flex flex-col max-h-[88vh] animate-in fade-in zoom-in-95 duration-200">
+    <div
+      ref={containerRef}
+      style={{
+        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+        touchAction: 'none',
+      }}
+      className={`absolute top-0 left-0 z-30 w-full max-w-sm sm:max-w-md bg-slate-900/95 backdrop-blur-xl border border-purple-800/70 rounded-2xl shadow-2xl shadow-purple-950/60 overflow-hidden text-slate-100 flex flex-col max-h-[88vh] select-none pointer-events-auto ${
+        isDragging ? 'cursor-grabbing scale-[1.01]' : ''
+      }`}
+    >
       {/* HUD Header */}
       <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
-        <div className="flex items-center gap-2.5">
+        <div
+          onPointerDown={handlePointerDown}
+          className="flex items-center gap-2.5 cursor-grab active:cursor-grabbing flex-1 mr-2"
+          title="Drag to reposition Sensitivity window"
+        >
+          <div className="text-slate-400 hover:text-purple-400 p-0.5">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 5a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm10-14a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0zm0 7a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-md">
             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -163,12 +274,12 @@ export const InteractiveSensitivityHUD: React.FC<InteractiveSensitivityHUDProps>
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="text-sm font-bold text-white tracking-tight">Model Sensitivity &amp; What-If</h3>
+              <h3 className="text-sm font-bold text-white tracking-tight">Model Sensitivity</h3>
               <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700/60">
                 Live 3D
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">Perturb vitals to observe dynamic 3D vessel color shifts</p>
+            <p className="text-[10px] text-slate-400">Perturb vitals to observe dynamic 3D vessel shifts</p>
           </div>
         </div>
 
@@ -179,7 +290,7 @@ export const InteractiveSensitivityHUD: React.FC<InteractiveSensitivityHUDProps>
               className="text-[11px] text-purple-300 hover:text-white bg-purple-950/60 hover:bg-purple-900/80 px-2 py-1 rounded border border-purple-700/60 transition-colors font-medium"
               title="Reset all inputs back to original baseline persona values"
             >
-              Reset to baseline
+              Reset
             </button>
           )}
 

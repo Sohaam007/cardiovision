@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { SceneCanvas } from './scene/SceneCanvas';
 import { PersonaPicker } from './components/PersonaPicker';
 import { ClinicalPanel } from './components/ClinicalPanel';
 import { SafetyModal } from './components/SafetyModal';
@@ -7,11 +6,15 @@ import { FloatingRiskLegend } from './components/FloatingRiskLegend';
 import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 import { WebGLFallback } from './components/WebGLFallback';
 import { ModelInfoDrawer } from './components/ModelInfoDrawer';
-import { DissectionControls } from './components/DissectionControls';
 import { DoctorInspectionDrawer } from './components/DoctorInspectionDrawer';
 import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
 import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
+import { SceneCanvas } from './scene/SceneCanvas';
+import { DissectionControls } from './components/DissectionControls';
+import { DraggableToolsMenu } from './components/DraggableToolsMenu';
+import { PatientFindingsHUD } from './components/PatientFindingsHUD';
+import { ECGMonitorHUD } from './components/ECGMonitorHUD';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -35,6 +38,7 @@ export const App: React.FC = () => {
   const toggleSensitivity = useStore((state) => state.toggleSensitivity);
   const [isModelInfoOpen, setIsModelInfoOpen] = useState(false);
   const [isBlenderStudioOpen, setIsBlenderStudioOpen] = useState(false);
+  const [isDisclaimerDismissed, setIsDisclaimerDismissed] = useState(false);
 
   // Initial asset loading & health check
   useEffect(() => {
@@ -116,10 +120,25 @@ export const App: React.FC = () => {
       <DoctorInspectionDrawer />
       <BlenderStudioModal isOpen={isBlenderStudioOpen} onClose={() => setIsBlenderStudioOpen(false)} />
 
-      {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner */}
-      <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 text-center font-medium tracking-wide shadow-md z-30">
-        For decision support and educational purposes only. Not a medical device. Not a substitute for formal diagnostic imaging or clinical judgment.
-      </header>
+      {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner (Dismissable with Cross button) */}
+      {!isDisclaimerDismissed && (
+        <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 flex items-center justify-between font-medium tracking-wide shadow-md z-30">
+          <div className="flex-1 text-center pr-2">
+            For decision support and educational purposes only. Not a medical device. Not a substitute for formal diagnostic imaging or clinical judgment.
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsDisclaimerDismissed(true)}
+            className="p-1 rounded-md text-amber-300 hover:text-white hover:bg-amber-900/60 transition-colors shrink-0"
+            title="Dismiss clinical safety banner to expand view"
+            aria-label="Dismiss disclaimer"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+      )}
 
       {/* 3. Application Navigation Bar */}
       <nav className="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-6 py-2.5 flex items-center justify-between z-20">
@@ -152,6 +171,18 @@ export const App: React.FC = () => {
 
         {/* Global Controls & Status */}
         <div className="flex items-center gap-2.5">
+          {isDisclaimerDismissed && (
+            <button
+              type="button"
+              onClick={() => setIsDisclaimerDismissed(false)}
+              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-amber-700 bg-amber-950/90 text-amber-300 hover:bg-amber-900 transition-all flex items-center gap-1.5 shadow-sm"
+              title="Show clinical safety disclaimer banner"
+            >
+              <span>⚠️</span>
+              <span className="hidden sm:inline">Disclaimer</span>
+            </button>
+          )}
+
           <button
             onClick={() => setIsBlenderStudioOpen(true)}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-purple-700 bg-purple-950/90 text-purple-300 hover:bg-purple-900 transition-all flex items-center gap-1.5 shadow-sm"
@@ -199,10 +230,7 @@ export const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* 4. Top Bar: Persona Picker (8 Holdout Patients) */}
-      <PersonaPicker />
-
-      {/* 5. Main Workspace Area: 2-Column Responsive View (3D Scene + Clinical Panel) */}
+      {/* 4. Main Workspace Area: 2-Column Responsive View (3D Scene + Clinical Panel) */}
       <main className="flex-1 relative flex flex-col lg:flex-row overflow-hidden">
         {/* Left Column: 3D Canvas Viewport */}
         <div className="flex-1 relative h-[50vh] lg:h-auto bg-slate-950">
@@ -216,26 +244,9 @@ export const App: React.FC = () => {
             )}
           </WebGLErrorBoundary>
 
-          {/* Viewport HUD Overlays */}
-          <div className="absolute top-4 left-4 pointer-events-none z-10 hidden sm:flex flex-col gap-1.5">
-            <div className="bg-slate-950/80 backdrop-blur border border-slate-800 text-[11px] text-slate-300 px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2">
-              <span className="text-cyan-400 font-medium">Mode:</span>
-              <span>
-                {viewerMode === 'realistic' && '3D Beating Heart (Cinema 4D Skeletal Pulsation)'}
-                {viewerMode === 'procedural' && '3D Procedural Model (Anatomical Cavity & Dissection)'}
-                {viewerMode === '2d' && '2D Clinical Angiogram & Hemodynamic Suite'}
-                {viewerMode === 'blender' && 'Blender 5.2 Medical Cycles Turntable (PBR Studio)'}
-              </span>
-            </div>
-            <div className="bg-slate-950/80 backdrop-blur border border-slate-800 text-[11px] text-slate-400 px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2">
-              <span className="text-amber-400 font-medium">Clinical Invariant:</span>
-              <span>Uniform vessel risk shading &bull; Zero localized lesion markers</span>
-            </div>
-          </div>
-
           {/* Segmented Mode Selector & Sensitivity What-If Toggle in Viewport Top-Right */}
-          <div className="absolute top-4 right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/80 shadow-2xl">
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2 max-w-full justify-end">
+            <div className="flex items-center bg-[#090d16]/90 backdrop-blur-md p-1 rounded-xl border border-slate-800 shadow-2xl">
               <button
                 type="button"
                 onClick={() => setViewerMode('realistic')}
@@ -257,7 +268,7 @@ export const App: React.FC = () => {
                     ? 'bg-cyan-600 text-white shadow-md shadow-cyan-950/60 ring-1 ring-cyan-400/50'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                 }`}
-                title="3D Procedural Myocardium & Chamber Dissection Model (Previous Model)"
+                title="3D Anatomical Procedural Model with Surgical Dissection & Myocardial Cutaway"
               >
                 <span>⚙️ 3D Procedural</span>
               </button>
@@ -295,7 +306,7 @@ export const App: React.FC = () => {
               className={`backdrop-blur-md border text-xs px-2.5 py-2 rounded-xl shadow-xl flex items-center gap-1.5 transition-all font-semibold ${
                 isSensitivityOpen
                   ? 'bg-purple-600 text-white border-purple-500 shadow-purple-950/50'
-                  : 'bg-slate-900/90 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
+                  : 'bg-[#090d16]/90 border-purple-800/70 hover:border-purple-600 text-purple-300 hover:text-white'
               }`}
               title="Toggle interactive 3D model sensitivity sliders and what-if simulation"
             >
@@ -306,16 +317,26 @@ export const App: React.FC = () => {
             </button>
           </div>
 
-          {/* Surgical Dissection Controls (Active in 3D procedural mode) */}
+          {/* 1. Draggable Access Patient Tool (8 Holdout Personas) */}
+          <PersonaPicker />
+
+          {/* 2. Draggable Patient Findings & Direct Structure Navigation HUD */}
+          <PatientFindingsHUD />
+
+          {/* 3. Consolidated Draggable Floating Tools HUD */}
+          <DraggableToolsMenu />
+
+          {/* 3b. Procedural Dissection Controls (Active when viewerMode === 'procedural') */}
           {viewerMode === 'procedural' && <DissectionControls />}
 
-          {/* Interactive Sensitivity & What-If Studio HUD Overlay */}
-          <InteractiveSensitivityHUD isOpen={isSensitivityOpen} onClose={closeSensitivity} />
+          {/* 4. Floating Risk Legend HUD (Movable & Collapsible) */}
+          <FloatingRiskLegend />
 
-          {/* Floating Risk Legend HUD (Anterior/Lateral/Posterior presets, percentages, opacity slider, torso toggle, selected vessel details) */}
-          <div className="absolute bottom-4 left-4 z-10">
-            <FloatingRiskLegend />
-          </div>
+          {/* 5. Systematic Real-Time ECG Oscilloscope Monitor HUD (Minimalist & Draggable) */}
+          <ECGMonitorHUD />
+
+          {/* 6. Interactive Sensitivity & What-If Studio HUD Overlay (Draggable) */}
+          <InteractiveSensitivityHUD isOpen={isSensitivityOpen} onClose={closeSensitivity} />
         </div>
 
 

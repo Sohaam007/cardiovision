@@ -2,83 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useStore } from '../store/useStore.ts';
 import { getVesselColorHex, VESSEL_PARAMS } from '../scene/vesselConfig.ts';
 
-// ---------------------------------------------------------------------------
-// Web Audio API Synthesizer for Synchronized Physiological Heart Sounds (S1/S2)
-// ---------------------------------------------------------------------------
-class CardiacAudioSynthesizer {
-  private ctx: AudioContext | null = null;
-  private isMuted: boolean = true;
-
-  public setMuted(muted: boolean) {
-    this.isMuted = muted;
-    if (!muted && !this.ctx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
-      }
-    }
-    if (this.ctx && this.ctx.state === 'suspended' && !muted) {
-      this.ctx.resume();
-    }
-  }
-
-  public getMuted(): boolean {
-    return this.isMuted;
-  }
-
-  // S1: "Lub" - Mitral/Tricuspid valve closure (resonant ~80Hz with gentle decay)
-  public playS1() {
-    if (this.isMuted || !this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(80, now);
-      osc.frequency.exponentialRampToValueAtTime(45, now + 0.12);
-
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.15);
-    } catch {
-      // Audio playback fails gracefully if context locked
-    }
-  }
-
-  // S2: "Dub" - Aortic/Pulmonary valve closure (~115Hz, shorter, crisper)
-  public playS2() {
-    if (this.isMuted || !this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(115, now);
-      osc.frequency.exponentialRampToValueAtTime(65, now + 0.09);
-
-      gain.gain.setValueAtTime(0.20, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.12);
-    } catch {
-      // Audio playback fails gracefully
-    }
-  }
-}
-
-// Global audio synthesizer instance
-const audioSynth = new CardiacAudioSynthesizer();
+import { cardiacAudio } from '../audio/cardiacAudio.ts';
 
 export const WebGLFallback: React.FC = () => {
   // Global Store Bindings
@@ -91,29 +15,28 @@ export const WebGLFallback: React.FC = () => {
   const webglError = useStore((state) => state.webglError);
   const setWebglError = useStore((state) => state.setWebglError);
   const cameraPreset = useStore((state) => state.cameraPreset) || 'anterior';
-  const setCameraPreset = useStore((state) => state.setCameraPreset);
   const patientInputs = useStore((state) => state.patientInputs);
 
-  // Local State: Options & Controls
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [cardiacPhase, setCardiacPhase] = useState<'auto' | 'diastole' | 'systole'>('auto');
-  const [showHemodynamics, setShowHemodynamics] = useState<boolean>(true);
-  const [showChambers, setShowChambers] = useState<boolean>(false);
-  const [showTerritories, setShowTerritories] = useState<boolean>(true);
-  const [showECG, setShowECG] = useState<boolean>(true);
-  const [showCalibers, setShowCalibers] = useState<boolean>(true);
-  const [fluoroscopyMode, setFluoroscopyMode] = useState<boolean>(false);
-  const [isAudioActive, setIsAudioActive] = useState<boolean>(false);
-  const [zoomLevel, setZoomLevel] = useState<number>(1.0);
+  // Global Store Bindings for Unified Viewport State
+  const isPlaying = useStore((state) => state.isPlaying);
+  const cardiacPhase = useStore((state) => state.cardiacPhase);
+  const showHemodynamics = useStore((state) => state.showHemodynamics);
+  const showChambers = useStore((state) => state.showCavities);
+  const showTerritories = useStore((state) => state.showPerfusion);
+  const showCalibers = useStore((state) => state.showCalibers);
+  const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
+  const isAudioMuted = useStore((state) => state.isAudioMuted);
+  const zoomLevel = useStore((state) => state.zoomLevel);
+
+  // Sync Web Audio Synthesizer with Store
+  useEffect(() => {
+    cardiacAudio.setMuted(isAudioMuted);
+  }, [isAudioMuted]);
 
   // Patient Physiological Vitals
   const rawPulseRate = Number(patientInputs['PR'] || 75);
   const pulseRate = Math.max(45, Math.min(160, isNaN(rawPulseRate) ? 75 : rawPulseRate));
   const ejectionFraction = Number(patientInputs['EF-TTE'] || 50);
-  const systolicBP = Number(patientInputs['BP'] || 120);
-  const hasSTElevation = Boolean(patientInputs['ST_Elevation']);
-  const hasSTDepression = Boolean(patientInputs['ST_Depression']);
-  const hasTInversion = Boolean(patientInputs['T_Inversion']);
 
   // Dynamic Cardiac Period in seconds
   const beatPeriod = 60 / pulseRate; // e.g. 0.8s at 75 BPM
@@ -136,12 +59,6 @@ export const WebGLFallback: React.FC = () => {
   const lcxColor = getVesselColorHex(lcxProb, colorblindMode);
   const rcaColor = getVesselColorHex(rcaProb, colorblindMode);
 
-  // Audio Toggle Handler
-  const toggleAudio = () => {
-    const nextState = !isAudioActive;
-    setIsAudioActive(nextState);
-    audioSynth.setMuted(!nextState);
-  };
 
   // Animation Loop: Updates cardiac cycle contraction and hemodynamic flow
   useEffect(() => {
@@ -159,12 +76,12 @@ export const WebGLFallback: React.FC = () => {
 
             // Trigger S1 valve closure at onset of systole (t ~ 0.05)
             if (next >= 0.04 && next <= 0.12 && lastSoundRef.current !== 's1') {
-              audioSynth.playS1();
+              cardiacAudio.playS1();
               lastSoundRef.current = 's1';
             }
             // Trigger S2 valve closure at onset of diastole (t ~ 0.38)
             else if (next >= 0.36 && next <= 0.44 && lastSoundRef.current !== 's2') {
-              audioSynth.playS2();
+              cardiacAudio.playS2();
               lastSoundRef.current = 's2';
             }
             // Reset trigger state for next cycle
@@ -273,223 +190,11 @@ export const WebGLFallback: React.FC = () => {
           )}
         </div>
 
-        {/* Right: View Projections & X-Ray Fluoroscopy Mode */}
-        <div className="flex items-center gap-1.5">
-          {/* Projection Presets */}
-          <div
-            className={`border rounded-lg p-1 flex items-center gap-1 text-xs shadow-md ${
-              fluoroscopyMode
-                ? 'bg-slate-200 border-slate-300 text-slate-700'
-                : 'bg-slate-900/90 border-slate-800 text-slate-300'
-            }`}
-          >
-            <span className="text-[10px] font-semibold uppercase px-1 text-slate-400">View:</span>
-            <button
-              onClick={() => setCameraPreset('anterior')}
-              className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                cameraPreset === 'anterior'
-                  ? 'bg-cyan-600 text-white shadow-sm'
-                  : 'hover:bg-slate-800/40'
-              }`}
-              title="Frontal Anterior View (AP / RAO)"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={() => setCameraPreset('lateral')}
-              className={`px-2 py-1 rounded text-xs font-medium transition-all flex items-center gap-1 ${
-                cameraPreset === 'lateral'
-                  ? 'bg-cyan-600 text-white shadow-sm'
-                  : 'hover:bg-slate-800/40'
-              }`}
-              title="Left Lateral View (LAO Cranial - LCX Groove)"
-            >
-              <span>Left Lateral</span>
-              <span className="text-[9px] px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 font-mono">
-                LCX
-              </span>
-            </button>
-            <button
-              onClick={() => setCameraPreset('posterior')}
-              className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                cameraPreset === 'posterior'
-                  ? 'bg-cyan-600 text-white shadow-sm'
-                  : 'hover:bg-slate-800/40'
-              }`}
-              title="Posterior Crux View (PA / Caudal - RCA PDA)"
-            >
-              Posterior
-            </button>
-          </div>
-
-          {/* Fluoroscopy Cine Angiogram Mode Button */}
-          <button
-            onClick={() => setFluoroscopyMode(!fluoroscopyMode)}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 shadow-md ${
-              fluoroscopyMode
-                ? 'bg-amber-600 text-white border-amber-500 shadow-amber-900/40'
-                : 'bg-slate-900/90 border-slate-700 text-slate-200 hover:text-white hover:border-slate-600'
-            }`}
-            title="Toggle Cath-Lab Cine Fluoroscopy X-Ray radiographic contrast mode"
-          >
-            <span>{fluoroscopyMode ? '⚡ Exit X-Ray' : '⚡ Fluoroscopy X-Ray'}</span>
-          </button>
-        </div>
       </div>
 
       {/* 2. Interactive SVG Canvas & Overlay HUD Container */}
       <div className="flex-1 w-full relative flex items-center justify-center my-2 min-h-0 overflow-hidden">
-        {/* Floating Layer Controls (Top Left) */}
-        <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1.5 max-w-[260px]">
-          <button
-            onClick={() => setShowHemodynamics(!showHemodynamics)}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors flex items-center gap-1 shadow-sm ${
-              showHemodynamics
-                ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60'
-                : 'bg-slate-900/70 text-slate-400 border-slate-800'
-            }`}
-            title="Toggle hemodynamic blood flow velocity stream pulses"
-          >
-            <span>🌊 Flow</span>
-          </button>
-
-          <button
-            onClick={() => setShowChambers(!showChambers)}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors flex items-center gap-1 shadow-sm ${
-              showChambers
-                ? 'bg-purple-950/80 text-purple-300 border-purple-700/60'
-                : 'bg-slate-900/70 text-slate-400 border-slate-800'
-            }`}
-            title="Toggle anatomical ventricular/atrial chambers and cardiac valves"
-          >
-            <span>🫀 Cavities</span>
-          </button>
-
-          <button
-            onClick={() => setShowTerritories(!showTerritories)}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors flex items-center gap-1 shadow-sm ${
-              showTerritories
-                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
-                : 'bg-slate-900/70 text-slate-400 border-slate-800'
-            }`}
-            title="Toggle AHA 17-segment coronary vascular perfusion territory map"
-          >
-            <span>🗺️ Perfusion</span>
-          </button>
-
-          <button
-            onClick={() => setShowCalibers(!showCalibers)}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors flex items-center gap-1 shadow-sm ${
-              showCalibers
-                ? 'bg-blue-950/80 text-blue-300 border-blue-700/60'
-                : 'bg-slate-900/70 text-slate-400 border-slate-800'
-            }`}
-            title="Toggle vessel labels and probability chips"
-          >
-            <span>🏷️ Labels</span>
-          </button>
-
-          <button
-            onClick={() => setShowECG(!showECG)}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors flex items-center gap-1 shadow-sm ${
-              showECG
-                ? 'bg-amber-950/80 text-amber-300 border-amber-700/60'
-                : 'bg-slate-900/70 text-slate-400 border-slate-800'
-            }`}
-            title="Toggle synchronized 12-lead ECG rhythm monitor strip"
-          >
-            <span>📈 ECG</span>
-          </button>
-
-          <button
-            onClick={toggleAudio}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors flex items-center gap-1 shadow-sm ${
-              isAudioActive
-                ? 'bg-rose-950/80 text-rose-300 border-rose-700/60'
-                : 'bg-slate-900/70 text-slate-400 border-slate-800'
-            }`}
-            title="Toggle synthesized physiological heart sounds (S1 'Lub' / S2 'Dub')"
-          >
-            <span>{isAudioActive ? '🔊 Audio ON' : '🔇 Audio Muted'}</span>
-          </button>
-        </div>
-
-        {/* Floating Zoom & Playback Controls (Top Right) */}
-        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-slate-900/85 backdrop-blur border border-slate-800 rounded-lg p-1 shadow-lg text-xs">
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className={`px-2 py-1 rounded font-semibold transition-colors ${
-              isPlaying
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-amber-600 text-white shadow-sm'
-            }`}
-            title="Play or pause physiological heartbeat animation"
-          >
-            {isPlaying ? '⏸ Pause' : '▶ Play'}
-          </button>
-
-          {/* Cardiac Phase Selector */}
-          <div className="flex items-center gap-0.5 bg-slate-950/60 p-0.5 rounded border border-slate-800">
-            <button
-              onClick={() => setCardiacPhase('auto')}
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                cardiacPhase === 'auto'
-                  ? 'bg-cyan-600 text-white'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="Continuous physiological heartbeat cycle"
-            >
-              Auto
-            </button>
-            <button
-              onClick={() => setCardiacPhase('diastole')}
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                cardiacPhase === 'diastole'
-                  ? 'bg-cyan-600 text-white'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="Freeze at diastolic filling phase (peak coronary perfusion)"
-            >
-              Diastole
-            </button>
-            <button
-              onClick={() => setCardiacPhase('systole')}
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                cardiacPhase === 'systole'
-                  ? 'bg-cyan-600 text-white'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="Freeze at peak systolic ejection (ventricular contraction)"
-            >
-              Systole
-            </button>
-          </div>
-
-          <button
-            onClick={() => setZoomLevel((z) => Math.max(0.7, z - 0.15))}
-            className="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold"
-            title="Zoom out"
-          >
-            &minus;
-          </button>
-          <span className="font-mono text-[11px] text-slate-400 w-9 text-center">
-            {Math.round(zoomLevel * 100)}%
-          </span>
-          <button
-            onClick={() => setZoomLevel((z) => Math.min(1.8, z + 0.15))}
-            className="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold"
-            title="Zoom in"
-          >
-            &#43;
-          </button>
-          <button
-            onClick={() => setZoomLevel(1.0)}
-            className="px-1.5 py-1 text-[10px] text-slate-400 hover:text-white rounded hover:bg-slate-800"
-            title="Reset zoom"
-          >
-            Reset
-          </button>
-        </div>
+        {/* Viewport controls consolidated in DraggableToolsMenu HUD */}
 
         {/* Selected Vessel Deep-Dive Inspection Card */}
         {selectedVessel && (
@@ -1230,104 +935,6 @@ export const WebGLFallback: React.FC = () => {
           </svg>
         </div>
       </div>
-
-      {/* 3. Bottom Dock: Synchronized Oscilloscope ECG Rhythm Strip & Vitals Banner */}
-      {showECG && (
-        <div
-          className={`w-full border rounded-xl p-2.5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 z-10 transition-colors ${
-            fluoroscopyMode
-              ? 'bg-white border-slate-300 text-slate-800'
-              : 'bg-slate-900/90 border-slate-800 text-slate-200'
-          }`}
-        >
-          {/* Left: Patient Physiological Vitals HUD */}
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-semibold tracking-wide">ECG Lead II</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-slate-950/50 px-2 py-1 rounded border border-slate-800/80 font-mono text-[11px]">
-              <span className="text-slate-400">HR:</span>
-              <span className="font-bold text-cyan-400">{pulseRate} BPM</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-slate-950/50 px-2 py-1 rounded border border-slate-800/80 font-mono text-[11px]">
-              <span className="text-slate-400">EF:</span>
-              <span className="font-bold text-emerald-400">{ejectionFraction}%</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-slate-950/50 px-2 py-1 rounded border border-slate-800/80 font-mono text-[11px]">
-              <span className="text-slate-400">BP:</span>
-              <span className="font-bold text-amber-400">{systolicBP} mmHg</span>
-            </div>
-
-            <div className="hidden md:flex items-center gap-1 text-[11px] text-slate-400">
-              <span>Phase:</span>
-              <span className="font-mono text-amber-300 font-semibold">
-                {phaseTime <= 0.35 ? 'Ventricular Systole' : 'Diastolic Perfusion'}
-              </span>
-            </div>
-
-            {(hasSTElevation || hasSTDepression || hasTInversion) && (
-              <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 text-[10px] font-bold">
-                {hasSTElevation && 'ST-Elev'}
-                {hasSTDepression && 'ST-Depr'}
-                {hasTInversion && ' T-Inv'}
-              </span>
-            )}
-          </div>
-
-          {/* Center / Right: Oscilloscope ECG Real-Time Rhythm Waveform */}
-          <div className="w-full sm:w-72 h-10 bg-slate-950 rounded-lg border border-slate-800 relative overflow-hidden flex items-center px-2">
-            <svg viewBox="0 0 300 40" className="w-full h-full">
-              {/* Grid Background Lines */}
-              <line x1="0" y1="10" x2="300" y2="10" stroke="#1e293b" strokeWidth="0.5" />
-              <line x1="0" y1="20" x2="300" y2="20" stroke="#1e293b" strokeWidth="0.5" />
-              <line x1="0" y1="30" x2="300" y2="30" stroke="#1e293b" strokeWidth="0.5" />
-
-              {/* Dynamic P-Q-R-S-T Physiological Wave Path */}
-              <path
-                d={`M 0 20 
-                    L 30 20 
-                    Q 45 14 55 20 
-                    L 70 20 
-                    L 75 23 
-                    L 85 ${hasSTElevation ? 3 : 2} 
-                    L 95 36 
-                    L 100 20 
-                    L 115 ${hasSTElevation ? 14 : hasSTDepression ? 26 : 20} 
-                    Q 135 ${hasTInversion ? 27 : 12} 150 20 
-                    L 200 20 
-                    L 205 23 
-                    L 215 ${hasSTElevation ? 3 : 2} 
-                    L 225 36 
-                    L 230 20 
-                    L 245 ${hasSTElevation ? 14 : hasSTDepression ? 26 : 20} 
-                    Q 265 ${hasTInversion ? 27 : 12} 280 20 
-                    L 300 20`}
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                className="drop-shadow-[0_0_6px_rgba(16,185,129,0.7)]"
-              />
-
-              {/* Sweeping Oscilloscope Vertical Beam Synchronized with Phase */}
-              <line
-                x1={phaseTime * 300}
-                y1="0"
-                x2={phaseTime * 300}
-                y2="40"
-                stroke="#38bdf8"
-                strokeWidth="2"
-                opacity="0.8"
-                className="drop-shadow-[0_0_4px_#38bdf8]"
-              />
-            </svg>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
