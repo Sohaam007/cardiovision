@@ -57,9 +57,37 @@ export const App: React.FC = () => {
       } catch (err) {
         console.warn('Demo patients fetch warning:', err);
       }
+
+      // Handle URL query params for automated testing, deep-linking and screenshot captures
+      try {
+        const search = window.location.search;
+        if (search) {
+          const params = new URLSearchParams(search);
+          const view = params.get('view');
+          const vessel = params.get('vessel') as any;
+          const tab = params.get('tab') as any;
+          const bp = params.get('bp');
+
+          if (view === 'anterior' || view === 'lateral' || view === 'posterior') {
+            useStore.getState().setCameraPreset(view);
+          }
+          if (vessel && (vessel === 'LAD' || vessel === 'LCX' || vessel === 'RCA')) {
+            useStore.getState().setSelectedVessel(vessel, true);
+          }
+          if (tab && ['explainability', 'sensitivity', 'form', '3d_debug'].includes(tab)) {
+            useStore.getState().setActiveTab(tab);
+          }
+          if (bp) {
+            useStore.getState().setPatientInput('BP', Number(bp));
+          }
+        }
+      } catch {
+        // Ignore in non-browser environment
+      }
     }
 
     initializeApp();
+
 
     return () => {
       mounted = false;

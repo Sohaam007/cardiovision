@@ -82,7 +82,9 @@ const DEFAULT_VESSELS: Record<VesselKey, VesselData> = {
 
 const INITIAL_DISCLAIMER =
   typeof window !== 'undefined' &&
-  window.localStorage.getItem('cardiovision_disclaimer_accepted') === 'true';
+  (window.localStorage.getItem('cardiovision_disclaimer_accepted') === 'true' ||
+    new URLSearchParams(window.location.search).has('nodialog'));
+
 
 export const useStore = create<AppState>()((set) => ({
   prediction: {
@@ -267,4 +269,8 @@ export const useStore = create<AppState>()((set) => ({
       apiStatus: unavailable ? 'unavailable' : 'live',
     }),
 }));
+
+if (typeof window !== 'undefined') {
+  (window as any).__CARDIOVISION_STORE__ = useStore;
+}
 

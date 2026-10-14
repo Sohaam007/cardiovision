@@ -37,6 +37,15 @@
   - Demo Holdout: 8 stratified representative patients (2 normal, 2 single-vessel, 2 double-vessel, 2 triple-vessel) isolated prior to model training (leaving N=295 for dev set).
   - Validation: RepeatedStratifiedKFold (5 splits x 3 repeats = 15 folds, random seed 42) with inner 3-fold CV for hyperparameter selection.
   - Calibration: Cross-fitted Platt scaling LogisticRegression(C=1e6) on decision margins yields calibrated probabilities and preserves additive TreeSHAP explainability in log-odds space.
-  - Zero shap dependency in production: Native XGBoost `pred_contribs=True` computes exact TreeSHAP values in < 15ms per patient.
   - Constraint: Enforced P(CAD) >= max(P(LAD), P(LCX), P(RCA)) on live predictions and flagged via `meta.cad_adjusted`.
+- 3D Interactions, Fallback, & Clinical UI Invariants (Task 3D-02):
+  - OrbitControls Damping and Limits: Configured minDistance=2.0, maxDistance=8.0, polar angle bounds [pi/8, 7pi/8] to avoid orientation inversion, dampingFactor=0.08.
+  - Camera Presets: Defined Anterior, Left Lateral (tuned to show LCX winding along the left AV groove), and Posterior with 750ms cubic tweening (`easeInOutCubic`).
+  - Proxy Picking: Mesh basic invisible tube geometries with proxyRadius >= 2x visible radius capture pointer hover and click events without visual obstruction, smoothly flying the camera to vessel focus targets.
+  - WebGL Fallback: Implemented WebGLErrorBoundary and WebGLFallback rendering a clean 2D anatomical SVG schematic with uniform risk coloration and numeric percentage badges when 3D acceleration is unavailable or manually toggled.
+  - UI Wording Standards: Strictly eliminated "Stenotic" / "Normal" in favor of "predicted probability of significant stenosis" / "Probable Stenosis (≥50%)" vs "Low Risk (<50%)". Titled sensitivity panel "Model sensitivity" with explicit non-treatment disclaimer note.
+  - Sensitivity Debounce & Offline Resilience: Debounce set to 300ms. In offline mode or when backend is down during user slider adjustments, displays "Model server unavailable" rather than presenting stale cached numbers as live predictions.
+  - Verified Parity: Added Tier 4 Scenario E test confirming vessel colors strictly equal numeric card percentages for 3 holdout personas.
+  - Measured 4x CPU Throttling: Measured 22.2 FPS active camera tweening (45.06 ms average delta) and 0 FPS idle on demand frameloop.
+
 

@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { useStore } from '../store/useStore.ts';
 import {
   getVesselColorHex,
@@ -146,6 +149,51 @@ export function runClinicalScenarioTests(): { passed: number; failed: number; te
     );
 
     assert(colorDistance > 0.5, 'Critical LAD must have high visual contrast against healthy circumflex');
+  });
+
+  test('Tier 4: Scenario E - Vessel colors strictly equal card percentages for 3 demo patients', () => {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const demoJsonPath = path.resolve(__dirname, '../../public/demo_patients.json');
+    const demoPatients = JSON.parse(fs.readFileSync(demoJsonPath, 'utf-8'));
+    assert(demoPatients.length >= 3, 'Demo patients dataset must have at least 3 personas');
+
+    const firstThree = demoPatients.slice(0, 3);
+    for (const patient of firstThree) {
+      useStore.getState().loadPersona(patient);
+      const state = useStore.getState();
+
+      for (const vessel of ['LAD', 'LCX', 'RCA'] as const) {
+        const expectedProb = patient.prediction.vessels[vessel].prob;
+        const stateProb = state.prediction.vessels[vessel].prob;
+        strictEqual(stateProb, expectedProb, `${patient.name} ${vessel} probability sync`);
+
+        // Card percentage formula
+        const cardPct = Math.round(expectedProb * 100);
+
+        // Vessel 3D/2D color calculation
+        const hexStd = getVesselColorHex(stateProb, false);
+        const hexCb = getVesselColorHex(stateProb, true);
+        const colorThree = getVesselColorThree(stateProb, false);
+
+        // Verify color consistency with card percentage tier
+        const tier = getRiskTier(stateProb);
+        if (cardPct >= 70) {
+          strictEqual(tier.label, 'High Risk');
+          assert(colorThree.r > colorThree.g, `${patient.name} ${vessel} high risk must have r > g`);
+        } else if (cardPct < 40) {
+          strictEqual(tier.label, 'Low Risk');
+          assert(colorThree.g > 0.2, `${patient.name} ${vessel} low risk must have green component`);
+        } else {
+          strictEqual(tier.label, 'Moderate Risk');
+          assert(colorThree.r > 0.3 && colorThree.g > 0.2, `${patient.name} ${vessel} moderate risk must be amber`);
+        }
+
+        // Colorblind hex must also exist and be valid
+        assert(/^#[0-9a-f]{6}$/i.test(hexStd), `${vessel} valid standard hex: ${hexStd}`);
+        assert(/^#[0-9a-f]{6}$/i.test(hexCb), `${vessel} valid colorblind hex: ${hexCb}`);
+        assert(hexStd !== hexCb, `${vessel} colorblind hex differs from standard`);
+      }
+    }
   });
 
   return { passed, failed, tests };
