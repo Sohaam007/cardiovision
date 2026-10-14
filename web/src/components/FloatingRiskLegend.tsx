@@ -18,7 +18,11 @@ export const FloatingRiskLegend: React.FC = () => {
   const predictions = useStore((state) => state.predictions);
   const isSensitivityOpen = useStore((state) => state.isSensitivityOpen);
   const toggleSensitivity = useStore((state) => state.toggleSensitivity);
+  const viewerMode = useStore((state) => state.viewerMode);
+  const force2DFallback = useStore((state) => state.force2DFallback);
+  const webglError = useStore((state) => state.webglError);
 
+  const is2D = viewerMode === '2d' || force2DFallback || webglError;
   const activePalette = colorblindMode ? PALETTES.colorblind : PALETTES.standard;
 
   return (
@@ -160,74 +164,80 @@ export const FloatingRiskLegend: React.FC = () => {
 
         {/* 3. Integrated Controls: Opacity & Torso & Colorblind Toggle */}
         <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/80">
-          {/* Heart Opacity Slider */}
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] text-slate-300 font-medium whitespace-nowrap">
-              Heart Opacity:
-            </span>
-            <div className="flex items-center gap-2 flex-1 max-w-[140px]">
-              <input
-                type="range"
-                min="0.10"
-                max="1.00"
-                step="0.05"
-                value={heartOpacity}
-                onChange={(e) => setHeartOpacity(parseFloat(e.target.value))}
-                className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-cyan-400 focus:outline-none"
-              />
-              <span className="font-mono text-[10px] text-slate-400 w-7 text-right">
-                {(heartOpacity * 100).toFixed(0)}%
-              </span>
-            </div>
-          </div>
+          {!is2D && (
+            <>
+              {/* Heart Opacity Slider */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] text-slate-300 font-medium whitespace-nowrap">
+                  Heart Opacity:
+                </span>
+                <div className="flex items-center gap-2 flex-1 max-w-[140px]">
+                  <input
+                    type="range"
+                    min="0.10"
+                    max="1.00"
+                    step="0.05"
+                    value={heartOpacity}
+                    onChange={(e) => setHeartOpacity(parseFloat(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-cyan-400 focus:outline-none"
+                  />
+                  <span className="font-mono text-[10px] text-slate-400 w-7 text-right">
+                    {(heartOpacity * 100).toFixed(0)}%
+                  </span>
+                </div>
+              </div>
 
-          {/* Toggles Row */}
+              {/* 3D Toggles Row */}
+              <div className="flex items-center justify-between gap-1.5 pt-1">
+                {/* Cutaway Toggle */}
+                <button
+                  onClick={toggleChamberCutaway}
+                  className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                    chamberCutaway
+                      ? 'bg-purple-950/80 text-purple-300 border-purple-700/60'
+                      : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
+                  }`}
+                  title="Toggle anatomical cutaway revealing interior ventricular cavities, septum, and chordae tendineae"
+                >
+                  <span>Cutaway</span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      chamberCutaway ? 'bg-purple-400' : 'bg-slate-600'
+                    }`}
+                  />
+                </button>
+
+                {/* Torso Toggle */}
+                <button
+                  onClick={toggleTorso}
+                  className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                    showTorso
+                      ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60'
+                      : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <span>Torso</span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      showTorso ? 'bg-cyan-400' : 'bg-slate-600'
+                    }`}
+                  />
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Colorblind Toggle Row */}
           <div className="flex items-center justify-between gap-1.5 pt-1">
-            {/* Cutaway Toggle */}
-            <button
-              onClick={toggleChamberCutaway}
-              className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
-                chamberCutaway
-                  ? 'bg-purple-950/80 text-purple-300 border-purple-700/60'
-                  : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
-              }`}
-              title="Toggle anatomical cutaway revealing interior ventricular cavities, septum, and chordae tendineae"
-            >
-              <span>Cutaway</span>
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  chamberCutaway ? 'bg-purple-400' : 'bg-slate-600'
-                }`}
-              />
-            </button>
-
-            {/* Torso Toggle */}
-            <button
-              onClick={toggleTorso}
-              className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
-                showTorso
-                  ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60'
-                  : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
-              }`}
-            >
-              <span>Torso</span>
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  showTorso ? 'bg-cyan-400' : 'bg-slate-600'
-                }`}
-              />
-            </button>
-
-            {/* Colorblind Toggle */}
             <button
               onClick={toggleColorblindMode}
-              className={`flex-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+              className={`w-full px-2 py-1 rounded text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 ${
                 colorblindMode
                   ? 'bg-amber-950/80 text-amber-300 border-amber-700/60'
                   : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
               }`}
             >
-              <span>Colorblind</span>
+              <span>Colorblind Palette (Okabe-Ito)</span>
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
                   colorblindMode ? 'bg-amber-400' : 'bg-slate-600'

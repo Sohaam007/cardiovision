@@ -7,6 +7,8 @@ import { FloatingRiskLegend } from './components/FloatingRiskLegend';
 import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 import { WebGLFallback } from './components/WebGLFallback';
 import { ModelInfoDrawer } from './components/ModelInfoDrawer';
+import { DissectionControls } from './components/DissectionControls';
+import { DoctorInspectionDrawer } from './components/DoctorInspectionDrawer';
 import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
 import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
@@ -108,9 +110,10 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden font-sans">
-      {/* 1. First-Load Clinical Safety Modal & Model Information Drawer */}
+      {/* 1. First-Load Clinical Safety Modal, Model Info, & Doctor Inspection Drawer */}
       <SafetyModal />
       <ModelInfoDrawer isOpen={isModelInfoOpen} onClose={() => { setIsModelInfoOpen(false); useStore.getState().closeModelInfo(); }} />
+      <DoctorInspectionDrawer />
       <BlenderStudioModal isOpen={isBlenderStudioOpen} onClose={() => setIsBlenderStudioOpen(false)} />
 
       {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner */}
@@ -267,9 +270,9 @@ export const App: React.FC = () => {
                     ? 'bg-amber-600 text-white shadow-md shadow-amber-950/60 ring-1 ring-amber-400/50'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                 }`}
-                title="2D High-Contrast Schematic Fallback View"
+                title="2D Clinical Angiogram & Hemodynamic Suite with Live Flow, ECG, and Cavities"
               >
-                <span>📊 2D Schematic</span>
+                <span>🔬 2D Angiogram</span>
               </button>
 
               <button
@@ -302,6 +305,9 @@ export const App: React.FC = () => {
               <span>{isSensitivityOpen ? 'Close Sensitivity' : '⚡ 3D Sensitivity'}</span>
             </button>
           </div>
+
+          {/* Surgical Dissection Controls (Active in 3D procedural mode) */}
+          {viewerMode === 'procedural' && <DissectionControls />}
 
           {/* Interactive Sensitivity & What-If Studio HUD Overlay */}
           <InteractiveSensitivityHUD isOpen={isSensitivityOpen} onClose={closeSensitivity} />
