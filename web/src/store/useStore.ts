@@ -4,7 +4,7 @@ import type { DemoPatient, FeatureSchemaItem, PredictResponse } from '../api/cli
 export type VesselKey = 'LAD' | 'LCX' | 'RCA';
 export type TargetKey = 'CAD' | 'LAD' | 'LCX' | 'RCA';
 export type TabKey = 'form' | 'sensitivity' | 'explainability' | '3d_debug';
-export type ApiStatusKey = 'idle' | 'waking' | 'live' | 'demo';
+export type ApiStatusKey = 'idle' | 'waking' | 'live' | 'demo' | 'unavailable';
 
 export interface VesselData {
   prob: number;
@@ -33,6 +33,7 @@ export interface AppState {
   selectedTarget: TargetKey;
   apiStatus: ApiStatusKey;
   demoMode: boolean;
+  modelServerUnavailable: boolean;
   selectedPersonaId: string | null;
   activeTab: TabKey;
   disclaimerAccepted: boolean;
@@ -41,6 +42,7 @@ export interface AppState {
   isLoadingPrediction: boolean;
 
   // Actions
+
   setVesselProbability: (vessel: VesselKey, prob: number) => void;
   setColorblindMode: (enabled: boolean) => void;
   toggleColorblindMode: () => void;
@@ -69,6 +71,7 @@ export interface AppState {
   setDemoPatients: (patients: DemoPatient[]) => void;
   loadPersona: (persona: DemoPatient) => void;
   setIsLoadingPrediction: (loading: boolean) => void;
+  setModelServerUnavailable: (unavailable: boolean) => void;
 }
 
 const DEFAULT_VESSELS: Record<VesselKey, VesselData> = {
@@ -101,6 +104,7 @@ export const useStore = create<AppState>()((set) => ({
   selectedTarget: 'CAD',
   apiStatus: 'idle',
   demoMode: false,
+  modelServerUnavailable: false,
   selectedPersonaId: null,
   activeTab: 'explainability',
   disclaimerAccepted: INITIAL_DISCLAIMER,
@@ -243,6 +247,9 @@ export const useStore = create<AppState>()((set) => ({
       selectedPersonaId: persona.id,
       patientInputs: { ...persona.features },
       predictions: persona.prediction,
+      modelServerUnavailable: false,
+      apiStatus: 'demo',
+      demoMode: true,
       prediction: {
         vessels: {
           LAD: { prob: persona.prediction.vessels.LAD.prob, label: persona.prediction.vessels.LAD.label },
@@ -254,4 +261,10 @@ export const useStore = create<AppState>()((set) => ({
   },
 
   setIsLoadingPrediction: (loading: boolean) => set({ isLoadingPrediction: loading }),
+  setModelServerUnavailable: (unavailable: boolean) =>
+    set({
+      modelServerUnavailable: unavailable,
+      apiStatus: unavailable ? 'unavailable' : 'live',
+    }),
 }));
+

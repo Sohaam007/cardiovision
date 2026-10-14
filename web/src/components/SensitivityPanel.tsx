@@ -8,25 +8,34 @@ export const SensitivityPanel: React.FC = () => {
   const setPredictions = useStore((state) => state.setPredictions);
   const setIsLoadingPrediction = useStore((state) => state.setIsLoadingPrediction);
   const isLoading = useStore((state) => state.isLoadingPrediction);
+  const modelServerUnavailable = useStore((state) => state.modelServerUnavailable);
+  const setModelServerUnavailable = useStore((state) => state.setModelServerUnavailable);
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const triggerLivePredict = useCallback((updatedFeatures: Record<string, any>) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    debounceTimerRef.current = setTimeout(async () => {
-      setIsLoadingPrediction(true);
-      try {
-        const result = await predictRisk(updatedFeatures);
-        setPredictions(result.data);
-      } catch (err) {
-        console.error('Sensitivity prediction error:', err);
-      } finally {
-        setIsLoadingPrediction(false);
+  const triggerLivePredict = useCallback(
+    (updatedFeatures: Record<string, any>) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
-    }, 250);
-  }, [setPredictions, setIsLoadingPrediction]);
+      debounceTimerRef.current = setTimeout(async () => {
+        setIsLoadingPrediction(true);
+        try {
+          const result = await predictRisk(updatedFeatures);
+          setPredictions(result.data);
+          setModelServerUnavailable(false);
+        } catch (err: any) {
+          if (err.name !== 'AbortError') {
+            console.warn('Sensitivity prediction API error:', err);
+            setModelServerUnavailable(true);
+          }
+        } finally {
+          setIsLoadingPrediction(false);
+        }
+      }, 300);
+    },
+    [setPredictions, setIsLoadingPrediction, setModelServerUnavailable]
+  );
 
   const handleSliderChange = (field: string, value: number) => {
     setPatientInput(field, value);
@@ -52,15 +61,34 @@ export const SensitivityPanel: React.FC = () => {
       <div className="bg-amber-950/40 border border-amber-800/40 rounded-lg p-3 text-amber-200">
         <div className="flex items-center gap-2 font-semibold text-amber-300 mb-1">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
           </svg>
-          <span>Model Sensitivity Exploratory Only</span>
+          <span className="text-sm font-bold">Model sensitivity</span>
         </div>
         <p className="text-[11px] text-amber-200/90 leading-relaxed">
+          Not a treatment prediction (exploratory sensitivity analysis, not for clinical titration or therapy guidance).
           Sliders dynamically update multi-vessel probability estimates and log-odds contributions.
-          Not for clinical titration or therapy guidance.
         </p>
       </div>
+
+      {modelServerUnavailable && (
+        <div className="bg-rose-950/70 border border-rose-700/80 rounded-lg p-3 text-rose-200 text-xs flex items-start gap-2 shadow-lg">
+          <svg className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <span className="font-semibold text-rose-300">Model server unavailable</span>
+            <p className="text-[11px] text-rose-200/90 mt-0.5">
+              Edited inputs cannot be evaluated because the model server is offline. Cached numbers are not shown as live predictions. Please select a holdout persona above for verified offline demo cases.
+            </p>
+          </div>
+        </div>
+      )}
 
       {isLoading && (
         <div className="text-[11px] text-cyan-400 font-medium flex items-center gap-1.5 animate-pulse">
@@ -73,6 +101,7 @@ export const SensitivityPanel: React.FC = () => {
       <div className="flex flex-col gap-3.5 bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
         {/* Systolic BP */}
         <div className="flex flex-col gap-1">
+
           <div className="flex justify-between items-center text-slate-300">
             <span className="font-medium">Systolic Blood Pressure (BP)</span>
             <span className="font-mono font-bold text-cyan-400">{bp} mmHg</span>

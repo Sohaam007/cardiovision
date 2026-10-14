@@ -10,6 +10,7 @@ export const ClinicalPanel: React.FC = () => {
   const setActiveTab = useStore((state) => state.setActiveTab);
   const predictions = useStore((state) => state.predictions);
   const apiStatus = useStore((state) => state.apiStatus);
+  const modelServerUnavailable = useStore((state) => state.modelServerUnavailable);
 
   const cadProb = predictions?.cad?.prob ?? 0;
   const isHighRisk = cadProb >= 0.7;
@@ -26,58 +27,86 @@ export const ClinicalPanel: React.FC = () => {
             </span>
             <span
               className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${
-                apiStatus === 'live'
+                modelServerUnavailable
+                  ? 'bg-rose-950 text-rose-300 border border-rose-800/80'
+                  : apiStatus === 'live'
                   ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60'
                   : 'bg-amber-950 text-amber-400 border border-amber-800/60'
               }`}
             >
-              {apiStatus === 'live' ? 'Live Model Serving' : 'Demo Offline Engine'}
+              {modelServerUnavailable
+                ? 'Model Server Unavailable'
+                : apiStatus === 'live'
+                ? 'Live Model Serving'
+                : 'Demo Mode (Offline)'}
             </span>
           </div>
 
           <div className="text-right">
-            <span
-              className={`text-lg font-black font-mono px-2.5 py-0.5 rounded ${
-                isHighRisk
-                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                  : isMidRisk
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-              }`}
-            >
-              {(cadProb * 100).toFixed(0)}% CAD
-            </span>
+            {modelServerUnavailable ? (
+              <span className="text-xs font-bold font-mono px-2 py-1 rounded bg-rose-950/60 text-rose-300 border border-rose-800/60">
+                Model Offline
+              </span>
+            ) : (
+              <span
+                className={`text-lg font-black font-mono px-2.5 py-0.5 rounded ${
+                  isHighRisk
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                    : isMidRisk
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                }`}
+              >
+                {(cadProb * 100).toFixed(0)}% CAD
+              </span>
+            )}
           </div>
         </div>
 
         {/* Vessel Risk Micro-Badges */}
         {predictions && (
-          <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-800/60 text-center">
-            {(['LAD', 'LCX', 'RCA'] as const).map((vessel) => {
-              const p = predictions.vessels[vessel]?.prob ?? 0;
-              const isStenotic = p >= 0.5;
-              return (
-                <div
-                  key={vessel}
-                  className="bg-slate-900 p-1.5 rounded border border-slate-800 text-[11px]"
-                >
-                  <div className="text-slate-400 font-bold">{vessel}</div>
+          <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-slate-800/60">
+            <div className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider text-center">
+              Predicted probability of significant stenosis
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {(['LAD', 'LCX', 'RCA'] as const).map((vessel) => {
+                const p = predictions.vessels[vessel]?.prob ?? 0;
+                const isProbableStenosis = p >= 0.5;
+                return (
                   <div
-                    className={`font-mono font-bold ${
-                      p >= 0.7 ? 'text-rose-400' : p >= 0.4 ? 'text-amber-400' : 'text-emerald-400'
-                    }`}
+                    key={vessel}
+                    className="bg-slate-900 p-1.5 rounded border border-slate-800 text-[11px]"
                   >
-                    {(p * 100).toFixed(0)}%
+                    <div className="text-slate-400 font-bold">{vessel}</div>
+                    <div
+                      className={`font-mono font-bold ${
+                        modelServerUnavailable
+                          ? 'text-slate-500'
+                          : p >= 0.7
+                          ? 'text-rose-400'
+                          : p >= 0.4
+                          ? 'text-amber-400'
+                          : 'text-emerald-400'
+                      }`}
+                    >
+                      {modelServerUnavailable ? '--%' : `${(p * 100).toFixed(0)}%`}
+                    </div>
+                    <div className="text-[9px] text-slate-400 font-medium">
+                      {modelServerUnavailable
+                        ? 'Offline'
+                        : isProbableStenosis
+                        ? 'Probable (≥50%)'
+                        : 'Low (<50%)'}
+                    </div>
                   </div>
-                  <div className="text-[9px] text-slate-500 uppercase">
-                    {isStenotic ? 'Stenotic' : 'Normal'}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
+
 
       {/* Tab Navigation */}
       <div className="flex border-b border-slate-800 bg-slate-950 text-xs font-semibold">

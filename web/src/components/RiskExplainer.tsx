@@ -53,7 +53,7 @@ export const RiskExplainer: React.FC = () => {
 
         {/* Selected target probability pill */}
         <div className="flex items-center gap-2 text-right">
-          <span className="text-xs text-slate-400">Estimated Risk:</span>
+          <span className="text-xs text-slate-400">Predicted probability of significant stenosis:</span>
           <span
             className={`text-sm font-bold font-mono px-2 py-0.5 rounded ${
               targetProb >= 0.7
