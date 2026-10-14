@@ -5,6 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useStore } from '../store/useStore.ts';
 import { Heart } from './Heart.tsx';
+import { Pericardium } from './Pericardium.tsx';
 import { Torso } from './Torso.tsx';
 import { Vessels } from './Vessels.tsx';
 import {
@@ -200,23 +201,27 @@ export const SceneCanvas: React.FC = () => {
         <CameraTweenController controlsRef={controlsRef} />
 
         {/* Photorealistic Cinema 4D Studio Lighting */}
-        <ambientLight intensity={0.7} />
-        {/* Key Light: High-angle specular shine across aortic arch & ventricular crest */}
-        <directionalLight position={[5, 7, 6]} intensity={1.5} color="#ffffff" />
-        {/* Fill Light: Soft warm blood-red fill on anterior surface */}
-        <directionalLight position={[-5, 3, 5]} intensity={0.85} color="#ffe4e6" />
-        {/* Rim Light: Cool blue/cyan rim accentuating anatomical silhouette */}
-        <directionalLight position={[-4, 5, -5]} intensity={1.1} color="#bae6fd" />
-        {/* Deep posterior fill */}
-        <directionalLight position={[4, -4, -6]} intensity={0.4} color="#fecdd3" />
+        <ambientLight intensity={0.6} />
+        {/* Key Light: High-angle specular shine across aortic arch, ventricular crest & wet cut-wall edges */}
+        <directionalLight position={[5, 8, 6]} intensity={1.8} color="#ffffff" />
+        {/* Fill Light: Soft warm pinkish-white fill illuminating anterior myocardium */}
+        <directionalLight position={[-5, 3, 4]} intensity={0.9} color="#ffe4e6" />
+        {/* Rim Light: Electric cyan/sky-blue rim catching holographic torso contour & heart edges */}
+        <directionalLight position={[-4, 6, -5]} intensity={1.3} color="#38bdf8" />
+        {/* Posterior Depth Fill: Deep ruby-plum contour */}
+        <directionalLight position={[3, -4, -5]} intensity={0.45} color="#fda4af" />
         {/* Inferior apex point bounce */}
-        <pointLight position={[0, -2, 3]} intensity={0.45} color="#fca5a5" />
+        <pointLight position={[0, -2, 3]} intensity={0.4} color="#fca5a5" />
 
         {/* Anatomical Model Components */}
         <group position={[0, 0, 0]}>
-          <Torso />
-          <Heart />
-          <Vessels />
+          <Torso showRibs={false} />
+          {/* Cardiac apparatus shifted slightly to the left side of the torso and scaled to 0.89 (safely enclosed) */}
+          <group position={[-0.16, 0.02, 0]} scale={[0.89, 0.89, 0.89]} name="CardiacApparatus">
+            <Pericardium />
+            <Heart />
+            <Vessels />
+          </group>
         </group>
 
         {/* Interactive Controls calling invalidate() on motion */}
