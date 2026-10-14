@@ -1,14 +1,21 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
+import * as THREE from 'three';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { useStore } from '../store/useStore';
-import { Heart } from './Heart';
-import { Torso } from './Torso';
-import { Vessels } from './Vessels';
-
-export const SCENE_DPR_CONFIG: [number, number] = [1, 1.5];
-export const SCENE_FRAMELOOP_CONFIG = 'demand';
+import { useStore } from '../store/useStore.ts';
+import { Heart } from './Heart.tsx';
+import { Torso } from './Torso.tsx';
+import { Vessels } from './Vessels.tsx';
+import {
+  SCENE_DPR_CONFIG,
+  SCENE_FRAMELOOP_CONFIG,
+  ORBIT_CONTROLS_CONFIG,
+  CAMERA_PRESETS,
+  VESSEL_FOCUS_PRESETS,
+  CAMERA_TWEEN_DURATION_MS,
+  easeInOutCubic,
+} from './sceneConfig.ts';
 
 /**
  * Subscribes to Zustand state mutations outside the React render loop
@@ -34,41 +41,121 @@ export const DemandInvalidator: React.FC = () => {
 };
 
 /**
- * Listens for camera preset trigger events and repositions the camera
- * to standard clinical viewing angles.
+ * Camera preset & vessel focus controller with smooth cubic tweening.
+ * Animates both camera position and OrbitControls target simultaneously,
+ * maintaining demand frameloop invalidations during transitions.
  */
 interface CameraControllerProps {
   controlsRef: React.RefObject<OrbitControlsImpl>;
 }
 
-const CameraPresetController: React.FC<CameraControllerProps> = ({ controlsRef }) => {
+const CameraTweenController: React.FC<CameraControllerProps> = ({ controlsRef }) => {
   const cameraPreset = useStore((state) => state.cameraPreset);
+  const flyToVesselTarget = useStore((state) => state.flyToVesselTarget);
   const setCameraPreset = useStore((state) => state.setCameraPreset);
+  const setIsTweening = useStore((state) => state.setIsTweening);
   const { camera, invalidate } = useThree();
 
+  const animFrameRef = useRef<number | null>(null);
+
+  const startTween = useCallback(
+    (
+      targetPosArr: [number, number, number],
+      targetLookAtArr: [number, number, number],
+      duration = CAMERA_TWEEN_DURATION_MS
+    ) => {
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+
+      const startPos = camera.position.clone();
+      const startTarget = controlsRef.current
+        ? controlsRef.current.target.clone()
+        : new THREE.Vector3(0, 0, 0);
+
+      const endPos = new THREE.Vector3(...targetPosArr);
+      const endTarget = new THREE.Vector3(...targetLookAtArr);
+
+      const startTime = performance.now();
+      setIsTweening(true);
+
+      const animate = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const t = easeInOutCubic(progress);
+
+        camera.position.lerpVectors(startPos, endPos, t);
+
+        if (controlsRef.current) {
+          controlsRef.current.target.lerpVectors(startTarget, endTarget, t);
+          controlsRef.current.update();
+        }
+
+        invalidate();
+
+        if (progress < 1) {
+          animFrameRef.current = requestAnimationFrame(animate);
+        } else {
+          camera.position.copy(endPos);
+          if (controlsRef.current) {
+            controlsRef.current.target.copy(endTarget);
+            controlsRef.current.update();
+          }
+          invalidate();
+          animFrameRef.current = null;
+          setIsTweening(false);
+        }
+      };
+
+      animFrameRef.current = requestAnimationFrame(animate);
+    },
+    [camera, controlsRef, invalidate, setIsTweening]
+  );
+
+  // Handle Preset changes (Anterior, Left Lateral, Posterior)
   useEffect(() => {
     if (!cameraPreset) return;
 
-    if (cameraPreset === 'anterior') {
-      camera.position.set(0, 0.35, 3.8);
-    } else if (cameraPreset === 'lateral') {
-      // Patient left lateral view - ideal for inspecting LCX
-      camera.position.set(3.8, 0.35, 0.2);
-    } else if (cameraPreset === 'posterior') {
-      // Posterior view - ideal for inspecting distal LCX and RCA crux
-      camera.position.set(0.2, 0.35, -3.8);
+    const preset = CAMERA_PRESETS[cameraPreset];
+    if (preset) {
+      startTween(preset.position, preset.target);
     }
 
-    camera.lookAt(0, 0, 0);
-
-    if (controlsRef.current) {
-      controlsRef.current.target.set(0, 0, 0);
-      controlsRef.current.update();
-    }
-
-    invalidate();
     setCameraPreset(null);
-  }, [cameraPreset, camera, controlsRef, invalidate, setCameraPreset]);
+  }, [cameraPreset, setCameraPreset, startTween]);
+
+  // Handle Vessel Focus changes
+  useEffect(() => {
+    if (!flyToVesselTarget) return;
+
+    const focusPreset = VESSEL_FOCUS_PRESETS[flyToVesselTarget];
+    if (focusPreset) {
+      startTween(focusPreset.position, focusPreset.target);
+    }
+  }, [flyToVesselTarget, startTween]);
+
+  // Cancel tween if user interacts with OrbitControls manually
+  useEffect(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+
+    const onUserInteractionStart = () => {
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+        setIsTweening(false);
+      }
+    };
+
+    controls.addEventListener('start', onUserInteractionStart);
+    return () => {
+      controls.removeEventListener('start', onUserInteractionStart);
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    };
+  }, [controlsRef, setIsTweening]);
 
   return null;
 };
@@ -81,10 +168,16 @@ const SceneControls: React.FC<{ controlsRef: React.RefObject<OrbitControlsImpl> 
     <OrbitControls
       ref={controlsRef}
       makeDefault
-      enableDamping={true}
-      dampingFactor={0.08}
-      minDistance={1.8}
-      maxDistance={7.5}
+      enableDamping={ORBIT_CONTROLS_CONFIG.enableDamping}
+      dampingFactor={ORBIT_CONTROLS_CONFIG.dampingFactor}
+      minDistance={ORBIT_CONTROLS_CONFIG.minDistance}
+      maxDistance={ORBIT_CONTROLS_CONFIG.maxDistance}
+      rotateSpeed={ORBIT_CONTROLS_CONFIG.rotateSpeed}
+      zoomSpeed={ORBIT_CONTROLS_CONFIG.zoomSpeed}
+      panSpeed={ORBIT_CONTROLS_CONFIG.panSpeed}
+      minPolarAngle={ORBIT_CONTROLS_CONFIG.minPolarAngle}
+      maxPolarAngle={ORBIT_CONTROLS_CONFIG.maxPolarAngle}
+      screenSpacePanning={ORBIT_CONTROLS_CONFIG.screenSpacePanning}
       onChange={() => invalidate()}
     />
   );
@@ -103,7 +196,7 @@ export const SceneCanvas: React.FC = () => {
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
         <DemandInvalidator />
-        <CameraPresetController controlsRef={controlsRef} />
+        <CameraTweenController controlsRef={controlsRef} />
 
         {/* Lightweight balanced lighting */}
         <ambientLight intensity={0.75} />

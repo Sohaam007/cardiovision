@@ -71,18 +71,25 @@ const VesselItem: React.FC<VesselItemProps> = ({ vesselKey }) => {
 
       {/* Invisible enlarged proxy tube for easy pointer interaction */}
       <mesh
+        name={`Proxy_${vesselKey}`}
         geometry={proxyGeometry}
         visible={true}
         onClick={(e) => {
           e.stopPropagation();
-          setSelectedVessel(isSelected ? null : vesselKey);
+          setSelectedVessel(isSelected ? null : vesselKey, true);
         }}
         onPointerOver={(e) => {
           e.stopPropagation();
           setHoveredVessel(vesselKey);
+          if (typeof document !== 'undefined') {
+            document.body.style.cursor = 'pointer';
+          }
         }}
         onPointerOut={() => {
           setHoveredVessel(null);
+          if (typeof document !== 'undefined') {
+            document.body.style.cursor = 'auto';
+          }
         }}
       >
         <meshBasicMaterial

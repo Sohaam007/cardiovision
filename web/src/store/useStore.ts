@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { DemoPatient, FeatureSchemaItem, PredictResponse } from '../api/client';
+import type { DemoPatient, FeatureSchemaItem, PredictResponse } from '../api/client.ts';
 
 export type VesselKey = 'LAD' | 'LCX' | 'RCA';
 export type TargetKey = 'CAD' | 'LAD' | 'LCX' | 'RCA';
@@ -22,6 +22,10 @@ export interface AppState {
   selectedVessel: VesselKey | null;
   hoveredVessel: VesselKey | null;
   cameraPreset: 'anterior' | 'lateral' | 'posterior' | null;
+  flyToVesselTarget: VesselKey | null;
+  force2DFallback: boolean;
+  webglError: boolean;
+  isTweening: boolean;
 
   // Clinical & Prediction State
   patientInputs: Record<string, any>;
@@ -43,9 +47,13 @@ export interface AppState {
   setShowTorso: (show: boolean) => void;
   toggleTorso: () => void;
   setHeartOpacity: (opacity: number) => void;
-  setSelectedVessel: (vessel: VesselKey | null) => void;
+  setSelectedVessel: (vessel: VesselKey | null, flyTo?: boolean) => void;
   setHoveredVessel: (vessel: VesselKey | null) => void;
   setCameraPreset: (preset: 'anterior' | 'lateral' | 'posterior' | null) => void;
+  flyToVessel: (vessel: VesselKey | null) => void;
+  setForce2DFallback: (force: boolean) => void;
+  setWebglError: (error: boolean) => void;
+  setIsTweening: (tweening: boolean) => void;
   resetDemoProbabilities: () => void;
 
   setPatientInput: (field: string, value: any) => void;
@@ -64,9 +72,9 @@ export interface AppState {
 }
 
 const DEFAULT_VESSELS: Record<VesselKey, VesselData> = {
-  LAD: { prob: 0.9397, label: 1 },
-  LCX: { prob: 0.2412, label: 0 },
-  RCA: { prob: 0.2775, label: 0 },
+  LAD: { prob: 0.74, label: 1 },
+  LCX: { prob: 0.31, label: 0 },
+  RCA: { prob: 0.52, label: 1 },
 };
 
 const INITIAL_DISCLAIMER =
@@ -83,6 +91,10 @@ export const useStore = create<AppState>()((set) => ({
   selectedVessel: null,
   hoveredVessel: null,
   cameraPreset: null,
+  flyToVesselTarget: null,
+  force2DFallback: false,
+  webglError: false,
+  isTweening: false,
 
   patientInputs: {},
   predictions: null,
@@ -121,15 +133,36 @@ export const useStore = create<AppState>()((set) => ({
   setHeartOpacity: (opacity: number) =>
     set({ heartOpacity: Math.max(0.1, Math.min(1, opacity)) }),
 
-  setSelectedVessel: (vessel: VesselKey | null) => {
+  setSelectedVessel: (vessel: VesselKey | null, flyTo = true) => {
     set((state) => {
       // If a vessel is selected, also switch selectedTarget to that vessel if applicable
       const newTarget = vessel ? (vessel as TargetKey) : state.selectedTarget;
-      return { selectedVessel: vessel, selectedTarget: newTarget };
+      return {
+        selectedVessel: vessel,
+        selectedTarget: newTarget,
+        flyToVesselTarget: flyTo ? vessel : null,
+        cameraPreset: null,
+      };
     });
   },
   setHoveredVessel: (vessel: VesselKey | null) => set({ hoveredVessel: vessel }),
-  setCameraPreset: (preset) => set({ cameraPreset: preset }),
+  setCameraPreset: (preset) =>
+    set({
+      cameraPreset: preset,
+      flyToVesselTarget: null,
+    }),
+
+  flyToVessel: (vessel: VesselKey | null) =>
+    set((state) => ({
+      selectedVessel: vessel,
+      selectedTarget: vessel ? (vessel as TargetKey) : state.selectedTarget,
+      flyToVesselTarget: vessel,
+      cameraPreset: null,
+    })),
+
+  setForce2DFallback: (force: boolean) => set({ force2DFallback: force }),
+  setWebglError: (error: boolean) => set({ webglError: error }),
+  setIsTweening: (tweening: boolean) => set({ isTweening: tweening }),
 
   resetDemoProbabilities: () =>
     set({
@@ -142,6 +175,10 @@ export const useStore = create<AppState>()((set) => ({
       selectedVessel: null,
       hoveredVessel: null,
       cameraPreset: null,
+      flyToVesselTarget: null,
+      force2DFallback: false,
+      webglError: false,
+      isTweening: false,
     }),
 
   setPatientInput: (field: string, value: any) =>

@@ -3,8 +3,10 @@ import { SceneCanvas } from './scene/SceneCanvas';
 import { PersonaPicker } from './components/PersonaPicker';
 import { ClinicalPanel } from './components/ClinicalPanel';
 import { SafetyModal } from './components/SafetyModal';
+import { FloatingRiskLegend } from './components/FloatingRiskLegend';
+import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
+import { WebGLFallback } from './components/WebGLFallback';
 import { useStore } from './store/useStore';
-import { PALETTES } from './scene/vesselConfig';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
 export const App: React.FC = () => {
@@ -17,8 +19,9 @@ export const App: React.FC = () => {
   const loadPersona = useStore((state) => state.loadPersona);
   const setApiStatus = useStore((state) => state.setApiStatus);
   const setDemoMode = useStore((state) => state.setDemoMode);
-
-  const activePalette = colorblindMode ? PALETTES.colorblind : PALETTES.standard;
+  const force2DFallback = useStore((state) => state.force2DFallback);
+  const setForce2DFallback = useStore((state) => state.setForce2DFallback);
+  const webglError = useStore((state) => state.webglError);
 
   // Initial asset loading & health check
   useEffect(() => {
@@ -133,7 +136,9 @@ export const App: React.FC = () => {
       <main className="flex-1 relative flex flex-col lg:flex-row overflow-hidden">
         {/* Left Column: 3D Canvas Viewport */}
         <div className="flex-1 relative h-[50vh] lg:h-auto bg-slate-950">
-          <SceneCanvas />
+          <WebGLErrorBoundary fallback={<WebGLFallback />}>
+            {force2DFallback || webglError ? <WebGLFallback /> : <SceneCanvas />}
+          </WebGLErrorBoundary>
 
           {/* Viewport HUD Overlays */}
           <div className="absolute top-4 left-4 pointer-events-none z-10 hidden sm:flex flex-col gap-1.5">
@@ -147,27 +152,24 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Color Legend HUD */}
-          <div className="absolute bottom-4 left-4 pointer-events-none z-10 bg-slate-950/85 backdrop-blur border border-slate-800 text-xs text-slate-300 p-2.5 rounded-lg shadow-lg flex flex-col gap-1.5">
-            <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
-              {colorblindMode ? 'Okabe-Ito Colorblind Scale' : 'Clinical Risk Scale'}
-            </span>
-            <div className="flex items-center gap-3 text-[11px]">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activePalette.low }} />
-                <span>Low (&lt;40%)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activePalette.mid }} />
-                <span>Mod (40-70%)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activePalette.high }} />
-                <span>High (&ge;70%)</span>
-              </div>
-            </div>
+          {/* 2D / 3D Mode Toggle in Viewport Top-Right */}
+          <div className="absolute top-4 right-4 pointer-events-auto z-10 flex items-center gap-2">
+            <button
+              onClick={() => setForce2DFallback(!force2DFallback)}
+              className="bg-slate-900/85 backdrop-blur-md border border-slate-700/80 hover:border-slate-600 text-[11px] text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-1.5 transition-all"
+              title="Toggle between 3D WebGL anatomical view and 2D high-contrast schematic"
+            >
+              <span className={`w-2 h-2 rounded-full ${force2DFallback ? 'bg-amber-400' : 'bg-cyan-400'}`} />
+              <span>{force2DFallback ? 'Switch to 3D View' : '2D Schematic Mode'}</span>
+            </button>
+          </div>
+
+          {/* Floating Risk Legend HUD (Anterior/Lateral/Posterior presets, percentages, opacity slider, torso toggle, selected vessel details) */}
+          <div className="absolute bottom-4 left-4 z-10">
+            <FloatingRiskLegend />
           </div>
         </div>
+
 
         {/* Right Column: Clinical Decision Support & Explainability Panel */}
         <ClinicalPanel />
