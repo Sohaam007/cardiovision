@@ -199,6 +199,32 @@ export function runUseStoreTests(): { passed: number; failed: number; tests: str
     strictEqual(useStore.getState().isModelInfoOpen, false, 'toggleModelInfo must toggle true to false');
   });
 
+  test('Tier 1: ViewerMode switching and 2D fallback synchronization operate correctly', () => {
+    const { setViewerMode, setForce2DFallback } = useStore.getState();
+    strictEqual(useStore.getState().viewerMode, 'realistic', 'Default viewerMode must be realistic');
+    strictEqual(useStore.getState().force2DFallback, false, 'Default force2DFallback must be false');
+
+    setViewerMode('procedural');
+    strictEqual(useStore.getState().viewerMode, 'procedural');
+    strictEqual(useStore.getState().force2DFallback, false);
+
+    setViewerMode('2d');
+    strictEqual(useStore.getState().viewerMode, '2d');
+    strictEqual(useStore.getState().force2DFallback, true, 'viewerMode 2d must synchronize force2DFallback true');
+
+    setViewerMode('blender');
+    strictEqual(useStore.getState().viewerMode, 'blender');
+    strictEqual(useStore.getState().force2DFallback, false);
+
+    setForce2DFallback(true);
+    strictEqual(useStore.getState().force2DFallback, true);
+    strictEqual(useStore.getState().viewerMode, '2d');
+
+    setForce2DFallback(false);
+    strictEqual(useStore.getState().force2DFallback, false);
+    strictEqual(useStore.getState().viewerMode, 'realistic');
+  });
+
   return { passed, failed, tests };
 }
 

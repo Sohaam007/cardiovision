@@ -79,4 +79,11 @@
   - Exported Draco-compressed `docs/figures/cardiac_model.glb` (1.35 MB, passing < 5.0 MB test).
   - Integrated photorealistic beating heart model with skeletal heartbeat animation and internal chamber cutaway dissection directly into the main 3D canvas (`web/src/scene/Heart.tsx`) with Suspense and error boundary fallbacks, matching screenshots 183520, 183730, and 183947.
   - Scope Boundary Separation: Reverted `web/src/scene/Torso.tsx` to legacy baseline and left `WebGLFallback.tsx` untouched, preserving exclusive ownership of torso and 2D schematic features for Soumyadeep.
+- Multi-Representation Viewport Toggle (3D Beating, 3D Procedural, 2D Schematic, Blender Studio):
+  - In response to clinical feedback on Screenshot 193936, the viewer now offers side-by-side representation modes rather than permanently replacing the previous procedural model.
+  - Added `viewerMode: 'realistic' | 'procedural' | '2d' | 'blender'` in `web/src/store/useStore.ts` with bidirectional synchronization for `force2DFallback`.
+  - `Heart.tsx` renders `RealisticBeatingHeart` (photorealistic beating GLB with Cinema 4D reference pulsation) when in `realistic` mode, and retains `ProceduralHeart` (procedural myocardium, AV sulcal adipose cushions, systemic aortic branches, and chamber dissection) when in `procedural` mode.
+  - Integrated `BlenderTurntableEmbed.tsx` allowing clinicians to view Blender 5.2 360° turntable loops, 24-frame angle scrubbers, and clinical stills directly in the main viewport or expand into the full studio modal.
+  - Placed a segmented pill control `[🫀 3D Beating] [⚙️ 3D Procedural] [📊 2D Schematic] [🎬 Blender Studio]` side-by-side with `[⚡ 3D Sensitivity]` in the top-right canvas HUD.
+  - Maintained strict scope isolation: zero edits to `WebGLFallback.tsx` and `Torso.tsx`, preserving Soumyadeep's 2D and torso tasks intact.
 
