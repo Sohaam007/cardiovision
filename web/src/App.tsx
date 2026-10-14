@@ -6,6 +6,7 @@ import { SafetyModal } from './components/SafetyModal';
 import { FloatingRiskLegend } from './components/FloatingRiskLegend';
 import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 import { WebGLFallback } from './components/WebGLFallback';
+import { ModelInfoDrawer } from './components/ModelInfoDrawer';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -13,6 +14,7 @@ export const App: React.FC = () => {
   const selectedVessel = useStore((state) => state.selectedVessel);
   const colorblindMode = useStore((state) => state.colorblindMode);
   const toggleColorblindMode = useStore((state) => state.toggleColorblindMode);
+  const openModelInfo = useStore((state) => state.openModelInfo);
   const prediction = useStore((state) => state.prediction);
   const setSchema = useStore((state) => state.setSchema);
   const setDemoPatients = useStore((state) => state.setDemoPatients);
@@ -99,6 +101,9 @@ export const App: React.FC = () => {
       {/* 1. First-Load Clinical Safety Modal */}
       <SafetyModal />
 
+      {/* Model Performance & Validation Info Drawer */}
+      <ModelInfoDrawer />
+
       {/* 2. Mandatory Persistent Clinical Safety Disclaimer Banner */}
       <header className="bg-amber-950/90 border-b border-amber-600/50 text-amber-200 text-xs px-4 py-2 text-center font-medium tracking-wide shadow-md z-30">
         For decision support and educational purposes only. Not a medical device. Not a substitute for formal diagnostic imaging or clinical judgment.
@@ -135,6 +140,17 @@ export const App: React.FC = () => {
 
         {/* Global Controls & Status */}
         <div className="flex items-center gap-3">
+          <button
+            onClick={openModelInfo}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-cyan-700 bg-cyan-950/90 text-cyan-300 hover:bg-cyan-900 transition-all flex items-center gap-1.5 shadow-sm"
+            title="Inspect 15-fold cross-validation metrics, feature ablations, and clinical limitations"
+          >
+            <svg className="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Model Info</span>
+          </button>
+
           <button
             onClick={toggleColorblindMode}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${

@@ -186,6 +186,19 @@ export function runUseStoreTests(): { passed: number; failed: number; tests: str
     strictEqual(state.selectedVessel, null);
   });
 
+  test('Tier 1: ModelInfo drawer state toggles and operates correctly', () => {
+    const { openModelInfo, closeModelInfo, toggleModelInfo } = useStore.getState();
+    strictEqual(useStore.getState().isModelInfoOpen, false, 'Default isModelInfoOpen must be false');
+    openModelInfo();
+    strictEqual(useStore.getState().isModelInfoOpen, true, 'openModelInfo must set isModelInfoOpen to true');
+    closeModelInfo();
+    strictEqual(useStore.getState().isModelInfoOpen, false, 'closeModelInfo must set isModelInfoOpen to false');
+    toggleModelInfo();
+    strictEqual(useStore.getState().isModelInfoOpen, true, 'toggleModelInfo must toggle false to true');
+    toggleModelInfo();
+    strictEqual(useStore.getState().isModelInfoOpen, false, 'toggleModelInfo must toggle true to false');
+  });
+
   return { passed, failed, tests };
 }
 

@@ -450,7 +450,8 @@
             ]
           }
         }
-      }
+      },
+      "notes": "Strong predictive discrimination (ROC-AUC 0.9026 +/- 0.0372, PR-AUC 0.9569). Calibrated decision margins align well with invasive catheterization ground truth."
     },
     "lad": {
       "prevalence": {
@@ -884,7 +885,8 @@
             ]
           }
         }
-      }
+      },
+      "notes": "Robust predictive utility (ROC-AUC 0.8376 +/- 0.0436, PR-AUC 0.8745). Driven predominantly by Typical Chest Pain, Region RWMA, and EF-TTE."
     },
     "lcx": {
       "prevalence": {
@@ -1318,7 +1320,8 @@
             ]
           }
         }
-      }
+      },
+      "notes": "Moderate discrimination (ROC-AUC 0.7584 +/- 0.0456, PR-AUC 0.6453). Circumflex territory (lateral left ventricular wall) produces subtler surface ECG and non-invasive echocardiographic manifestations than anterior LAD. Default 0.50 threshold yields 51.69% recall; screening threshold 0.27 achieves 90.25% recall."
     },
     "rca": {
       "prevalence": {
@@ -1752,7 +1755,8 @@
             ]
           }
         }
-      }
+      },
+      "notes": "Weaker standalone performance (ROC-AUC 0.7011 +/- 0.0477, PR-AUC 0.6099). Inferior wall and right ventricular ischemia show limited representation in non-invasive 54-feature tabular data. Default 0.50 threshold exhibits low sensitivity (37.33%); calibrated screening threshold of 0.25 is recommended for rule-out triage (90.99% recall, 43.57% precision)."
     }
   },
   "cad_constraint_analysis": {
@@ -1779,6 +1783,96 @@
       "pr_auc": 0.93,
       "brier_score": 0.1682,
       "ece": 0.1345
+    }
+  },
+  "feature_ablations": {
+    "cad": {
+      "full_features": {
+        "feature_count": 54,
+        "roc_auc_mean": 0.9068,
+        "roc_auc_std": 0.0367,
+        "pr_auc_mean": 0.9594
+      },
+      "without_lab": {
+        "feature_count": 40,
+        "excluded_count": 14,
+        "roc_auc_mean": 0.9251,
+        "roc_auc_std": 0.0321,
+        "pr_auc_mean": 0.9652
+      },
+      "without_echo": {
+        "feature_count": 51,
+        "excluded_count": 3,
+        "roc_auc_mean": 0.882,
+        "roc_auc_std": 0.0464,
+        "pr_auc_mean": 0.9446
+      }
+    },
+    "lad": {
+      "full_features": {
+        "feature_count": 54,
+        "roc_auc_mean": 0.8388,
+        "roc_auc_std": 0.0409,
+        "pr_auc_mean": 0.8743
+      },
+      "without_lab": {
+        "feature_count": 40,
+        "excluded_count": 14,
+        "roc_auc_mean": 0.8408,
+        "roc_auc_std": 0.0424,
+        "pr_auc_mean": 0.8679
+      },
+      "without_echo": {
+        "feature_count": 51,
+        "excluded_count": 3,
+        "roc_auc_mean": 0.7946,
+        "roc_auc_std": 0.0494,
+        "pr_auc_mean": 0.8245
+      }
+    },
+    "lcx": {
+      "full_features": {
+        "feature_count": 54,
+        "roc_auc_mean": 0.7574,
+        "roc_auc_std": 0.0526,
+        "pr_auc_mean": 0.6431
+      },
+      "without_lab": {
+        "feature_count": 40,
+        "excluded_count": 14,
+        "roc_auc_mean": 0.7139,
+        "roc_auc_std": 0.0607,
+        "pr_auc_mean": 0.5815
+      },
+      "without_echo": {
+        "feature_count": 51,
+        "excluded_count": 3,
+        "roc_auc_mean": 0.764,
+        "roc_auc_std": 0.0522,
+        "pr_auc_mean": 0.6608
+      }
+    },
+    "rca": {
+      "full_features": {
+        "feature_count": 54,
+        "roc_auc_mean": 0.7057,
+        "roc_auc_std": 0.0393,
+        "pr_auc_mean": 0.6164
+      },
+      "without_lab": {
+        "feature_count": 40,
+        "excluded_count": 14,
+        "roc_auc_mean": 0.7072,
+        "roc_auc_std": 0.0437,
+        "pr_auc_mean": 0.5716
+      },
+      "without_echo": {
+        "feature_count": 51,
+        "excluded_count": 3,
+        "roc_auc_mean": 0.7178,
+        "roc_auc_std": 0.0365,
+        "pr_auc_mean": 0.6177
+      }
     }
   }
 }
