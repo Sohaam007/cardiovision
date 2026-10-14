@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { DemoPatient, FeatureSchemaItem, PredictResponse } from '../api/client.ts';
+import { predictRisk, type DemoPatient, type FeatureSchemaItem, type PredictResponse } from '../api/client.ts';
 
 export type VesselKey = 'LAD' | 'LCX' | 'RCA';
 export type TargetKey = 'CAD' | 'LAD' | 'LCX' | 'RCA';
@@ -37,6 +37,7 @@ export interface AppState {
   isCutOpen: boolean;
   dissectionPlane: DissectionPlane;
   cutDepth: number; // 0.0 to 1.0
+  isInvertedCut: boolean;
   selectedInternalStructure: string | null;
   cardiacCyclePhase: CardiacCyclePhase;
 
@@ -70,6 +71,9 @@ export interface AppState {
   schema: FeatureSchemaItem[];
   demoPatients: DemoPatient[];
   isLoadingPrediction: boolean;
+  isDirty: boolean;
+  activePersonaBaseline: Record<string, any> | null;
+  activePersonaPredictions: PredictResponse | null;
 
   // Actions
   setVesselProbability: (vessel: VesselKey, prob: number) => void;
@@ -94,6 +98,8 @@ export interface AppState {
   setIsCutOpen: (open: boolean) => void;
   setDissectionPlane: (plane: DissectionPlane) => void;
   setCutDepth: (depth: number) => void;
+  toggleInvertCut: () => void;
+  setIsInvertedCut: (inverted: boolean) => void;
   setSelectedInternalStructure: (structureId: string | null) => void;
   setCardiacCyclePhase: (phase: CardiacCyclePhase) => void;
 
@@ -140,6 +146,9 @@ export interface AppState {
   loadPersona: (persona: DemoPatient) => void;
   setIsLoadingPrediction: (loading: boolean) => void;
   setModelServerUnavailable: (unavailable: boolean) => void;
+  setIsDirty: (dirty: boolean) => void;
+  resetToBaseline: () => void;
+  runPrediction: () => Promise<void>;
   isModelInfoOpen: boolean;
   openModelInfo: () => void;
   closeModelInfo: () => void;
@@ -182,6 +191,7 @@ export const useStore = create<AppState>()((set) => ({
   isCutOpen: false,
   dissectionPlane: 'coronal',
   cutDepth: 0.5,
+  isInvertedCut: false,
   selectedInternalStructure: null,
   cardiacCyclePhase: 'systole',
 
@@ -214,6 +224,9 @@ export const useStore = create<AppState>()((set) => ({
   schema: [],
   demoPatients: [],
   isLoadingPrediction: false,
+  isDirty: false,
+  activePersonaBaseline: null,
+  activePersonaPredictions: null,
 
   setVesselProbability: (vessel: VesselKey, prob: number) => {
     const safeProb = Number.isFinite(prob) ? Math.max(0, Math.min(1, Number(prob.toFixed(4)))) : 0.5;
@@ -290,6 +303,8 @@ export const useStore = create<AppState>()((set) => ({
   setIsCutOpen: (open: boolean) => set({ isCutOpen: open, chamberCutaway: open, showCavities: open }),
   setDissectionPlane: (plane: DissectionPlane) => set({ dissectionPlane: plane }),
   setCutDepth: (depth: number) => set({ cutDepth: Math.max(0, Math.min(1, depth)) }),
+  toggleInvertCut: () => set((state) => ({ isInvertedCut: !state.isInvertedCut })),
+  setIsInvertedCut: (inverted: boolean) => set({ isInvertedCut: inverted }),
   setSelectedInternalStructure: (structureId: string | null) => set({ selectedInternalStructure: structureId }),
   setCardiacCyclePhase: (phase: CardiacCyclePhase) => set({ cardiacCyclePhase: phase }),
 
@@ -360,6 +375,11 @@ export const useStore = create<AppState>()((set) => ({
       cardiacPhase: 'auto',
       isAudioMuted: true,
       zoomLevel: 1.0,
+      selectedPersonaId: null,
+      patientInputs: {},
+      isDirty: false,
+      activePersonaBaseline: null,
+      activePersonaPredictions: null,
     }),
 
   setPatientInput: (field: string, value: any) =>
@@ -373,7 +393,8 @@ export const useStore = create<AppState>()((set) => ({
       return {
         patientInputs: updatedInputs,
         heartRateBpm: newBpm,
-        selectedPersonaId: null,
+        isDirty: true,
+        selectedPersonaId: state.selectedPersonaId, // Retain active persona baseline reference!
       };
     }),
 
@@ -384,6 +405,7 @@ export const useStore = create<AppState>()((set) => ({
       return {
         patientInputs: { ...inputs },
         heartRateBpm: newBpm,
+        isDirty: true,
       };
     }),
 
@@ -428,6 +450,9 @@ export const useStore = create<AppState>()((set) => ({
     set({
       selectedPersonaId: persona.id,
       patientInputs: { ...feats },
+      activePersonaBaseline: { ...feats },
+      activePersonaPredictions: persona.prediction,
+      isDirty: false,
       heartRateBpm: validBpm,
       predictions: persona.prediction,
       prediction: {
@@ -448,6 +473,81 @@ export const useStore = create<AppState>()((set) => ({
       modelServerUnavailable: unavailable,
       apiStatus: unavailable ? 'unavailable' : 'live',
     }),
+  setIsDirty: (dirty: boolean) => set({ isDirty: dirty }),
+
+  resetToBaseline: () =>
+    set((state) => {
+      let baseline: Record<string, any> = {};
+      if (state.activePersonaBaseline) {
+        baseline = { ...state.activePersonaBaseline };
+      } else if (state.selectedPersonaId && state.demoPatients.length > 0) {
+        const found = state.demoPatients.find((p) => p.id === state.selectedPersonaId);
+        if (found) {
+          baseline = { ...(found.features || (found as any).inputs || {}) };
+        }
+      }
+
+      if (Object.keys(baseline).length === 0 && state.schema.length > 0) {
+        state.schema.forEach((item) => {
+          baseline[item.name] = item.default;
+        });
+      }
+
+      const pr = Number(baseline.PR);
+      const newBpm = !isNaN(pr) && pr >= 30 && pr <= 180 ? pr : state.heartRateBpm;
+
+      let nextPredictions = state.activePersonaPredictions || state.predictions;
+      let nextVessels = state.prediction.vessels;
+
+      if (state.selectedPersonaId && state.demoPatients.length > 0) {
+        const found = state.demoPatients.find((p) => p.id === state.selectedPersonaId);
+        if (found?.prediction) {
+          nextPredictions = found.prediction;
+          const v = found.prediction.vessels;
+          if (v) {
+            nextVessels = {
+              LAD: { prob: v.LAD.prob, label: v.LAD.label },
+              LCX: { prob: v.LCX.prob, label: v.LCX.label },
+              RCA: { prob: v.RCA.prob, label: v.RCA.label },
+            };
+          }
+        }
+      }
+
+      return {
+        patientInputs: baseline,
+        heartRateBpm: newBpm,
+        predictions: nextPredictions,
+        prediction: {
+          ...state.prediction,
+          vessels: nextVessels,
+        },
+        isDirty: false,
+      };
+    }),
+
+  runPrediction: async () => {
+    const state = useStore.getState();
+    if (state.isLoadingPrediction) return;
+    state.setIsLoadingPrediction(true);
+    try {
+      const result = await predictRisk(state.patientInputs);
+      state.setPredictions(result.data);
+      if (result.isFallback) {
+        state.setModelServerUnavailable(true);
+      } else {
+        state.setModelServerUnavailable(false);
+      }
+      useStore.setState({ isDirty: false });
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.error('Prediction failed:', err);
+        state.setModelServerUnavailable(true);
+      }
+    } finally {
+      useStore.getState().setIsLoadingPrediction(false);
+    }
+  },
   isModelInfoOpen: false,
   openModelInfo: () => set({ isModelInfoOpen: true }),
   closeModelInfo: () => set({ isModelInfoOpen: false }),

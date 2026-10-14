@@ -161,6 +161,8 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
   const setBeatingSpeed = useStore((state) => state.setBeatingSpeed);
   const toggleAudio = useStore((state) => state.toggleAudio);
   const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
+  const resetZoom = useStore((state) => state.resetZoom);
+  const setCameraPreset = useStore((state) => state.setCameraPreset);
 
   // Local fallback state if not in fullScreen (e.g. standalone modal)
   const [localPlaying, setLocalPlaying] = useState<boolean>(true);
@@ -215,6 +217,8 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
     if (controlsRef.current) {
       controlsRef.current.reset();
     }
+    resetZoom();
+    setCameraPreset(null);
   };
 
   const calculatedBPM = Math.round(72 * speed);
@@ -277,13 +281,14 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
             </Canvas>
           </Suspense>
 
-          {/* Reset Camera Button */}
+          {/* Reset Camera Button (positioned bottom-right to eliminate collision with top-right mode selector) */}
           <button
             onClick={resetCamera}
-            className="absolute top-4 right-4 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors shadow-lg z-10"
-            title="Reset Camera Orientation"
+            data-testid="reset-camera-btn"
+            className="absolute bottom-4 right-4 bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-700/80 transition-all shadow-2xl z-10 flex items-center gap-1.5 backdrop-blur-md pointer-events-auto"
+            title="Reset Camera Orientation & Zoom"
           >
-            Reset View
+            <span>↺ Reset View</span>
           </button>
         </div>
       </div>
@@ -385,8 +390,9 @@ export const InteractiveBeatingHeart: React.FC<InteractiveBeatingHeartProps> = (
         {/* View Reset Button */}
         <button
           onClick={resetCamera}
+          data-testid="reset-camera-btn"
           className="absolute top-3 right-3 bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white px-2.5 py-1 rounded text-[11px] font-medium border border-slate-700 transition-colors"
-          title="Reset Camera Orientation"
+          title="Reset Camera Orientation & Zoom"
         >
           Reset View
         </button>

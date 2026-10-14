@@ -45,7 +45,7 @@ export const DraggableToolsMenu: React.FC = () => {
 
   // Widget state
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const [position, setPosition] = useState<Position>({ x: 16, y: 72 });
+  const [position, setPosition] = useState<Position>({ x: 16, y: 16 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -75,6 +75,16 @@ export const DraggableToolsMenu: React.FC = () => {
 
     return { x: clampedX, y: clampedY };
   }, []);
+
+  // Initial placement at top-left with boundary clamping
+  useEffect(() => {
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const menuWidth = containerRef.current?.offsetWidth || 288;
+      const menuHeight = containerRef.current?.offsetHeight || 300;
+      setPosition(clampAndSnap({ x: 16, y: 16 }, menuWidth, menuHeight));
+    }
+  }, [clampAndSnap]);
 
   // Dragging event listeners
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -148,7 +158,7 @@ export const DraggableToolsMenu: React.FC = () => {
         /* Collapsed Floating Chip / Pill */
         <div
           onPointerDown={handlePointerDown}
-          className="bg-slate-900/95 backdrop-blur-md border border-slate-700/80 hover:border-cyan-500/50 rounded-full px-3 py-1.5 flex items-center gap-2 cursor-grab text-xs text-slate-200 shadow-2xl hover:bg-slate-800"
+          className="bg-slate-900/95 backdrop-blur-md border border-slate-700/80 hover:border-cyan-500/50 rounded-full px-3 py-1.5 flex items-center gap-2 cursor-grab text-xs text-slate-200 shadow-2xl hover:bg-slate-800 transition-all duration-200 ease-in-out"
           title="Click to expand viewport tools or drag to reposition"
           data-testid="tools-collapsed-pill"
         >
@@ -172,7 +182,7 @@ export const DraggableToolsMenu: React.FC = () => {
         </div>
       ) : (
         /* Expanded Glassmorphic HUD Panel */
-        <div className="w-72 bg-[#090d16]/95 backdrop-blur-md border border-slate-800/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-200 text-xs">
+        <div className="w-72 bg-[#090d16]/95 backdrop-blur-md border border-slate-800/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-200 text-xs transition-all duration-200 ease-in-out">
           {/* Draggable Header */}
           <div
             onPointerDown={handlePointerDown}

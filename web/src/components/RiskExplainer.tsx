@@ -238,8 +238,10 @@ export const RiskExplainer: React.FC = () => {
           {top10.map((item: ExplanationItem, idx: number) => {
             const schemaItem = schemaMap.get(item.feature);
             const ref = schemaItem?.reference_range;
-            const refText = ref
-              ? `${ref.low}-${ref.high} ${schemaItem?.unit || ''} (${ref.source})`
+            const refText = typeof ref === 'string'
+              ? `${ref}${schemaItem?.unit ? ` ${schemaItem.unit}` : ''}`
+              : ref && typeof ref === 'object'
+              ? `${ref.low}-${ref.high} ${schemaItem?.unit || ''}${ref.source ? ` (${ref.source})` : ''}`
               : schemaItem?.unit
               ? schemaItem.unit
               : 'N/A';

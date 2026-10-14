@@ -91,9 +91,12 @@ export const ECGMonitorHUD: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<'II' | 'V1' | 'V5' | 'aVR'>('II');
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
 
-  // Draggable window state
+  // Draggable window state (defaults to bottom-right)
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [position, setPosition] = useState<Position>({ x: 16, y: 16 });
+  const [position, setPosition] = useState<Position>({
+    x: typeof window !== 'undefined' ? Math.max(16, window.innerWidth - 496) : 700,
+    y: typeof window !== 'undefined' ? Math.max(16, window.innerHeight - 165) : 450,
+  });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
 
@@ -179,22 +182,6 @@ export const ECGMonitorHUD: React.FC = () => {
   const currentNormalizedPhase = (scrollOffset % beatWidth) / beatWidth;
   const isSystolePhase = currentNormalizedPhase >= 0.16 && currentNormalizedPhase <= 0.38;
 
-  // Initial placement at bottom-center of viewport
-  useEffect(() => {
-    const parent = containerRef.current?.parentElement;
-    if (parent) {
-      const parentWidth = parent.clientWidth;
-      const parentHeight = parent.clientHeight;
-      const targetWidth = isMinimized ? 240 : 500;
-      const targetHeight = isMinimized ? 40 : 160;
-
-      setPosition({
-        x: Math.max(16, Math.min(parentWidth - targetWidth - 16, (parentWidth - targetWidth) / 2)),
-        y: Math.max(16, parentHeight - targetHeight - 20),
-      });
-    }
-  }, []);
-
   // Boundary clamping
   const clamp = useCallback((pos: Position, menuWidth: number, menuHeight: number): Position => {
     const parent = containerRef.current?.parentElement;
@@ -212,6 +199,46 @@ export const ECGMonitorHUD: React.FC = () => {
       y: Math.max(minY, Math.min(maxY, pos.y)),
     };
   }, []);
+
+  // Initial placement at bottom-right of viewport
+  useEffect(() => {
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const parentWidth = parent.clientWidth;
+      const parentHeight = parent.clientHeight;
+      const targetWidth = isMinimized ? 240 : 480;
+      const targetHeight = isMinimized ? 40 : 160;
+
+      setPosition(clamp({
+        x: Math.max(16, parentWidth - 496),
+        y: Math.max(16, parentHeight - 165),
+      }, targetWidth, targetHeight));
+    }
+  }, [clamp, isMinimized]);
+
+  // Fluid expand/minimize handlers with boundary clamping
+  const handleMinimize = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      setPosition((prev) => clamp(prev, 240, 40));
+    }
+    setIsMinimized(true);
+  };
+
+  const handleExpand = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const parentWidth = parent.clientWidth;
+      const parentHeight = parent.clientHeight;
+      setPosition((prev) => clamp({
+        x: Math.min(prev.x, parentWidth - 496),
+        y: Math.min(prev.y, parentHeight - 165),
+      }, 480, 160));
+    }
+    setIsMinimized(false);
+  };
 
   // Pointer drag listeners using robust window-level tracking
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -283,7 +310,7 @@ export const ECGMonitorHUD: React.FC = () => {
       {isMinimized ? (
         /* Minimalist Pill */
         <div
-          className="bg-[#070b12]/95 backdrop-blur-md border border-slate-700/80 hover:border-emerald-500/60 rounded-xl px-3 py-1.5 flex items-center gap-2.5 text-xs text-slate-200 shadow-2xl transition-all"
+          className="bg-[#070b12]/95 backdrop-blur-md border border-slate-700/80 hover:border-emerald-500/60 rounded-xl px-3 py-1.5 flex items-center gap-2.5 text-xs text-slate-200 shadow-2xl transition-all duration-200 ease-in-out"
         >
           {/* Drag Handle */}
           <div
@@ -297,7 +324,7 @@ export const ECGMonitorHUD: React.FC = () => {
           </div>
 
           <div
-            onClick={() => setIsMinimized(false)}
+            onClick={handleExpand}
             className="flex items-center gap-2 cursor-pointer hover:opacity-90"
             title="Click to expand ECG Oscilloscope Monitor"
           >
@@ -317,11 +344,13 @@ export const ECGMonitorHUD: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setIsMinimized(false)}
+            onClick={handleExpand}
             className="w-5 h-5 rounded-md bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-[10px] transition-colors"
             title="Expand ECG Monitor"
+            aria-label="Expand ECG Monitor"
+            data-testid="expand-ecg-btn"
           >
-            ▲
+            ▼
           </button>
           <button
             type="button"
@@ -335,7 +364,7 @@ export const ECGMonitorHUD: React.FC = () => {
       ) : (
         /* Minimalist & Professional Telemetry Monitor Window */
         <div
-          className="w-[92vw] sm:w-[480px] md:w-[500px] rounded-2xl border border-slate-800/90 bg-[#070b12]/95 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col text-xs"
+          className="w-[92vw] sm:w-[480px] md:w-[500px] rounded-2xl border border-slate-800/90 bg-[#070b12]/95 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col text-xs transition-all duration-200 ease-in-out"
         >
           {/* Header Bar */}
           <div
@@ -390,11 +419,13 @@ export const ECGMonitorHUD: React.FC = () => {
               {/* Minimize & Close */}
               <button
                 type="button"
-                onClick={() => setIsMinimized(true)}
+                onClick={handleMinimize}
                 className="w-6 h-6 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/50"
-                title="Minimize"
+                title="Minimize ECG Monitor"
+                aria-label="Minimize ECG Monitor"
+                data-testid="collapse-ecg-btn"
               >
-                —
+                ▲
               </button>
               <button
                 type="button"

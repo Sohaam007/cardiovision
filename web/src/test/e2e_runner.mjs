@@ -16,6 +16,10 @@ import { runClinicalScenarioTests } from './clinicalScenarios.test.ts';
 import { runIntegrationINT01Tests } from './integrationINT01.test.ts';
 import { runDraggableToolsMenuTests } from './DraggableToolsMenu.test.ts';
 import { runPatientFindingsEngineTests } from './patientFindingsEngine.test.ts';
+import { runLayoutHUDMilestone1Tests } from './layoutHUDMilestone1.test.ts';
+import { run3DRepresentationMilestone2Tests } from './3dRepresentationMilestone2.test.ts';
+import { runClinicalFormTests } from './clinicalForm.test.ts';
+import { runButtonUtilityAuditMilestone4Tests } from './buttonUtilityAuditMilestone4.test.ts';
 
 const startTime = performance.now();
 
@@ -31,6 +35,10 @@ const suites = [
   { name: 'Demand Rendering & Performance Contracts (sceneConfig.test.ts)', runner: runSceneConfigTests },
   { name: 'Real-World Clinical Scenarios (clinicalScenarios.test.ts)', runner: runClinicalScenarioTests },
   { name: 'Integration & Fallback Contracts (integrationINT01.test.ts)', runner: runIntegrationINT01Tests },
+  { name: 'Milestone 1: Dedicated Top Bar & HUD Decluttering (layoutHUDMilestone1.test.ts)', runner: runLayoutHUDMilestone1Tests },
+  { name: 'Milestone 2: 3D Representation Switcher & Surgical Dissection Parity (3dRepresentationMilestone2.test.ts)', runner: run3DRepresentationMilestone2Tests },
+  { name: 'Milestone 3: 54-Feature Clinical Form, Schema & Reactive Prediction (clinicalForm.test.ts)', runner: runClinicalFormTests },
+  { name: 'Milestone 4: Comprehensive Button & Control Utility Audit (buttonUtilityAuditMilestone4.test.ts)', runner: runButtonUtilityAuditMilestone4Tests },
 ];
 
 let totalPassed = 0;
@@ -39,7 +47,7 @@ const allResults = [];
 
 for (const suite of suites) {
   console.log(`\n▶ Suite: ${suite.name}`);
-  const result = suite.runner();
+  const result = await suite.runner();
   result.tests.forEach((t) => console.log(t));
   totalPassed += result.passed;
   totalFailed += result.failed;

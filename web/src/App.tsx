@@ -10,12 +10,12 @@ import { DoctorInspectionDrawer } from './components/DoctorInspectionDrawer';
 import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { BlenderTurntableEmbed } from './components/BlenderTurntableEmbed';
 import { InteractiveSensitivityHUD } from './components/InteractiveSensitivityHUD';
-import { InteractiveBeatingHeart } from './components/InteractiveBeatingHeart';
 import { SceneCanvas } from './scene/SceneCanvas';
 import { DissectionControls } from './components/DissectionControls';
 import { DraggableToolsMenu } from './components/DraggableToolsMenu';
 import { PatientFindingsHUD } from './components/PatientFindingsHUD';
 import { ECGMonitorHUD } from './components/ECGMonitorHUD';
+import { RepresentationSwitcherPill } from './components/RepresentationSwitcherPill';
 import { useStore } from './store/useStore';
 import { checkHealth, fetchSchema, fetchDemoPatients } from './api/client';
 
@@ -231,7 +231,10 @@ export const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* 4. Main Workspace Area: 2-Column Responsive View (3D Scene + Clinical Panel) */}
+      {/* 4. Dedicated Patient Access Bar (Relocated PersonaPicker completely outside 3D Canvas) */}
+      <PersonaPicker />
+
+      {/* 5. Main Workspace Area: 2-Column Responsive View (3D Scene + Clinical Panel) */}
       <main className="flex-1 relative flex flex-col lg:flex-row overflow-hidden">
         {/* Left Column: 3D Canvas Viewport */}
         <div className="flex-1 relative h-[50vh] lg:h-auto bg-slate-950">
@@ -240,12 +243,13 @@ export const App: React.FC = () => {
               <WebGLFallback />
             ) : viewerMode === 'blender' ? (
               <BlenderTurntableEmbed onOpenModal={() => setIsBlenderStudioOpen(true)} />
-            ) : viewerMode === 'procedural' ? (
-              <SceneCanvas />
             ) : (
-              <InteractiveBeatingHeart fullScreen />
+              <SceneCanvas />
             )}
           </WebGLErrorBoundary>
+
+          {/* 0. In-Viewport Floating Representation Switcher Pill */}
+          <RepresentationSwitcherPill />
 
           {/* Segmented Mode Selector & Sensitivity What-If Toggle in Viewport Top-Right */}
           <div className="absolute top-3 right-3 sm:top-4 sm:right-4 pointer-events-auto z-10 flex flex-wrap items-center gap-2 max-w-full justify-end">
@@ -320,17 +324,14 @@ export const App: React.FC = () => {
             </button>
           </div>
 
-          {/* 1. Draggable Access Patient Tool (8 Holdout Personas) */}
-          <PersonaPicker />
-
-          {/* 2. Draggable Patient Findings & Direct Structure Navigation HUD */}
+          {/* 1. Draggable Patient Findings & Direct Structure Navigation HUD */}
           <PatientFindingsHUD />
 
           {/* 3. Consolidated Draggable Floating Tools HUD */}
           <DraggableToolsMenu />
 
-          {/* 3b. Procedural Dissection Controls (Active strictly when viewerMode === 'procedural') */}
-          {viewerMode === 'procedural' && <DissectionControls />}
+          {/* 3b. Surgical Dissection Controls (Active for both procedural and realistic 3D representations) */}
+          {(viewerMode === 'procedural' || viewerMode === 'realistic') && <DissectionControls />}
 
           {/* 4. Floating Risk Legend HUD (Movable & Collapsible) */}
           <FloatingRiskLegend />

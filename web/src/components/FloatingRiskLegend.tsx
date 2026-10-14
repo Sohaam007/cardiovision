@@ -28,9 +28,12 @@ export const FloatingRiskLegend: React.FC = () => {
   const is2D = viewerMode === '2d' || force2DFallback || webglError;
   const activePalette = colorblindMode ? PALETTES.colorblind : PALETTES.standard;
 
-  // Movable Floating Window State
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const [position, setPosition] = useState<Position>({ x: 16, y: 380 });
+  // Movable Floating Window State (starts collapsed as minimal chip)
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
+  const [position, setPosition] = useState<Position>({
+    x: 16,
+    y: typeof window !== 'undefined' ? Math.max(16, window.innerHeight - 52) : 550,
+  });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -61,16 +64,44 @@ export const FloatingRiskLegend: React.FC = () => {
     return { x: clampedX, y: clampedY };
   }, []);
 
-  // Position initialized dynamically based on parent height
+  // Initial placement at bottom-left in collapsed chip state
   useEffect(() => {
     const parent = containerRef.current?.parentElement;
-    if (parent && parent.clientHeight > 450) {
-      setPosition((prev) => ({
-        x: prev.x,
-        y: Math.max(120, parent.clientHeight - 390),
-      }));
+    if (parent && parent.clientHeight > 100) {
+      setPosition(clampAndSnap({
+        x: 16,
+        y: Math.max(16, parent.clientHeight - 52),
+      }, 200, 36));
     }
-  }, []);
+  }, [clampAndSnap]);
+
+  // Fluid expand/collapse handlers with boundary clamping
+  const handleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const parentHeight = parent.clientHeight;
+      const expandedHeight = 350;
+      setPosition((prev) => clampAndSnap({
+        x: prev.x,
+        y: Math.max(12, Math.min(prev.y, parentHeight - expandedHeight - 12)),
+      }, 320, expandedHeight));
+    }
+    setIsCollapsed(false);
+  };
+
+  const handleCollapse = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const parentHeight = parent.clientHeight;
+      setPosition((prev) => clampAndSnap({
+        x: prev.x,
+        y: Math.max(16, parentHeight - 52),
+      }, 200, 36));
+    }
+    setIsCollapsed(true);
+  };
 
   // Dragging event listeners
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -143,7 +174,8 @@ export const FloatingRiskLegend: React.FC = () => {
         /* Collapsed Floating Chip / Pill */
         <div
           onPointerDown={handlePointerDown}
-          className="bg-slate-900/95 backdrop-blur-md border border-slate-700/80 hover:border-cyan-500/50 rounded-full px-3 py-1.5 flex items-center gap-2.5 cursor-grab text-xs text-slate-200 shadow-2xl transition-all hover:bg-slate-800"
+          onClick={handleExpand}
+          className="bg-slate-900/95 backdrop-blur-md border border-slate-700/80 hover:border-cyan-500/50 rounded-full px-3 py-1.5 flex items-center gap-2.5 cursor-grab text-xs text-slate-200 shadow-2xl transition-all duration-200 ease-in-out hover:bg-slate-800"
           title="Click to expand clinical risk scale or drag to reposition"
           data-testid="risk-legend-collapsed-pill"
         >
@@ -170,10 +202,7 @@ export const FloatingRiskLegend: React.FC = () => {
           </div>
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsCollapsed(false);
-            }}
+            onClick={handleExpand}
             className="w-5 h-5 rounded-full bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors text-[10px]"
             title="Expand Clinical Risk Scale"
             aria-label="Expand Clinical Risk Scale"
@@ -184,7 +213,7 @@ export const FloatingRiskLegend: React.FC = () => {
         </div>
       ) : (
         /* Expanded Floating Window */
-        <div className="w-80 bg-[#090d16]/95 backdrop-blur-md border border-slate-800/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-200 text-xs transition-all">
+        <div className="w-80 bg-[#090d16]/95 backdrop-blur-md border border-slate-800/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-200 text-xs transition-all duration-200 ease-in-out">
           {/* Draggable Header */}
           <div
             onPointerDown={handlePointerDown}
@@ -204,10 +233,7 @@ export const FloatingRiskLegend: React.FC = () => {
 
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsCollapsed(true);
-              }}
+              onClick={handleCollapse}
               className="w-6 h-6 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors border border-slate-700/60"
               title="Minimize to floating chip"
               aria-label="Collapse Risk Legend"

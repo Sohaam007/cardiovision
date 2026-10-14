@@ -5,10 +5,13 @@ import { INTERNAL_HEART_STRUCTURES } from '../data/heartAnatomyData';
 export const DissectionControls: React.FC = () => {
   const isCutOpen = useStore((state) => state.isCutOpen);
   const toggleCutOpen = useStore((state) => state.toggleCutOpen);
+  const setIsCutOpen = useStore((state) => state.setIsCutOpen);
   const dissectionPlane = useStore((state) => state.dissectionPlane);
   const setDissectionPlane = useStore((state) => state.setDissectionPlane);
   const cutDepth = useStore((state) => state.cutDepth);
   const setCutDepth = useStore((state) => state.setCutDepth);
+  const isInvertedCut = useStore((state) => state.isInvertedCut);
+  const toggleInvertCut = useStore((state) => state.toggleInvertCut);
   const selectedInternalStructure = useStore((state) => state.selectedInternalStructure);
   const setSelectedInternalStructure = useStore((state) => state.setSelectedInternalStructure);
   const cardiacCyclePhase = useStore((state) => state.cardiacCyclePhase);
@@ -85,12 +88,13 @@ export const DissectionControls: React.FC = () => {
               </button>
             </div>
 
-            {/* Cut Open Heart (Anterior Cutaway vs Exterior Whole Heart) */}
+            {/* Cut Open Heart / Close Cavity (Anterior Cutaway vs Exterior Whole Heart) */}
             <button
               onClick={toggleCutOpen}
+              data-testid="toggle-cut-open"
               className={`px-3.5 py-2 rounded-xl text-xs font-semibold shadow-xl backdrop-blur-md transition-all flex items-center gap-2 border ${
                 isCutOpen
-                  ? 'bg-rose-950/90 text-rose-200 border-rose-500 shadow-rose-950/50 hover:bg-rose-900'
+                  ? 'bg-rose-950/90 text-rose-200 border-rose-500 shadow-rose-950/50 hover:bg-rose-900 ring-1 ring-rose-400/50'
                   : 'bg-slate-900/80 text-slate-300 border-slate-700/80 hover:bg-slate-800 hover:text-white'
               }`}
               title="Toggle cutaway interior view exposing internal ventricles, valves, and septum"
@@ -108,7 +112,7 @@ export const DissectionControls: React.FC = () => {
                   d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.828 2.828a2 2 0 11-2.828-2.828L9 9m3 3l-7 7"
                 />
               </svg>
-              <span>{isCutOpen ? 'Close Exterior (Whole Heart)' : 'Cut Open Heart (Internal Anatomy)'}</span>
+              <span>{isCutOpen ? 'Close Cavity (Whole Heart)' : 'Cut Open Heart (Internal Anatomy)'}</span>
             </button>
           </>
         )}
@@ -185,21 +189,49 @@ export const DissectionControls: React.FC = () => {
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
               Surgical Dissection HUD
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">Depth: {(cutDepth * 100).toFixed(0)}%</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-400 font-mono">{(cutDepth * 100).toFixed(0)}%</span>
+              <button
+                type="button"
+                onClick={() => setIsCutOpen(false)}
+                data-testid="close-cavity-btn"
+                className="px-2 py-0.5 rounded bg-slate-900 hover:bg-rose-950 text-slate-300 hover:text-rose-200 border border-slate-700/80 hover:border-rose-600 text-[10px] font-semibold transition-colors"
+                title="Close internal cavity and restore exterior whole heart"
+              >
+                Close Cavity
+              </button>
+            </div>
           </div>
 
           <div>
-            <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-medium">
-              Dissection Plane
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[10px] text-slate-400 uppercase tracking-wider font-medium">
+                Dissection Plane
+              </label>
+              <button
+                type="button"
+                onClick={toggleInvertCut}
+                data-testid="plane-invert"
+                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-all flex items-center gap-1 border ${
+                  isInvertedCut
+                    ? 'bg-cyan-950 text-cyan-200 border-cyan-500 shadow-sm ring-1 ring-cyan-400/50 font-semibold'
+                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                }`}
+                title="Invert surgical cut plane normal / clipping direction"
+              >
+                <span>⇄ Invert</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${isInvertedCut ? 'bg-cyan-400' : 'bg-slate-600'}`} />
+              </button>
+            </div>
             <div className="grid grid-cols-3 gap-1">
               {planes.map((p) => (
                 <button
                   key={p.key}
                   onClick={() => setDissectionPlane(p.key)}
+                  data-testid={`plane-${p.key}`}
                   className={`py-1 px-1.5 rounded text-[10px] font-medium transition-all text-center border ${
                     dissectionPlane === p.key
-                      ? 'bg-cyan-950 text-cyan-200 border-cyan-500 shadow-sm'
+                      ? 'bg-cyan-950 text-cyan-200 border-cyan-500 shadow-sm ring-1 ring-cyan-400/50 font-semibold'
                       : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
                   }`}
                   title={p.desc}

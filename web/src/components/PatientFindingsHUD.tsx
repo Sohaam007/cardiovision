@@ -16,25 +16,16 @@ export const PatientFindingsHUD: React.FC = () => {
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [position, setPosition] = useState<Position>({ x: 16, y: 124 });
+  const [position, setPosition] = useState<Position>({
+    x: typeof window !== 'undefined' ? Math.max(16, (window.innerWidth - 480) / 2) : 200,
+    y: 64,
+  });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
 
   const findings = React.useMemo(() => {
     return evaluatePatientFindings(patientInputs);
   }, [patientInputs]);
-
-  // Initial placement at top-left under tools menu
-  useEffect(() => {
-    const parent = containerRef.current?.parentElement;
-    if (parent) {
-      const parentWidth = parent.clientWidth;
-      setPosition({
-        x: Math.max(16, Math.min(parentWidth - 320, 16)),
-        y: 124,
-      });
-    }
-  }, []);
 
   // Clamping within parent bounds
   const clamp = useCallback((pos: Position, width: number, height: number): Position => {
@@ -53,6 +44,19 @@ export const PatientFindingsHUD: React.FC = () => {
       y: Math.max(minY, Math.min(maxY, pos.y)),
     };
   }, []);
+
+  // Initial placement at top-center of viewport (below switcher pill)
+  useEffect(() => {
+    const parent = containerRef.current?.parentElement;
+    if (parent) {
+      const parentWidth = parent.clientWidth;
+      const targetWidth = containerRef.current?.offsetWidth || 480;
+      setPosition(clamp({
+        x: Math.max(16, (parentWidth - targetWidth) / 2),
+        y: 64,
+      }, targetWidth, 40));
+    }
+  }, [clamp]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -124,7 +128,7 @@ export const PatientFindingsHUD: React.FC = () => {
     >
       {isCollapsed ? (
         /* Collapsed Findings Pill */
-        <div className="bg-[#090d16]/95 backdrop-blur-md border border-slate-700/80 hover:border-rose-500/60 rounded-xl px-3 py-1.5 flex items-center gap-2.5 text-xs text-slate-200 shadow-2xl transition-all">
+        <div className="bg-[#090d16]/95 backdrop-blur-md border border-slate-700/80 hover:border-rose-500/60 rounded-xl px-3 py-1.5 flex items-center gap-2.5 text-xs text-slate-200 shadow-2xl transition-all duration-200 ease-in-out">
           <div
             onPointerDown={handlePointerDown}
             className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-rose-400 p-0.5"
@@ -151,7 +155,7 @@ export const PatientFindingsHUD: React.FC = () => {
         </div>
       ) : (
         /* Expanded Findings Floating Bar */
-        <div className="bg-[#090d16]/95 backdrop-blur-xl border border-slate-800 rounded-xl shadow-2xl p-1.5 flex items-center gap-2 max-w-[94vw] overflow-x-auto scrollbar-thin">
+        <div className="bg-[#090d16]/95 backdrop-blur-xl border border-slate-800 rounded-xl shadow-2xl p-1.5 flex items-center gap-2 max-w-[94vw] overflow-x-auto scrollbar-thin transition-all duration-200 ease-in-out">
           {/* Drag Handle */}
           <div
             onPointerDown={handlePointerDown}
