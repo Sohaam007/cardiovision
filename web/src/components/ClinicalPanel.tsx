@@ -39,6 +39,8 @@ export const ClinicalPanel: React.FC = () => {
                 className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                   modelServerUnavailable
                     ? 'bg-rose-950 text-rose-300 border border-rose-800/80'
+                    : apiStatus === 'waking'
+                    ? 'bg-amber-950/80 text-amber-300 border border-amber-600/60 animate-pulse'
                     : apiStatus === 'live'
                     ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60'
                     : 'bg-amber-950 text-amber-400 border border-amber-800/60'
@@ -46,6 +48,8 @@ export const ClinicalPanel: React.FC = () => {
               >
                 {modelServerUnavailable
                   ? 'Server Offline'
+                  : apiStatus === 'waking'
+                  ? 'Waking Server...'
                   : apiStatus === 'live'
                   ? 'Live Server'
                   : 'Demo Mode'}
@@ -56,6 +60,10 @@ export const ClinicalPanel: React.FC = () => {
               {modelServerUnavailable ? (
                 <span className="text-xs font-bold font-mono px-2 py-0.5 rounded bg-rose-950/60 text-rose-300 border border-rose-800/60">
                   Model Offline
+                </span>
+              ) : apiStatus === 'waking' ? (
+                <span className="text-xs font-bold font-mono px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-800/60 animate-pulse">
+                  Waking Server...
                 </span>
               ) : (
                 <span
@@ -85,6 +93,13 @@ export const ClinicalPanel: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {apiStatus === 'waking' && (
+          <div className="bg-amber-950/40 border border-amber-700/60 rounded-lg p-2.5 text-amber-200 text-xs flex items-center gap-2 animate-pulse">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
+            <span>Waking the model server... Initial cloud spin-up may take ~30s. Demo holdout mode active in the interim.</span>
+          </div>
+        )}
 
         {/* Three Vessel Interactive Cards (LAD, LCX, RCA) */}
         {predictions && (

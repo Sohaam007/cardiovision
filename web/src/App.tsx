@@ -31,6 +31,7 @@ export const App: React.FC = () => {
 
     async function initializeApp() {
       // 1. Check live API health
+      setApiStatus('waking');
       const isLive = await checkHealth();
       if (!mounted) return;
       if (isLive) {
