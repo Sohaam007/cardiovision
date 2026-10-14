@@ -74,5 +74,9 @@
   - PR #8 was merged into `main` (commit `2478d37`) at 2026-10-14T08:37:54Z based on local verification while GitHub Actions CI run 38536419272 was failing (Frontend Quality failed at 08:37:49Z with exit code 9 due to Node 20 runner rejecting `--experimental-strip-types`; Backend & ML Tests failed at 08:38:25Z due to unpinned `httpx` required by `starlette.testclient`).
   - Governance Finding: Merging prior to remote status check completion constituted a procedural breach of the 'CI green before merge' requirement.
   - Remediation: PR #9 (`debdas/fix-ci-deps`) was merged at 08:42:15Z (commit `40cbd3d`), pinning `httpx==0.28.1` in `requirements.txt` and upgrading the runner to Node 22, returning `main` to verified green CI status. Subsequent runs on `main` passed with 100% green status.
-
+- Photorealistic Beating Heart Model Integration & Blender Turntable Framing Resolution:
+  - Fixed Blender 5.2 360-degree turntable and scrubber renders (`web/public/blender/frames/frame_01.png` .. `frame_24.png`, `blender_turntable.webp`) by importing `docs/reference/Beating_heart.glb` with calibrated 50mm lens camera at 0.44m orbit radius and 3-point medical studio lighting, resolving previous procedural distortion and edge clipping seen in screenshots 184010 and 184120.
+  - Exported Draco-compressed `docs/figures/cardiac_model.glb` (1.35 MB, passing < 5.0 MB test).
+  - Integrated photorealistic beating heart model with skeletal heartbeat animation and internal chamber cutaway dissection directly into the main 3D canvas (`web/src/scene/Heart.tsx`) with Suspense and error boundary fallbacks, matching screenshots 183520, 183730, and 183947.
+  - Scope Boundary Separation: Reverted `web/src/scene/Torso.tsx` to legacy baseline and left `WebGLFallback.tsx` untouched, preserving exclusive ownership of torso and 2D schematic features for Soumyadeep.
 

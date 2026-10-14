@@ -39,4 +39,5 @@ docs/reference/*.zip
 docs/reference/Beating_heart.glb
 docs/reference/realistic_human_heart.glb
 web/public/heart_moving.mp4
-
+# Scratch directory
+scratch/
