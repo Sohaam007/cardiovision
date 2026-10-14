@@ -86,4 +86,9 @@
   - Integrated `BlenderTurntableEmbed.tsx` allowing clinicians to view Blender 5.2 360° turntable loops, 24-frame angle scrubbers, and clinical stills directly in the main viewport or expand into the full studio modal.
   - Placed a segmented pill control `[🫀 3D Beating] [⚙️ 3D Procedural] [📊 2D Schematic] [🎬 Blender Studio]` side-by-side with `[⚡ 3D Sensitivity]` in the top-right canvas HUD.
   - Maintained strict scope isolation: zero edits to `WebGLFallback.tsx` and `Torso.tsx`, preserving Soumyadeep's 2D and torso tasks intact.
+- Single-Presenter Video Script Consolidation (Soumyadeep Pal):
+  - In accordance with team direction, consolidated the video walkthrough script (`docs/11_VIDEO_SCRIPT.md`) to be delivered solely by Soumyadeep Pal (3D Graphics & Visualization Lead).
+  - Merged Debdas's DevOps, deployment, CI/CD, and automated quality assurance sections into Soumyadeep's narration flow, eliminating presentation gaps between components.
+  - Comprehensive script coverage incorporates all recent milestones: multi-representation viewport switcher (`[🫀 3D Beating]`, `[⚙️ 3D Procedural]`, `[📊 2D Schematic]`, `[🎬 Blender Studio]`), unified `DraggableToolsMenu`, Wiggers diagram cardiac cycle, Web Audio API acoustic Lub-Dub auscultation, multi-planar 4-chamber dissection cutaways, automated Patient Findings HUD, Doctor Inspection Drawer, sub-25ms native TreeSHAP explainability in calibrated log-odds space, what-if sensitivity levers, server-side anatomical hierarchy constraint ($P(\text{CAD}) \ge \max(\text{vessels})$), radical scientific honesty on distal vessels (LCX/RCA), calibrated screening operating points, and live Vercel/Render deployments backed by 59 pytests (31 zero-leakage) and 69 web tests.
+  - Target duration set to ~7-8 minutes, satisfying Track A's 3-10 minute requirement.
 

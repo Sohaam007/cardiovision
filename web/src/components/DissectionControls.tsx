@@ -39,7 +39,7 @@ export const DissectionControls: React.FC = () => {
   ];
 
   return (
-    <div className="absolute top-16 right-4 z-20 flex flex-col items-end gap-2 pointer-events-auto">
+    <div className="absolute top-20 right-3 sm:top-20 sm:right-4 z-20 flex flex-col items-end gap-2 pointer-events-auto">
       {/* Primary Action Buttons Row */}
       <div className="flex items-center gap-2">
         {!force2DFallback && (

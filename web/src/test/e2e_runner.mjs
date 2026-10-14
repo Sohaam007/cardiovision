@@ -14,6 +14,8 @@ import { runVesselConfigTests } from './vesselConfig.test.ts';
 import { runSceneConfigTests } from './sceneConfig.test.ts';
 import { runClinicalScenarioTests } from './clinicalScenarios.test.ts';
 import { runIntegrationINT01Tests } from './integrationINT01.test.ts';
+import { runDraggableToolsMenuTests } from './DraggableToolsMenu.test.ts';
+import { runPatientFindingsEngineTests } from './patientFindingsEngine.test.ts';
 
 const startTime = performance.now();
 
@@ -23,6 +25,8 @@ console.log('================================================================\n'
 
 const suites = [
   { name: 'Store Contracts & State Management (useStore.test.ts)', runner: runUseStoreTests },
+  { name: 'Draggable Tools HUD & Layer Controls (DraggableToolsMenu.test.tsx)', runner: runDraggableToolsMenuTests },
+  { name: 'Patient Finding Logic Engine & Structure Mapping (patientFindingsEngine.test.ts)', runner: runPatientFindingsEngineTests },
   { name: 'Vessel Anatomy & Color Interpolation Math (vesselConfig.test.ts)', runner: runVesselConfigTests },
   { name: 'Demand Rendering & Performance Contracts (sceneConfig.test.ts)', runner: runSceneConfigTests },
   { name: 'Real-World Clinical Scenarios (clinicalScenarios.test.ts)', runner: runClinicalScenarioTests },

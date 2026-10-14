@@ -183,12 +183,34 @@ const SceneControls: React.FC<{ controlsRef: React.RefObject<OrbitControlsImpl> 
   );
 };
 
+const CameraZoomController: React.FC = () => {
+  const zoomLevel = useStore((state) => state.zoomLevel);
+  const { camera, invalidate } = useThree();
+
+  useEffect(() => {
+    if (camera instanceof THREE.PerspectiveCamera || camera instanceof THREE.OrthographicCamera) {
+      camera.zoom = zoomLevel;
+      camera.updateProjectionMatrix();
+      invalidate();
+    }
+  }, [zoomLevel, camera, invalidate]);
+
+  return null;
+};
+
 export const SceneCanvas: React.FC = () => {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const isBeating = useStore((state) => state.isBeating);
+  const fluoroscopyMode = useStore((state) => state.fluoroscopyMode);
 
   return (
-    <div className="w-full h-full relative select-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
+    <div
+      className={`w-full h-full relative select-none transition-colors duration-500 ${
+        fluoroscopyMode
+          ? 'bg-gradient-to-b from-slate-300 via-slate-400 to-slate-200'
+          : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black'
+      }`}
+    >
       <Canvas
         frameloop={isBeating ? 'always' : SCENE_FRAMELOOP_CONFIG}
         dpr={SCENE_DPR_CONFIG}
@@ -198,19 +220,30 @@ export const SceneCanvas: React.FC = () => {
       >
         <DemandInvalidator />
         <CameraTweenController controlsRef={controlsRef} />
+        <CameraZoomController />
 
-        {/* Photorealistic Cinema 4D Studio Lighting */}
-        <ambientLight intensity={0.7} />
-        {/* Key Light: High-angle specular shine across aortic arch & ventricular crest */}
-        <directionalLight position={[5, 7, 6]} intensity={1.5} color="#ffffff" />
-        {/* Fill Light: Soft warm blood-red fill on anterior surface */}
-        <directionalLight position={[-5, 3, 5]} intensity={0.85} color="#ffe4e6" />
-        {/* Rim Light: Cool blue/cyan rim accentuating anatomical silhouette */}
-        <directionalLight position={[-4, 5, -5]} intensity={1.1} color="#bae6fd" />
-        {/* Deep posterior fill */}
-        <directionalLight position={[4, -4, -6]} intensity={0.4} color="#fecdd3" />
-        {/* Inferior apex point bounce */}
-        <pointLight position={[0, -2, 3]} intensity={0.45} color="#fca5a5" />
+        {/* Photorealistic Cinema 4D Studio Lighting vs Cath Lab Fluoroscopy */}
+        {fluoroscopyMode ? (
+          <>
+            <ambientLight intensity={1.8} color="#f8fafc" />
+            <directionalLight position={[0, 0, 10]} intensity={2.5} color="#ffffff" />
+            <directionalLight position={[0, 0, -8]} intensity={1.5} color="#e2e8f0" />
+          </>
+        ) : (
+          <>
+            <ambientLight intensity={0.7} />
+            {/* Key Light: High-angle specular shine across aortic arch & ventricular crest */}
+            <directionalLight position={[5, 7, 6]} intensity={1.5} color="#ffffff" />
+            {/* Fill Light: Soft warm blood-red fill on anterior surface */}
+            <directionalLight position={[-5, 3, 5]} intensity={0.85} color="#ffe4e6" />
+            {/* Rim Light: Cool blue/cyan rim accentuating anatomical silhouette */}
+            <directionalLight position={[-4, 5, -5]} intensity={1.1} color="#bae6fd" />
+            {/* Deep posterior fill */}
+            <directionalLight position={[4, -4, -6]} intensity={0.4} color="#fecdd3" />
+            {/* Inferior apex point bounce */}
+            <pointLight position={[0, -2, 3]} intensity={0.45} color="#fca5a5" />
+          </>
+        )}
 
         {/* Anatomical Model Components */}
         <group position={[0, 0, 0]}>
