@@ -23,6 +23,13 @@ def test_health_endpoint():
     assert "model_version" in data
 
 
+def test_root_redirect_endpoint():
+    """Verify GET / redirects to /docs documentation."""
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code in (307, 302, 308)
+    assert response.headers["location"] == "/docs"
+
+
 def test_schema_endpoint():
     """Verify GET /schema returns 54 documented features."""
     response = client.get("/schema")
