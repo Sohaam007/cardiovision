@@ -5,7 +5,8 @@ import math
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from fastapi import FastAPI, HTTPException, Request, RedirectResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -16,8 +17,11 @@ NAMES_PATH = MODELS_DIR / "feature_names.json"
 DEMO_PATH = PROJECT_ROOT / "api" / "demo_patients.json"
 
 app = FastAPI(title="CardioVision CAD Prediction API", version="v1")
+
+
 @app.get("/", include_in_schema=False)
 def root():
+    """Redirect root path to interactive OpenAPI documentation."""
     return RedirectResponse(url="/docs")
 
 # Configure CORS
